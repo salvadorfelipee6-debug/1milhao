@@ -17,7 +17,7 @@ export type BlockForGrid = Pick<
 // Retorna todos os blocos ativos para montar a grade
 // Usa cache Redis de 5 minutos
 export async function getActiveBlocksForGrid(): Promise<BlockForGrid[]> {
-  const cached = await redis.get<BlockForGrid[]>(CACHE_KEY)
+  const cached = await redis.get(CACHE_KEY)
   if (cached) return cached
 
   const blocks = await db
@@ -54,7 +54,7 @@ export async function invalidateBlocksCache() {
 
 // Retorna estatísticas gerais da grade
 export async function getGridStats() {
-  const cached = await redis.get<{ sold: number; active: number }>('grid:stats')
+  const cached = await redis.get('grid:stats')
   if (cached) return cached
 
   const result = await db
@@ -243,3 +243,4 @@ export async function getTopBlocks(limit = 50) {
     .orderBy(desc(schema.blocks.pixelCount))
     .limit(limit)
 }
+
