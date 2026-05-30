@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get('x-forwarded-for') ?? 'anon'
     // Rate limit generoso — 60 eventos por minuto por IP
-    const { success } = await rateLimit(`track:${ip}`, 60, 60)
+    const { success } = await rateLimit(`track:${ip}`)
     if (!success) return NextResponse.json({ ok: false })
 
     const body   = await req.json()
@@ -33,3 +33,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false })
   }
 }
+
