@@ -2,6 +2,7 @@ import 'server-only'
 import Stripe from 'stripe'
 import { MercadoPagoConfig, Preference } from 'mercadopago'
 import { db, schema } from '../db'
+import { eq } from 'drizzle-orm'
 import { activateBlock } from '../db/blocks'
 import { publishBlockActivated } from '../realtime'
 import { sendWelcomeEmail } from '../email'
@@ -17,7 +18,7 @@ const mp = new MercadoPagoConfig({
 })
 
 // ─── Preço por pixel ──────────────────────────────────────
-export const PIXEL_PRICE_BRL = 0.10  // R$ 0,10 por pixel
+export const PIXEL_PRICE_BRL = 0.10
 
 export function calculatePrice(pixelCount: number) {
   return Math.round(pixelCount * PIXEL_PRICE_BRL * 100) / 100
@@ -33,8 +34,6 @@ export function calculateDimensions(pixelCount: number) {
 }
 
 // ─── Stripe ───────────────────────────────────────────────
-
-// Cria sessão de checkout no Stripe
 export async function createStripeCheckout({
   blockId,
   pixelCount,
@@ -57,11 +56,10 @@ export async function createStripeCheckout({
         quantity: 1,
         price_data: {
           currency:     'brl',
-          unit_amount:  Math.round(price * 100),  // em centavos
+          unit_amount:  Math.round(price * 100),
           product_data: {
             name:        `${pixelCount.toLocaleString('pt-BR')} pixels — 1 Milhão de Influencer`,
             description: `Espaço permanente de @${instagramHandle} na grade`,
-            images:      ['https://1milhaoinfluencer.com.br/og-image.png'],
           },
         },
       },
@@ -73,10 +71,9 @@ export async function createStripeCheckout({
     },
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/comprar/sucesso?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url:  `${process.env.NEXT_PUBLIC_APP_URL}/comprar?cancelado=1`,
-    expires_at:  Math.floor(Date.now() / 1000) + 30 * 60,  // 30 minutos
+    expires_at:  Math.floor(Date.now() / 1000) + 30 * 60,
   })
 
-  // Salva pagamento como pendente
   await db.insert(schema.payments).values({
     blockId,
     provider:   'stripe',
@@ -89,11 +86,7 @@ export async function createStripeCheckout({
   return session.url!
 }
 
-// Processa webhook do Stripe
-export async function handleStripeWebhook(
-  payload: string,
-  signature: string
-) {
+export async function handleStripeWebhook(payload: string, signature: string) {
   let event: Stripe.Event
   try {
     event = stripe.webhooks.constructEvent(
@@ -108,15 +101,12 @@ export async function handleStripeWebhook(
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
     if (session.payment_status !== 'paid') return
-
     const { blockId, instagramHandle } = session.metadata!
     await confirmPayment({ blockId: blockId!, externalId: session.id, instagramHandle: instagramHandle! })
   }
 }
 
 // ─── Mercado Pago ─────────────────────────────────────────
-
-// Cria preferência de pagamento no MP (Pix + cartão)
 export async function createMercadoPagoPreference({
   blockId,
   pixelCount,
@@ -128,7 +118,7 @@ export async function createMercadoPagoPreference({
   email:           string
   instagramHandle: string
 }) {
-  const price = calculatePrice(pixelCount)
+  const price  = calculatePrice(pixelCount)
   const client = new Preference(mp)
 
   const preference = await client.create({
@@ -143,11 +133,7 @@ export async function createMercadoPagoPreference({
           currency_id: 'BRL',
         },
       ],
-      payer: { email },
-      payment_methods: {
-        excluded_payment_types: [],
-        installments:           1,  // Pagamento único
-      },
+      payer:           { email },
       back_urls: {
         success: `${process.env.NEXT_PUBLIC_APP_URL}/comprar/sucesso`,
         failure: `${process.env.NEXT_PUBLIC_APP_URL}/comprar?cancelado=1`,
@@ -160,11 +146,10 @@ export async function createMercadoPagoPreference({
     },
   })
 
-  // Salva pagamento como pendente
   await db.insert(schema.payments).values({
     blockId,
     provider:   'mercadopago',
-    externalId: preference.id,
+    externalId: preference.id ?? '',
     pixelCount,
     amountBrl:  price.toString(),
     status:     'pending',
@@ -172,26 +157,17 @@ export async function createMercadoPagoPreference({
 
   return {
     preferenceId: preference.id,
-    initPoint:    preference.init_point,  // URL de checkout
-    pixUrl: null,
+    initPoint:    preference.init_point,
+    pixUrl:       null,
   }
 }
 
-// Processa webhook do Mercado Pago
-export async function handleMercadoPagoWebhook(body: {
-  type:   string
-  data:   { id: string }
-}) {
+export async function handleMercadoPagoWebhook(body: { type: string; data: { id: string } }) {
   if (body.type !== 'payment') return
 
-  // Busca detalhes do pagamento na API do MP
   const res = await fetch(
     `https://api.mercadopago.com/v1/payments/${body.data.id}`,
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
-      },
-    }
+    { headers: { Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}` } }
   )
   const payment = await res.json()
   if (payment.status !== 'approved') return
@@ -202,14 +178,10 @@ export async function handleMercadoPagoWebhook(body: {
   })
   if (!block) return
 
-  await confirmPayment({
-    blockId,
-    externalId:      body.data.id,
-    instagramHandle: block.instagramHandle,
-  })
+  await confirmPayment({ blockId, externalId: body.data.id, instagramHandle: block.instagramHandle })
 }
 
-// ─── Confirma pagamento e ativa bloco ─────────────────────
+// ─── Confirma pagamento ───────────────────────────────────
 async function confirmPayment({
   blockId,
   externalId,
@@ -219,38 +191,27 @@ async function confirmPayment({
   externalId:      string
   instagramHandle: string
 }) {
-  // Atualiza status do pagamento
   await db
     .update(schema.payments)
     .set({ status: 'paid', paidAt: new Date() })
-    .where(
-      db.$with('p').as(
-        db.select().from(schema.payments)
-      ),
-    )
+    .where(eq(schema.payments.externalId, externalId))
 
-  // Ativa o bloco na grade
   await activateBlock(blockId)
 
-  // Busca dados do bloco para notificações
   const block = await db.query.blocks.findFirst({
     where: (b, { eq }) => eq(b.id, blockId),
   })
   if (!block) return
 
-  // Notifica todos os clientes em tempo real via WebSocket
   await publishBlockActivated(block)
 
-  // Envia e-mail de boas-vindas com link de edição
   await sendWelcomeEmail({
-    to:             block.editToken ? `${block.instagramHandle}@placeholder.com` : '',
-    displayName:    block.displayName,
+    to:              block.editToken ? `${block.instagramHandle}@placeholder.com` : '',
+    displayName:     block.displayName,
     instagramHandle: block.instagramHandle,
-    pixelCount:     block.pixelCount,
-    niche:          block.niche,
-    editToken:      block.editToken ?? '',
-    blockId:        block.id,
+    pixelCount:      block.pixelCount,
+    niche:           block.niche,
+    editToken:       block.editToken ?? '',
+    blockId:         block.id,
   })
 }
-
-
