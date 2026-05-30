@@ -1,0 +1,201 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design Tokens ─────────────────────────────────────── */
+@layer base {
+  :root {
+    /* Cores da marca */
+    --gold:         #FFD700;
+    --gold-2:       #FFA500;
+    --pink:         #E1306C;
+    --purple:       #833AB4;
+    --blue:         #405DE6;
+    --indigo:       #5851DB;
+
+    /* Superfícies */
+    --dark:         #080808;
+    --dark-2:       #111111;
+    --dark-3:       #1a1a1a;
+    --dark-4:       #222222;
+    --border:       rgba(255,255,255,0.08);
+    --border-2:     rgba(255,255,255,0.12);
+
+    /* Gradientes */
+    --grad-gold:    linear-gradient(135deg, #FFD700, #FFA500);
+    --grad-insta:   linear-gradient(135deg, #E1306C, #833AB4, #405DE6);
+    --grad-brand:   linear-gradient(180deg, #fff 0%, #FFD700 100%);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-[#080808] text-white;
+    font-family: var(--font-inter), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Tipografia display com Bebas Neue */
+  .font-display {
+    font-family: var(--font-bebas), sans-serif;
+    letter-spacing: 0.05em;
+  }
+
+  /* Scrollbar estilizada */
+  ::-webkit-scrollbar       { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--dark-2); }
+  ::-webkit-scrollbar-thumb { background: var(--dark-4); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #333; }
+}
+
+/* ─── Componentes reutilizáveis ──────────────────────────── */
+@layer components {
+
+  /* Botões */
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2
+           rounded-xl px-6 py-3 text-sm font-bold text-[#111]
+           transition-all duration-150 active:scale-95;
+    background: var(--grad-gold);
+    box-shadow: 0 4px 20px rgba(255,215,0,0.25);
+  }
+  .btn-gold:hover {
+    box-shadow: 0 8px 30px rgba(255,215,0,0.35);
+    transform: translateY(-1px);
+  }
+
+  .btn-insta {
+    @apply inline-flex items-center justify-center gap-2
+           rounded-xl px-6 py-3 text-sm font-bold text-white
+           transition-all duration-150 active:scale-95;
+    background: var(--grad-insta);
+  }
+  .btn-insta:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2
+           rounded-xl border px-6 py-3 text-sm font-semibold
+           text-white/60 transition-all duration-150;
+    border-color: var(--border);
+  }
+  .btn-ghost:hover {
+    @apply text-white;
+    border-color: var(--border-2);
+    background: rgba(255,255,255,0.04);
+  }
+
+  /* Cards */
+  .card-dark {
+    @apply rounded-2xl border;
+    background:    var(--dark-2);
+    border-color:  var(--border);
+  }
+
+  .card-glass {
+    @apply rounded-2xl border backdrop-blur-sm;
+    background:   rgba(255,255,255,0.03);
+    border-color: var(--border);
+  }
+
+  /* Gradiente de texto ouro */
+  .text-gold {
+    background: var(--grad-brand);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Gradiente de texto Instagram */
+  .text-insta {
+    background: var(--grad-insta);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Input */
+  .input-dark {
+    @apply w-full rounded-xl border bg-transparent px-4 py-3
+           text-sm text-white placeholder-white/30
+           outline-none transition-colors;
+    border-color: var(--border);
+  }
+  .input-dark:focus {
+    border-color: var(--border-2);
+    background: rgba(255,255,255,0.03);
+  }
+
+  /* Select */
+  .select-dark {
+    @apply input-dark cursor-pointer appearance-none;
+  }
+
+  /* Badge */
+  .badge-gold {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1
+           text-[10px] font-bold uppercase tracking-widest;
+    background:   rgba(255,215,0,0.1);
+    border:       1px solid rgba(255,215,0,0.2);
+    color:        rgba(255,215,0,0.9);
+  }
+
+  /* Seção com fundo de grade de pixels */
+  .bg-pixel-grid {
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Animações */
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-8px); }
+  }
+
+  .animate-pulse-dot {
+    animation: pulse-dot 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(1.4); }
+  }
+
+  /* Número de stats */
+  .stat-number {
+    @apply font-display text-3xl leading-none;
+    background: var(--grad-brand);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* ─── Canvas da grade ────────────────────────────────────── */
+#pixel-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* ─── Popup da grade ─────────────────────────────────────── */
+.popup-enter {
+  animation: popup-in 0.2s ease forwards;
+}
+@keyframes popup-in {
+  from { opacity: 0; transform: scale(0.92) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
