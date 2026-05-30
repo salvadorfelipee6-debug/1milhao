@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
   try {
     // Rate limiting — máximo 5 tentativas por IP por minuto
     const ip = req.headers.get('x-forwarded-for') ?? 'anonymous'
-    const { success } = await rateLimit(ip, 5, 60)
+    const { success } = await rateLimit(ip)
     if (!success) {
       return NextResponse.json(
         { error: 'Muitas tentativas. Aguarde 1 minuto.' },
