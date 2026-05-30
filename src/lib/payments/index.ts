@@ -173,7 +173,7 @@ export async function createMercadoPagoPreference({
   return {
     preferenceId: preference.id,
     initPoint:    preference.init_point,  // URL de checkout
-    pixUrl:       preference.point_of_interaction?.transaction_data?.qr_code,
+    pixUrl: null,
   }
 }
 
@@ -252,4 +252,5 @@ async function confirmPayment({
     blockId:        block.id,
   })
 }
+
 
