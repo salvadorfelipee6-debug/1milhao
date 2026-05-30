@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { handleStripeWebhook } from '@/lib/payments'
 
 // Necessário para receber o body raw do Stripe
-export const config = { api: { bodyParser: false } }
+
 
 export async function POST(req: NextRequest) {
   const payload   = await req.text()
@@ -19,3 +19,4 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
