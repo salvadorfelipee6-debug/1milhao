@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { auth } from '@clerk/nextjs/server'
 import { db, schema } from '@/lib/db'
 import {
   calculateDimensions,
@@ -96,7 +95,7 @@ export async function POST(req: NextRequest) {
     const [block] = await db
       .insert(schema.blocks)
       .values({
-        userId:          userId ?? 'anonymous',
+        userId:          'anonymous',
         instagramHandle: handle,
         displayName:     data.displayName,
         niche:           data.niche,
@@ -142,4 +141,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 })
   }
 }
+
 
