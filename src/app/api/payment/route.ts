@@ -42,9 +42,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Auth opcional — usuário pode comprar sem estar logado
-    const { userId } = await auth()
-
     // Valida body
     const body = await req.json()
     const parsed = bodySchema.safeParse(body)
@@ -141,5 +138,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 })
   }
 }
+
 
 
