@@ -490,7 +490,7 @@ export function PixelGrid({ initialBlocks, stats }: PixelGridProps) {
                 {b.followers != null && (
                   <div className="rounded-lg bg-white/5 px-1 py-1.5">
                     <p className="text-[11px] font-bold text-gold leading-none">
-                      {b.followers >= 1000 ? `${(b.followers / 1000).toFixed(0)}k` : b.followers}
+                      {Number(b.followers) >= 1000 ? `${(Number(b.followers) / 1000).toFixed(0)}k` : b.followers}
                     </p>
                     <p className="text-[9px] text-white/30 mt-0.5">seguidores</p>
                   </div>
