@@ -322,7 +322,8 @@ export function PixelGrid({ initialBlocks, stats }: PixelGridProps) {
     // Touch
     function onTouchStart(e: TouchEvent) {
       e.preventDefault()
-      const t    = e.touches[0]
+      const t = e.touches[0]
+      if (!t) return
       const block = getBlockAt(canvas!, t.clientX, t.clientY)
       if (block) { setSelectedBlock(block); return }
       const cell = canvasToGrid(canvas!, t.clientX, t.clientY)
@@ -336,6 +337,7 @@ export function PixelGrid({ initialBlocks, stats }: PixelGridProps) {
       e.preventDefault()
       if (!isDragging.current) return
       const t = e.touches[0]
+      if (!t) return
       dragEnd.current = canvasToGrid(canvas!, t.clientX, t.clientY)
       setSelection(getSelectionRect())
       cancelAnimationFrame(animFrameRef.current)
