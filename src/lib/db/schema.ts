@@ -57,12 +57,11 @@ export const nicheEnum = pgEnum('niche', [
 export const brandPlanEnum = pgEnum('brand_plan', ['free', 'pro', 'enterprise'])
 
 // ─── Tabela: blocks ───────────────────────────────────────
-// Cada linha = um bloco de pixels comprado por um influencer
 export const blocks = pgTable(
   'blocks',
   {
     id:               uuid('id').primaryKey().defaultRandom(),
-    userId:           varchar('user_id', { length: 255 }).notNull(),  // Clerk user ID
+    userId:           varchar('user_id', { length: 255 }).notNull(),
 
     // Dados do influencer
     instagramHandle:  varchar('instagram_handle', { length: 100 }).notNull(),
@@ -75,6 +74,16 @@ export const blocks = pgTable(
     websiteUrl:       text('website_url'),
     avatarUrl:        text('avatar_url'),
     colorHex:         varchar('color_hex', { length: 7 }).notNull().default('#E1306C'),
+
+    // Redes sociais
+    whatsappUrl:      varchar('whatsapp_url', { length: 30 }),
+    youtubeUrl:       text('youtube_url'),
+    tiktokUrl:        text('tiktok_url'),
+    twitterUrl:       text('twitter_url'),
+    facebookUrl:      text('facebook_url'),
+    kwaiUrl:          text('kwai_url'),
+    onlyfansUrl:      text('onlyfans_url'),
+    spotifyUrl:       text('spotify_url'),
 
     // Posição na grade (grade 1000×1000)
     pixelX:           integer('pixel_x').notNull().default(0),
@@ -91,11 +100,11 @@ export const blocks = pgTable(
     updatedAt:        timestamp('updated_at').notNull().defaultNow(),
   },
   (t) => ({
-    instagramIdx:   index('blocks_instagram_idx').on(t.instagramHandle),
-    statusIdx:      index('blocks_status_idx').on(t.status),
-    nicheIdx:       index('blocks_niche_idx').on(t.niche),
-    positionIdx:    index('blocks_position_idx').on(t.pixelX, t.pixelY),
-    userIdx:        index('blocks_user_idx').on(t.userId),
+    instagramIdx:    index('blocks_instagram_idx').on(t.instagramHandle),
+    statusIdx:       index('blocks_status_idx').on(t.status),
+    nicheIdx:        index('blocks_niche_idx').on(t.niche),
+    positionIdx:     index('blocks_position_idx').on(t.pixelX, t.pixelY),
+    userIdx:         index('blocks_user_idx').on(t.userId),
     uniqueInstagram: uniqueIndex('blocks_instagram_unique').on(t.instagramHandle),
   })
 )
@@ -107,7 +116,7 @@ export const payments = pgTable(
     id:              uuid('id').primaryKey().defaultRandom(),
     blockId:         uuid('block_id').notNull().references(() => blocks.id, { onDelete: 'cascade' }),
     provider:        paymentProviderEnum('provider').notNull(),
-    externalId:      varchar('external_id', { length: 255 }),  // ID no Stripe ou MP
+    externalId:      varchar('external_id', { length: 255 }),
     pixelCount:      integer('pixel_count').notNull(),
     amountBrl:       decimal('amount_brl', { precision: 10, scale: 2 }).notNull(),
     status:          paymentStatusEnum('status').notNull().default('pending'),
@@ -115,9 +124,9 @@ export const payments = pgTable(
     createdAt:       timestamp('created_at').notNull().defaultNow(),
   },
   (t) => ({
-    blockIdx:      index('payments_block_idx').on(t.blockId),
-    statusIdx:     index('payments_status_idx').on(t.status),
-    externalIdx:   index('payments_external_idx').on(t.externalId),
+    blockIdx:    index('payments_block_idx').on(t.blockId),
+    statusIdx:   index('payments_status_idx').on(t.status),
+    externalIdx: index('payments_external_idx').on(t.externalId),
   })
 )
 
@@ -128,7 +137,6 @@ export const analytics = pgTable(
     id:          uuid('id').primaryKey().defaultRandom(),
     blockId:     uuid('block_id').notNull().references(() => blocks.id, { onDelete: 'cascade' }),
     eventType:   varchar('event_type', { length: 30 }).notNull(),
-    // view | popup_open | ig_click | advertise_click | video_play
     ip:          varchar('ip', { length: 45 }),
     eventDate:   timestamp('event_date').notNull().defaultNow(),
   },
@@ -213,11 +221,11 @@ export const favorites = pgTable(
 
 // ─── Relations ────────────────────────────────────────────
 export const blocksRelations = relations(blocks, ({ many, one }) => ({
-  payments:   many(payments),
-  analytics:  many(analytics),
-  affiliate:  one(affiliates, { fields: [blocks.id], references: [affiliates.blockId] }),
-  proposals:  many(proposals),
-  favorites:  many(favorites),
+  payments:  many(payments),
+  analytics: many(analytics),
+  affiliate: one(affiliates, { fields: [blocks.id], references: [affiliates.blockId] }),
+  proposals: many(proposals),
+  favorites: many(favorites),
 }))
 
 export const paymentsRelations = relations(payments, ({ one }) => ({
@@ -230,11 +238,11 @@ export const brandsRelations = relations(brands, ({ many }) => ({
 }))
 
 // ─── Types inferidos ──────────────────────────────────────
-export type Block       = typeof blocks.$inferSelect
-export type NewBlock    = typeof blocks.$inferInsert
-export type Payment     = typeof payments.$inferSelect
-export type NewPayment  = typeof payments.$inferInsert
-export type Analytics   = typeof analytics.$inferSelect
-export type Affiliate   = typeof affiliates.$inferSelect
-export type Brand       = typeof brands.$inferSelect
-export type Proposal    = typeof proposals.$inferSelect
+export type Block      = typeof blocks.$inferSelect
+export type NewBlock   = typeof blocks.$inferInsert
+export type Payment    = typeof payments.$inferSelect
+export type NewPayment = typeof payments.$inferInsert
+export type Analytics  = typeof analytics.$inferSelect
+export type Affiliate  = typeof affiliates.$inferSelect
+export type Brand      = typeof brands.$inferSelect
+export type Proposal   = typeof proposals.$inferSelect

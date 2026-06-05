@@ -15,6 +15,8 @@ import { rateLimit } from '@/lib/cache'
 import { NICHE_COLORS } from '@/types'
 import crypto from 'crypto'
 
+const urlOrEmpty = z.string().url().optional().or(z.literal(''))
+
 const bodySchema = z.object({
   instagramHandle:  z.string().min(1).max(100).regex(/^[a-zA-Z0-9._]+$/),
   displayName:      z.string().min(1).max(150),
@@ -22,12 +24,26 @@ const bodySchema = z.object({
   city:             z.string().max(80).optional(),
   followers:        z.string().max(30).optional(),
   bio:              z.string().max(120).optional(),
-  videoUrl:         z.string().url().optional().or(z.literal('')),
-  websiteUrl:       z.string().url().optional().or(z.literal('')),
-  avatarUrl:        z.string().url().optional().or(z.literal('')),
+  videoUrl:         urlOrEmpty,
+  websiteUrl:       urlOrEmpty,
+  avatarUrl:        urlOrEmpty,
   email:            z.string().email(),
   pixelCount:       z.number().int().min(100).max(40000),
   paymentProvider:  z.enum(['stripe', 'mercadopago']),
+  // Redes sociais
+  whatsappUrl:      z.string().max(30).optional(),
+  youtubeUrl:       urlOrEmpty,
+  tiktokUrl:        urlOrEmpty,
+  twitterUrl:       urlOrEmpty,
+  facebookUrl:      urlOrEmpty,
+  kwaiUrl:          urlOrEmpty,
+  onlyfansUrl:      urlOrEmpty,
+  spotifyUrl:       urlOrEmpty,
+  // Coordenadas opcionais (quando vem da seleção do grid)
+  pixelX:           z.number().int().optional(),
+  pixelY:           z.number().int().optional(),
+  pixelWidth:       z.number().int().optional(),
+  pixelHeight:      z.number().int().optional(),
 })
 
 export async function POST(req: NextRequest) {
@@ -52,7 +68,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const data = parsed.data
+    const data   = parsed.data
     const handle = data.instagramHandle.toLowerCase().replace('@', '')
 
     // Verifica se handle já existe
@@ -72,20 +88,28 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Calcula dimensões e encontra posição livre
-    const dims = calculateDimensions(data.pixelCount)
-    const pos  = await findFreePosition(dims.width, dims.height)
-    if (!pos) {
-      return NextResponse.json(
-        { error: 'Grade cheia — não foi possível encontrar espaço.' },
-        { status: 409 }
-      )
+    // Calcula dimensões — usa coordenadas do grid se fornecidas
+    const dims = (data.pixelWidth && data.pixelHeight)
+      ? { width: data.pixelWidth, height: data.pixelHeight, actual: data.pixelWidth * data.pixelHeight }
+      : calculateDimensions(data.pixelCount)
+
+    // Posição — usa a selecionada no grid ou encontra uma livre
+    let pos: { x: number; y: number }
+    if (data.pixelX !== undefined && data.pixelY !== undefined) {
+      pos = { x: data.pixelX, y: data.pixelY }
+    } else {
+      const found = await findFreePosition(dims.width, dims.height)
+      if (!found) {
+        return NextResponse.json(
+          { error: 'Grade cheia — não foi possível encontrar espaço.' },
+          { status: 409 }
+        )
+      }
+      pos = found
     }
 
     // Cor baseada no nicho
-    const colorHex = NICHE_COLORS[data.niche] ?? '#E1306C'
-
-    // Token de edição único
+    const colorHex  = NICHE_COLORS[data.niche] ?? '#E1306C'
     const editToken = crypto.randomBytes(32).toString('hex')
 
     // Insere bloco como pendente
@@ -96,13 +120,23 @@ export async function POST(req: NextRequest) {
         instagramHandle: handle,
         displayName:     data.displayName,
         niche:           data.niche,
-        city:            data.city ?? null,
-        followers:       data.followers ?? null,
-        bio:             data.bio ?? null,
-        videoUrl:        data.videoUrl || null,
+        city:            data.city       ?? null,
+        followers:       data.followers  ?? null,
+        bio:             data.bio        ?? null,
+        videoUrl:        data.videoUrl   || null,
         websiteUrl:      data.websiteUrl || null,
-        avatarUrl:       data.avatarUrl || null,
+        avatarUrl:       data.avatarUrl  || null,
         colorHex,
+        // Redes sociais
+        whatsappUrl:     data.whatsappUrl  || null,
+        youtubeUrl:      data.youtubeUrl   || null,
+        tiktokUrl:       data.tiktokUrl    || null,
+        twitterUrl:      data.twitterUrl   || null,
+        facebookUrl:     data.facebookUrl  || null,
+        kwaiUrl:         data.kwaiUrl      || null,
+        onlyfansUrl:     data.onlyfansUrl  || null,
+        spotifyUrl:      data.spotifyUrl   || null,
+        // Posição
         pixelX:          pos.x,
         pixelY:          pos.y,
         pixelWidth:      dims.width,
@@ -138,6 +172,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 })
   }
 }
-
-
-

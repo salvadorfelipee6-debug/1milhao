@@ -1,0 +1,467 @@
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import Ably from 'ably'
+import type { GridBlock } from '@/types'
+import { NICHE_LABELS } from '@/types'
+
+// ─── Mini canvas que "acende" o bloco ────────────────────
+function BlockLitCanvas({ block }: { block: GridBlock }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const frameRef  = useRef<number>(0)
+  const startRef  = useRef<number>(0)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const W = canvas.width
+    const H = canvas.height
+    const color = block.colorHex || '#FFD700'
+
+    // Pré-carrega avatar
+    let img: HTMLImageElement | null = null
+    if (block.avatarUrl) {
+      img = new window.Image()
+      img.crossOrigin = 'anonymous'
+      img.src = block.avatarUrl
+    }
+
+    function draw(ts: number) {
+      if (!startRef.current) startRef.current = ts
+      const elapsed = ts - startRef.current
+      const t       = Math.min(elapsed / 1200, 1) // 1.2s para acender
+
+      ctx!.clearRect(0, 0, W, H)
+
+      // Fundo grid
+      ctx!.fillStyle = '#0d0d0d'
+      ctx!.fillRect(0, 0, W, H)
+
+      // Células de contexto (simulando grade ao redor)
+      ctx!.strokeStyle = 'rgba(255,255,255,0.04)'
+      ctx!.lineWidth   = 0.5
+      const cs = W / 20
+      for (let x = 0; x < W; x += cs * 2) {
+        ctx!.beginPath(); ctx!.moveTo(x, 0); ctx!.lineTo(x, H); ctx!.stroke()
+      }
+      for (let y = 0; y < H; y += cs * 2) {
+        ctx!.beginPath(); ctx!.moveTo(0, y); ctx!.lineTo(W, y); ctx!.stroke()
+      }
+
+      // Easing suave
+      const ease = 1 - Math.pow(1 - t, 3)
+
+      // Glow pulsando após acender
+      const glow     = t >= 1 ? (Math.sin(ts / 600) * 0.5 + 0.5) * 0.4 + 0.1 : 0
+      const padding  = W * 0.12
+      const bx       = padding, by = padding
+      const bw       = W - padding * 2, bh = H - padding * 2
+
+      // Glow externo
+      ctx!.shadowColor = color
+      ctx!.shadowBlur  = 20 + glow * 30
+      ctx!.globalAlpha = ease * (0.6 + glow * 0.4)
+      ctx!.fillStyle   = color + '22'
+      ctx!.fillRect(bx - 8, by - 8, bw + 16, bh + 16)
+      ctx!.shadowBlur  = 0
+
+      // Fill do bloco
+      ctx!.globalAlpha = ease
+      ctx!.fillStyle   = color + '33'
+      ctx!.fillRect(bx, by, bw, bh)
+
+      // Avatar
+      if (img?.complete && img.naturalWidth > 0) {
+        ctx!.save()
+        ctx!.beginPath(); ctx!.rect(bx, by, bw, bh); ctx!.clip()
+        ctx!.globalAlpha = ease * 0.4
+        ctx!.drawImage(img, bx, by, bw, bh)
+        ctx!.restore()
+      }
+
+      // Borda
+      ctx!.globalAlpha = ease
+      ctx!.shadowColor = color
+      ctx!.shadowBlur  = 8 + glow * 16
+      ctx!.strokeStyle = color
+      ctx!.lineWidth   = 2
+      ctx!.strokeRect(bx + 1, by + 1, bw - 2, bh - 2)
+      ctx!.shadowBlur  = 0
+
+      // Handle
+      if (bw > 60) {
+        const fs = Math.min(bw * 0.11, 13)
+        ctx!.save()
+        ctx!.globalAlpha   = ease * 0.95
+        ctx!.fillStyle     = '#fff'
+        ctx!.font          = `bold ${fs}px Inter,sans-serif`
+        ctx!.textAlign     = 'center'
+        ctx!.textBaseline  = 'middle'
+        const txt    = '@' + block.instagramHandle
+        const maxLen = Math.floor(bw / (fs * 0.6))
+        ctx!.fillText(txt.length > maxLen ? txt.slice(0, maxLen) + '…' : txt, bx + bw / 2, by + bh / 2)
+        ctx!.restore()
+      }
+
+      ctx!.globalAlpha = 1
+
+      if (t < 1 || true) {
+        frameRef.current = requestAnimationFrame(draw)
+      }
+    }
+
+    frameRef.current = requestAnimationFrame(draw)
+    return () => cancelAnimationFrame(frameRef.current)
+  }, [block])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={280}
+      height={280}
+      className="w-full rounded-2xl"
+      style={{ aspectRatio: '1', display: 'block' }}
+    />
+  )
+}
+
+// ─── Confete simples em canvas ────────────────────────────
+function Confetti() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    canvas.width  = window.innerWidth
+    canvas.height = window.innerHeight
+
+    const pieces = Array.from({ length: 80 }, () => ({
+      x:   Math.random() * canvas.width,
+      y:   -20 - Math.random() * 100,
+      r:   3 + Math.random() * 5,
+      vx:  (Math.random() - 0.5) * 3,
+      vy:  2 + Math.random() * 4,
+      rot: Math.random() * Math.PI * 2,
+      vr:  (Math.random() - 0.5) * 0.2,
+      color: ['#FFD700','#E1306C','#405DE6','#FCAF45','#C13584'][Math.floor(Math.random() * 5)],
+    }))
+
+    let frame: number
+    function draw() {
+      ctx!.clearRect(0, 0, canvas!.width, canvas!.height)
+      let alive = false
+      for (const p of pieces) {
+        p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.vy += 0.05
+        if (p.y < canvas!.height + 20) alive = true
+        ctx!.save()
+        ctx!.translate(p.x, p.y)
+        ctx!.rotate(p.rot)
+        ctx!.fillStyle = p.color
+        ctx!.globalAlpha = Math.max(0, 1 - p.y / canvas!.height)
+        ctx!.fillRect(-p.r, -p.r / 2, p.r * 2, p.r)
+        ctx!.restore()
+      }
+      if (alive) frame = requestAnimationFrame(draw)
+    }
+    frame = requestAnimationFrame(draw)
+    return () => cancelAnimationFrame(frame)
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="pointer-events-none fixed inset-0 z-50"
+      style={{ width: '100vw', height: '100vh' }}
+    />
+  )
+}
+
+// ─── Página principal ─────────────────────────────────────
+export function SuccessClient() {
+  const searchParams = useSearchParams()
+  const router       = useRouter()
+
+  const [block,   setBlock]   = useState<GridBlock | null>(null)
+  const [status,  setStatus]  = useState<'waiting' | 'confirmed' | 'timeout'>('waiting')
+  const [showConfetti, setShowConfetti] = useState(false)
+  const [copied,  setCopied]  = useState(false)
+
+  const sessionId = searchParams.get('session_id')       // Stripe
+  const blockId   = searchParams.get('block_id')         // fallback manual
+
+  // Conecta Ably e aguarda o bloco ser ativado
+  useEffect(() => {
+    let ably: Ably.Realtime | null = null
+
+    async function connect() {
+      try {
+        ably = new Ably.Realtime({ authUrl: '/api/ably-token' })
+        const channel = ably.channels.get('grid-updates')
+
+        channel.subscribe('block-activated', (msg) => {
+          const b = msg.data as GridBlock
+          // Se veio session_id, aceita qualquer bloco recém-ativado
+          // (o webhook pode demorar alguns segundos)
+          setBlock(b)
+          setStatus('confirmed')
+          setShowConfetti(true)
+          setTimeout(() => setShowConfetti(false), 4000)
+        })
+      } catch {
+        // silencia erro de conexão
+      }
+    }
+
+    connect()
+
+    // Timeout de 30s — se não receber via Ably, busca na API
+    const timeout = setTimeout(async () => {
+      if (status === 'waiting') {
+        // Tenta buscar pelo session_id ou block_id
+        const id = blockId ?? sessionId
+        if (id) {
+          try {
+            const res  = await fetch(`/api/block?id=${id}`)
+            const data = await res.json()
+            if (data.block) {
+              setBlock(data.block)
+              setStatus('confirmed')
+              setShowConfetti(true)
+              setTimeout(() => setShowConfetti(false), 4000)
+              return
+            }
+          } catch { /* silencia */ }
+        }
+        setStatus('timeout')
+      }
+    }, 30_000)
+
+    return () => {
+      clearTimeout(timeout)
+      ably?.close()
+    }
+  }, [])
+
+  const shareUrl = block
+    ? `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/?highlight=${block.instagramHandle}`
+    : ''
+
+  async function copyShare() {
+    if (!shareUrl) return
+    await navigator.clipboard.writeText(shareUrl)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const nicheLabel = block
+    ? (NICHE_LABELS[block.niche as keyof typeof NICHE_LABELS] ?? block.niche)
+    : ''
+
+  return (
+    <main className="relative min-h-screen bg-dark px-4 py-16 overflow-hidden">
+
+      {/* Glow de fundo */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-0 h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-gold/6 blur-[120px]" />
+      </div>
+
+      {showConfetti && <Confetti />}
+
+      <div className="relative z-10 mx-auto max-w-lg text-center">
+
+        {/* ── Aguardando confirmação ── */}
+        {status === 'waiting' && (
+          <div className="space-y-6">
+            <div className="mx-auto h-16 w-16 animate-spin rounded-full border-2 border-white/10 border-t-gold" />
+            <div>
+              <h1 className="font-display text-4xl text-white">PROCESSANDO</h1>
+              <p className="mt-2 text-sm text-white/40">
+                Confirmando seu pagamento e acendendo seu bloco no mapa...
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/8 bg-dark-2 p-4 text-sm text-white/30">
+              <p>Isso costuma levar menos de 10 segundos.</p>
+              <p className="mt-1">Não feche essa página.</p>
+            </div>
+          </div>
+        )}
+
+        {/* ── Confirmado ── */}
+        {status === 'confirmed' && block && (
+          <div className="space-y-8">
+
+            {/* Badge */}
+            <div className="badge-gold inline-flex">
+              <span className="mr-2">✨</span>
+              Bloco ativado no mapa!
+            </div>
+
+            {/* Título */}
+            <div>
+              <h1 className="font-display text-6xl leading-none tracking-wide text-white md:text-8xl">
+                SEU<br />
+                <span className="text-gold">ESPAÇO</span><br />
+                É SEU!
+              </h1>
+              <p className="mt-4 text-sm text-white/40">
+                Permanente. Vitalício. Para sempre no mapa.
+              </p>
+            </div>
+
+            {/* Canvas animado */}
+            <div className="mx-auto w-56 overflow-hidden rounded-2xl border border-gold/20 shadow-[0_0_60px_rgba(255,215,0,0.15)]">
+              <BlockLitCanvas block={block} />
+            </div>
+
+            {/* Info do bloco */}
+            <div className="rounded-2xl border border-white/8 bg-dark-2 p-5 text-left space-y-3">
+              <div className="flex items-center gap-3">
+                <div
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white overflow-hidden"
+                  style={{ background: block.colorHex || '#E1306C' }}
+                >
+                  {block.avatarUrl
+                    ? <img src={block.avatarUrl} alt="" className="h-full w-full object-cover" />
+                    : block.instagramHandle.slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-bold text-white">@{block.instagramHandle}</p>
+                  <p className="text-xs text-white/40">
+                    {nicheLabel}
+                    {block.city ? ` · ${block.city}` : ''}
+                  </p>
+                </div>
+                <div className="ml-auto text-right">
+                  <p className="font-display text-lg text-gold">
+                    {block.pixelCount.toLocaleString('pt-BR')}
+                  </p>
+                  <p className="text-[10px] text-white/30">pixels</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-center border-t border-white/5 pt-3">
+                <div>
+                  <p className="text-sm font-bold text-white">{block.pixelWidth}×{block.pixelHeight}</p>
+                  <p className="text-[10px] text-white/30">tamanho</p>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white">
+                    {block.pixelX},{block.pixelY}
+                  </p>
+                  <p className="text-[10px] text-white/30">posição</p>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-gold">∞</p>
+                  <p className="text-[10px] text-white/30">vitalício</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Compartilhar */}
+            <div className="space-y-3">
+              <p className="text-xs text-white/30 uppercase tracking-widest">
+                Compartilhe seu espaço
+              </p>
+              <div className="flex overflow-hidden rounded-xl border border-white/10 bg-dark-2">
+                <input
+                  readOnly
+                  value={shareUrl}
+                  className="flex-1 bg-transparent px-3 py-2.5 text-xs text-white/50 outline-none"
+                />
+                <button
+                  onClick={copyShare}
+                  className="border-l border-white/10 px-4 text-xs font-semibold text-white/60 hover:text-white transition-colors"
+                >
+                  {copied ? '✓ copiado' : 'copiar'}
+                </button>
+              </div>
+
+              {/* Botões de share */}
+              <div className="flex gap-2 justify-center">
+                <a
+                  href={`https://instagram.com/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-dark-2 px-4 py-2.5 text-xs font-semibold text-white/60 hover:border-pink/30 hover:text-white transition-all"
+                >
+                  📸 Instagram
+                </a>
+                <a
+                  href={`https://twitter.com/intent/tweet?text=Garanti%20meu%20espa%C3%A7o%20permanente%20no%20mapa%20dos%201%20milh%C3%A3o%20de%20influencers!%20%F0%9F%8E%AF&url=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-dark-2 px-4 py-2.5 text-xs font-semibold text-white/60 hover:border-white/20 hover:text-white transition-all"
+                >
+                  𝕏 Twitter
+                </a>
+                <a
+                  href={`https://wa.me/?text=Garanti%20meu%20espa%C3%A7o%20permanente%20no%20mapa%20dos%201%20milh%C3%A3o%20de%20influencers!%20${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-dark-2 px-4 py-2.5 text-xs font-semibold text-white/60 hover:border-green-500/30 hover:text-white transition-all"
+                >
+                  💬 WhatsApp
+                </a>
+              </div>
+            </div>
+
+            {/* CTAs */}
+            <div className="flex flex-col gap-3">
+              <Link href="/" className="btn-gold py-4 text-base">
+                Ver meu bloco no mapa ao vivo →
+              </Link>
+              <Link href="/meu-painel" className="btn-ghost py-3 text-sm">
+                Ir para meu painel
+              </Link>
+            </div>
+
+            <p className="text-xs text-white/20">
+              Você receberá um e-mail com o link para editar seu bloco a qualquer momento.
+            </p>
+          </div>
+        )}
+
+        {/* ── Timeout ── */}
+        {status === 'timeout' && (
+          <div className="space-y-6">
+            <div className="text-4xl">⏳</div>
+            <div>
+              <h1 className="font-display text-4xl text-white">QUASE LÁ</h1>
+              <p className="mt-3 text-sm leading-relaxed text-white/50">
+                Seu pagamento foi recebido mas a confirmação está demorando um pouco mais que o esperado.
+                Isso é normal — seu bloco aparecerá no mapa em breve.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/8 bg-dark-2 p-5 text-sm text-white/40 space-y-2">
+              <p>✅ Pagamento recebido</p>
+              <p>⏳ Bloco sendo ativado...</p>
+              <p className="text-[11px] text-white/25 mt-3">
+                Você receberá um e-mail assim que seu espaço estiver ativo no mapa.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3">
+              <Link href="/" className="btn-gold py-3">
+                Ver o mapa ao vivo →
+              </Link>
+              <button
+                onClick={() => window.location.reload()}
+                className="btn-ghost py-3 text-sm"
+              >
+                Verificar novamente
+              </button>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </main>
+  )
+}

@@ -1,0 +1,11 @@
+import type { Metadata } from 'next'
+import { SuccessClient } from './SuccessClient'
+
+export const metadata: Metadata = {
+  title: 'Espaço garantido! 🎉',
+  description: 'Seu bloco está no mapa do 1 Milhão de Influencer.',
+}
+
+export default function SucessoPage() {
+  return <SuccessClient />
+}
