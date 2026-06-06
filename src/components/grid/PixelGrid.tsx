@@ -196,30 +196,25 @@ export function PixelGrid({ initialBlocks, stats, highlight }: PixelGridProps) {
       }
     }
 
-    // Highlight do bloco compartilhado
+    // Highlight do nicho ou bloco compartilhado
     if (highlightRef.current) {
-      const hBlock = blocksRef.current.find(b => b.instagramHandle === highlightRef.current)
-      if (hBlock) {
-        const pulse = (Math.sin(Date.now() / 300) * 0.5 + 0.5)
+      const isNiche  = Object.keys(NICHE_COLORS).includes(highlightRef.current)
+      const hBlocks  = isNiche
+        ? blocksRef.current.filter(b => b.niche === highlightRef.current)
+        : blocksRef.current.filter(b => b.instagramHandle === highlightRef.current)
+      const pulse = Math.sin(Date.now() / 300) * 0.5 + 0.5
+      for (const hBlock of hBlocks) {
         const bx = hBlock.pixelX * cs, by = hBlock.pixelY * cs
         const bw = hBlock.pixelWidth * cs, bh = hBlock.pixelHeight * cs
-        // Glow externo pulsante
+        const color = hBlock.colorHex || '#FFD700'
         ctx.shadowColor = '#FFD700'
-        ctx.shadowBlur  = 20 + pulse * 30
-        ctx.strokeStyle = `rgba(255,215,0,${0.6 + pulse * 0.4})`
-        ctx.lineWidth   = 2.5
-        ctx.strokeRect(bx - 2, by - 2, bw + 4, bh + 4)
+        ctx.shadowBlur  = 16 + pulse * 24
+        ctx.strokeStyle = `rgba(255,215,0,${0.5 + pulse * 0.5})`
+        ctx.lineWidth   = 2
+        ctx.strokeRect(bx - 1.5, by - 1.5, bw + 3, bh + 3)
         ctx.shadowBlur  = 0
-        // Fill brilhante
-        ctx.fillStyle = `rgba(255,215,0,${0.08 + pulse * 0.12})`
+        ctx.fillStyle   = `rgba(255,215,0,${0.06 + pulse * 0.1})`
         ctx.fillRect(bx, by, bw, bh)
-        // Seta apontando para o bloco se estiver no topo
-        if (hBlock.pixelY * cs < 40) {
-          ctx.fillStyle = `rgba(255,215,0,${0.6 + pulse * 0.4})`
-          ctx.font      = `${Math.max(10, cs * 12)}px sans-serif`
-          ctx.textAlign = 'center'
-          ctx.fillText('▼', bx + bw / 2, by - 4)
-        }
       }
     }
 
@@ -276,49 +271,47 @@ export function PixelGrid({ initialBlocks, stats, highlight }: PixelGridProps) {
     return () => ro.disconnect()
   }, [draw])
 
-  // ─── Highlight: scroll até o bloco + animação pulsante ────────
+  // ─── Highlight: scroll até o nicho + animação pulsante em todos ────────
   useEffect(() => {
     if (!highlight) return
-    const handle = highlight.replace('@', '')
-    highlightRef.current = handle
+    highlightRef.current = highlight.replace('@', '')
 
-    const block = blocksRef.current.find(b => b.instagramHandle === handle)
-    if (!block) return
+    // Encontra todos os blocos do nicho ou handle
+    const isNiche   = Object.keys(NICHE_COLORS).includes(highlight) || highlight === 'all'
+    const hBlocks   = isNiche
+      ? blocksRef.current.filter(b => b.niche === highlight)
+      : blocksRef.current.filter(b => b.instagramHandle === highlight.replace('@', ''))
 
-    // Aguarda canvas renderizar
+    if (hBlocks.length === 0) return
+
+    // Scroll até o primeiro bloco do grupo
     setTimeout(() => {
       const canvas = canvasRef.current
       if (!canvas) return
-      const rect  = canvas.getBoundingClientRect()
-      const cs    = rect.width / GRID_COLS
-      const byCss = block.pixelY * cs
-      const scrollTarget = rect.top + window.scrollY + byCss - window.innerHeight / 2 + (block.pixelHeight * cs) / 2
-      window.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' })
+      const rect   = canvas.getBoundingClientRect()
+      const cs     = rect.width / GRID_COLS
+      const first  = hBlocks[0]
+      const byCss  = first.pixelY * cs
+      const target = rect.top + window.scrollY + byCss - window.innerHeight / 2
+      window.scrollTo({ top: Math.max(0, target), behavior: 'smooth' })
 
-      // Abre popup automaticamente após scroll
-      setTimeout(() => {
-        setSelectedBlock(block as any)
-      }, 800)
+      // Se for handle único, abre popup
+      if (!isNiche && hBlocks.length === 1) {
+        setTimeout(() => setSelectedBlock(hBlocks[0] as any), 800)
+      }
     }, 400)
 
     // Loop de animação para o pulso
     let frame: number
-    function loop() {
-      draw()
-      frame = requestAnimationFrame(loop)
-    }
+    function loop() { draw(); frame = requestAnimationFrame(loop) }
     frame = requestAnimationFrame(loop)
 
-    // Para o loop após 6 segundos
     const stop = setTimeout(() => {
       cancelAnimationFrame(frame)
       highlightRef.current = null
     }, 6000)
 
-    return () => {
-      cancelAnimationFrame(frame)
-      clearTimeout(stop)
-    }
+    return () => { cancelAnimationFrame(frame); clearTimeout(stop) }
   }, [highlight, draw])
 
   // ─── Mouse + Touch events ──────────────────────────────────────
