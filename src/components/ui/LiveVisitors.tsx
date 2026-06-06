@@ -37,7 +37,7 @@ function getBaseVisitors(): number {
   const now    = new Date()
   // Horário de Brasília (UTC-3)
   const hour   = (now.getUTCHours() - 3 + 24) % 24
-  const mult   = HOUR_PROFILE[hour]
+  const mult   = HOUR_PROFILE[hour] ?? 0.5
   return Math.round(MIN_VISITORS + (MAX_VISITORS - MIN_VISITORS) * mult)
 }
 
