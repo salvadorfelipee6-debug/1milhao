@@ -291,6 +291,7 @@ export function PixelGrid({ initialBlocks, stats, highlight }: PixelGridProps) {
       const rect   = canvas.getBoundingClientRect()
       const cs     = rect.width / GRID_COLS
       const first  = hBlocks[0]
+      if (!first) return
       const byCss  = first.pixelY * cs
       const target = rect.top + window.scrollY + byCss - window.innerHeight / 2
       window.scrollTo({ top: Math.max(0, target), behavior: 'smooth' })
