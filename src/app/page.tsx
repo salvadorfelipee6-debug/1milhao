@@ -15,11 +15,16 @@ export const metadata: Metadata = {
     '1.000.000 de pixels. Cada pixel, um influencer. Compre seu espaço e apareça para marcas e seguidores para sempre. A partir de R$ 10.',
 }
 
-// Revalida a página a cada 60 segundos (ISR)
 export const revalidate = 60
 
-export default async function HomePage() {
-  // Busca em paralelo no servidor
+interface PageProps {
+  searchParams: Promise<{ highlight?: string }>
+}
+
+export default async function HomePage({ searchParams }: PageProps) {
+  const params    = await searchParams
+  const highlight = params.highlight || ''
+
   const [blocks, stats] = await Promise.all([
     getActiveBlocksForGrid(),
     getGridStats(),
@@ -27,10 +32,8 @@ export default async function HomePage() {
 
   return (
     <main>
-      {/* Hero com contador ao vivo */}
       <HeroSection stats={stats} />
 
-      {/* Grade de pixels — o coração do produto */}
       <section id="grade" className="px-4 py-12">
         <div className="mx-auto max-w-6xl">
           <div className="mb-8 text-center">
@@ -46,11 +49,11 @@ export default async function HomePage() {
             </p>
           </div>
 
-          {/* Suspense boundary — mostra skeleton enquanto carrega no cliente */}
           <Suspense fallback={<GridSkeleton />}>
             <PixelGrid
               initialBlocks={blocks}
               stats={stats}
+              highlight={highlight || undefined}
             />
           </Suspense>
         </div>

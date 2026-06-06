@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 interface PixelGridProps {
   initialBlocks: GridBlock[]
   stats:         GridStats
+  highlight?:    string   // @ do influencer a destacar
 }
 
 const GRID_COLS   = 1000
@@ -23,7 +24,7 @@ interface RichTooltip {
   emptyCell?: { gx: number; gy: number }
 }
 
-export function PixelGrid({ initialBlocks, stats }: PixelGridProps) {
+export function PixelGrid({ initialBlocks, stats, highlight }: PixelGridProps) {
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const blocksRef    = useRef<GridBlock[]>(initialBlocks)
   const router       = useRouter()
@@ -33,6 +34,7 @@ export function PixelGrid({ initialBlocks, stats }: PixelGridProps) {
   const dragEnd      = useRef<{ gx: number; gy: number } | null>(null)
   const hoverCell    = useRef<{ gx: number; gy: number } | null>(null)
   const animFrameRef = useRef<number>(0)
+  const highlightRef = useRef<string | null>(highlight?.replace('@', '') ?? null)
 
   const [selection,     setSelection]     = useState<{ x: number; y: number; w: number; h: number } | null>(null)
   const [selScreenPos,  setSelScreenPos]  = useState<{ left: number; top: number; right: number; bottom: number } | null>(null)
@@ -194,6 +196,33 @@ export function PixelGrid({ initialBlocks, stats }: PixelGridProps) {
       }
     }
 
+    // Highlight do bloco compartilhado
+    if (highlightRef.current) {
+      const hBlock = blocksRef.current.find(b => b.instagramHandle === highlightRef.current)
+      if (hBlock) {
+        const pulse = (Math.sin(Date.now() / 300) * 0.5 + 0.5)
+        const bx = hBlock.pixelX * cs, by = hBlock.pixelY * cs
+        const bw = hBlock.pixelWidth * cs, bh = hBlock.pixelHeight * cs
+        // Glow externo pulsante
+        ctx.shadowColor = '#FFD700'
+        ctx.shadowBlur  = 20 + pulse * 30
+        ctx.strokeStyle = `rgba(255,215,0,${0.6 + pulse * 0.4})`
+        ctx.lineWidth   = 2.5
+        ctx.strokeRect(bx - 2, by - 2, bw + 4, bh + 4)
+        ctx.shadowBlur  = 0
+        // Fill brilhante
+        ctx.fillStyle = `rgba(255,215,0,${0.08 + pulse * 0.12})`
+        ctx.fillRect(bx, by, bw, bh)
+        // Seta apontando para o bloco se estiver no topo
+        if (hBlock.pixelY * cs < 40) {
+          ctx.fillStyle = `rgba(255,215,0,${0.6 + pulse * 0.4})`
+          ctx.font      = `${Math.max(10, cs * 12)}px sans-serif`
+          ctx.textAlign = 'center'
+          ctx.fillText('▼', bx + bw / 2, by - 4)
+        }
+      }
+    }
+
     // Área de seleção em tempo real
     const selRect = getSelectionRect()
     if (selRect) {
@@ -246,6 +275,51 @@ export function PixelGrid({ initialBlocks, stats }: PixelGridProps) {
     ro.observe(canvas.parentElement!)
     return () => ro.disconnect()
   }, [draw])
+
+  // ─── Highlight: scroll até o bloco + animação pulsante ────────
+  useEffect(() => {
+    if (!highlight) return
+    const handle = highlight.replace('@', '')
+    highlightRef.current = handle
+
+    const block = blocksRef.current.find(b => b.instagramHandle === handle)
+    if (!block) return
+
+    // Aguarda canvas renderizar
+    setTimeout(() => {
+      const canvas = canvasRef.current
+      if (!canvas) return
+      const rect  = canvas.getBoundingClientRect()
+      const cs    = rect.width / GRID_COLS
+      const byCss = block.pixelY * cs
+      const scrollTarget = rect.top + window.scrollY + byCss - window.innerHeight / 2 + (block.pixelHeight * cs) / 2
+      window.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' })
+
+      // Abre popup automaticamente após scroll
+      setTimeout(() => {
+        setSelectedBlock(block as any)
+      }, 800)
+    }, 400)
+
+    // Loop de animação para o pulso
+    let frame: number
+    function loop() {
+      draw()
+      frame = requestAnimationFrame(loop)
+    }
+    frame = requestAnimationFrame(loop)
+
+    // Para o loop após 6 segundos
+    const stop = setTimeout(() => {
+      cancelAnimationFrame(frame)
+      highlightRef.current = null
+    }, 6000)
+
+    return () => {
+      cancelAnimationFrame(frame)
+      clearTimeout(stop)
+    }
+  }, [highlight, draw])
 
   // ─── Mouse + Touch events ──────────────────────────────────────
   useEffect(() => {
