@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import type { GridStats } from '@/types'
+import { LiveVisitors } from '@/components/ui/LiveVisitors'
 
 export function HeroSection({ stats }: { stats: GridStats }) {
-  const pct  = Math.round((stats.sold / 1_000_000) * 100)
+  const pct   = Math.round((stats.sold / 1_000_000) * 100)
   const avail = (1_000_000 - stats.sold).toLocaleString('pt-BR')
 
   return (
@@ -17,10 +18,13 @@ export function HeroSection({ stats }: { stats: GridStats }) {
 
       <div className="relative z-10 mx-auto max-w-5xl px-4 pb-24 pt-28 text-center">
 
-        {/* Badge ao vivo */}
-        <div className="badge-gold mb-8 inline-flex">
-          <span className="animate-pulse-dot mr-2 h-1.5 w-1.5 rounded-full bg-gold" />
-          {avail} pixels disponíveis · ao vivo
+        {/* Badge ao vivo com visitantes */}
+        <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="badge-gold inline-flex">
+            <span className="animate-pulse-dot mr-2 h-1.5 w-1.5 rounded-full bg-gold" />
+            {avail} pixels disponíveis · ao vivo
+          </div>
+          <LiveVisitors />
         </div>
 
         {/* Título principal */}
@@ -59,10 +63,10 @@ export function HeroSection({ stats }: { stats: GridStats }) {
         {/* Stats */}
         <div className="mx-auto mt-16 flex max-w-lg flex-wrap justify-center gap-8 border-t border-white/6 pt-10">
           {[
-            { n: '1.000.000',                    l: 'pixels totais' },
-            { n: stats.sold.toLocaleString('pt-BR'), l: 'já vendidos' },
-            { n: stats.active.toString(),        l: 'influencers' },
-            { n: 'R$ 0,10',                      l: 'por pixel' },
+            { n: '1.000.000',                         l: 'pixels totais' },
+            { n: stats.sold.toLocaleString('pt-BR'),  l: 'já vendidos' },
+            { n: stats.active.toString(),             l: 'influencers' },
+            { n: 'R$ 0,10',                           l: 'por pixel' },
           ].map(s => (
             <div key={s.l} className="text-center">
               <p className="stat-number">{s.n}</p>
