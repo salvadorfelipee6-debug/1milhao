@@ -277,6 +277,19 @@ export function RegisterForm({ stats }: RegisterFormProps) {
     spotifyUrl:      '',
   })
 
+  const [customLinks, setCustomLinks] = useState<{ label: string; url: string; emoji: string }[]>([])
+
+  function addCustomLink() {
+    if (customLinks.length >= 6) return
+    setCustomLinks(prev => [...prev, { label: '', url: '', emoji: '🔗' }])
+  }
+  function removeCustomLink(i: number) {
+    setCustomLinks(prev => prev.filter((_, idx) => idx !== i))
+  }
+  function updateCustomLink(i: number, field: 'label' | 'url' | 'emoji', value: string) {
+    setCustomLinks(prev => prev.map((l, idx) => idx === i ? { ...l, [field]: value } : l))
+  }
+
   const setField = useCallback((k: keyof typeof form, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
   }, [])
@@ -319,6 +332,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
           pixelWidth:      gridW ? Number(gridW) : undefined,
           pixelHeight:     gridH ? Number(gridH) : undefined,
           paymentProvider: provider,
+          customLinks:     customLinks.filter(l => l.label && l.url),
         }),
       })
       const data = await res.json()
@@ -646,6 +660,71 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                 <input type="url" value={form.websiteUrl}
                   onChange={e => setField('websiteUrl', e.target.value)}
                   placeholder="Link do seu mídia kit ou site pessoal..." className="input-dark" />
+              </div>
+
+              {/* Links personalizados */}
+              <div className="rounded-xl border border-white/8 bg-white/2 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+                      Links personalizados
+                    </label>
+                    <p className="text-[11px] text-white/30 mt-0.5">Loja, curso, mídia kit, portfólio, WhatsApp...</p>
+                  </div>
+                  <span className="text-[10px] text-white/25">{customLinks.length}/6</span>
+                </div>
+
+                {customLinks.map((link, i) => (
+                  <div key={i} className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      value={link.emoji}
+                      onChange={e => updateCustomLink(i, 'emoji', e.target.value)}
+                      placeholder="🔗"
+                      className="w-10 rounded-lg border border-white/8 bg-transparent px-2 py-2 text-center text-sm text-white outline-none focus:border-white/20"
+                      maxLength={2}
+                    />
+                    <input
+                      type="text"
+                      value={link.label}
+                      onChange={e => updateCustomLink(i, 'label', e.target.value)}
+                      placeholder="Nome do link"
+                      className="flex-1 rounded-lg border border-white/8 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/20 outline-none focus:border-white/20"
+                    />
+                    <input
+                      type="url"
+                      value={link.url}
+                      onChange={e => updateCustomLink(i, 'url', e.target.value)}
+                      placeholder="https://..."
+                      className="flex-1 rounded-lg border border-white/8 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/20 outline-none focus:border-white/20"
+                    />
+                    <button type="button" onClick={() => removeCustomLink(i)}
+                      className="text-white/30 hover:text-red-400 text-sm">✕</button>
+                  </div>
+                ))}
+
+                {customLinks.length < 6 && (
+                  <button type="button" onClick={addCustomLink}
+                    className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-white/15 py-2 text-xs text-white/30 hover:border-white/30 hover:text-white/50 transition-all">
+                    + Adicionar link
+                  </button>
+                )}
+              </div>
+
+              {/* Mensagem de incentivo — link na bio */}
+              <div className="rounded-xl border border-gold/20 bg-gold/5 p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">✨</span>
+                  <div>
+                    <p className="text-sm font-bold text-gold">Use como link na bio do Instagram!</p>
+                    <p className="mt-1 text-[12px] leading-relaxed text-white/50">
+                      Após garantir seu espaço, você terá uma página profissional em{' '}
+                      <span className="text-white/70 font-semibold">1milhao.com.br/influencer/seuarroba</span>{' '}
+                      com todas as suas redes, links e botão de contato para marcas.{' '}
+                      <span className="text-gold/80">Substitua o Linktree de vez.</span>
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

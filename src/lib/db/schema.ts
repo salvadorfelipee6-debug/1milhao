@@ -85,6 +85,9 @@ export const blocks = pgTable(
     onlyfansUrl:      text('onlyfans_url'),
     spotifyUrl:       text('spotify_url'),
 
+    // Links personalizados (JSON array)
+    customLinks:      text('custom_links'),
+
     // Posição na grade (grade 1000×1000)
     pixelX:           integer('pixel_x').notNull().default(0),
     pixelY:           integer('pixel_y').notNull().default(0),

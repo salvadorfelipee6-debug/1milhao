@@ -17,6 +17,23 @@ export interface GridBlock {
   pixelWidth:      number
   pixelHeight:     number
   pixelCount:      number
+  // Redes sociais
+  whatsappUrl?:    string | null
+  youtubeUrl?:     string | null
+  tiktokUrl?:      string | null
+  twitterUrl?:     string | null
+  facebookUrl?:    string | null
+  kwaiUrl?:        string | null
+  onlyfansUrl?:    string | null
+  spotifyUrl?:     string | null
+  // Links personalizados
+  customLinks?:    CustomLink[] | null
+}
+
+export interface CustomLink {
+  label: string
+  url:   string
+  emoji?: string
 }
 
 export interface GridStats {
@@ -42,6 +59,15 @@ export interface RegisterFormData {
   email:           string
   pixelCount:      number
   paymentProvider: 'stripe' | 'mercadopago'
+  whatsappUrl?:    string
+  youtubeUrl?:     string
+  tiktokUrl?:      string
+  twitterUrl?:     string
+  facebookUrl?:    string
+  kwaiUrl?:        string
+  onlyfansUrl?:    string
+  spotifyUrl?:     string
+  customLinks?:    CustomLink[]
 }
 
 // ─── Nichos ───────────────────────────────────────────────
