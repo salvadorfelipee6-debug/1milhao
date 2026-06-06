@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { getGridStats } from '@/lib/db/blocks'
 import { RegisterForm } from '@/components/forms/RegisterForm'
 
@@ -29,8 +30,9 @@ export default async function ComprarPage() {
           </p>
         </div>
 
-        {/* Formulário completo de cadastro e pagamento */}
-        <RegisterForm stats={stats} />
+        <Suspense fallback={<div className="h-96 animate-pulse rounded-2xl bg-white/5" />}>
+          <RegisterForm stats={stats} />
+        </Suspense>
 
       </div>
     </main>
