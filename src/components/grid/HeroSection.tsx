@@ -27,7 +27,7 @@ function PixelBackground() {
       x:     Math.random() * canvas!.width,
       y:     Math.random() * canvas!.height,
       size:  4 + Math.random() * 14,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      color: COLORS[Math.floor(Math.random() * COLORS.length)] as string,
       vx:    (Math.random() - 0.5) * 0.3,
       vy:    (Math.random() - 0.5) * 0.3,
       alpha: 0.03 + Math.random() * 0.08,
