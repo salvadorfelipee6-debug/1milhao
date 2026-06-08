@@ -1,20 +1,47 @@
 import Link from 'next/link'
 import { getTopBlocks } from '@/lib/db/blocks'
-import { NICHE_LABELS } from '@/types'
+import { NICHE_LABELS, NICHE_COLORS } from '@/types'
 
 // ─── Como Funciona ────────────────────────────────────────
 export function HowItWorksSection() {
   const steps = [
-    { n: '01', icon: '🔢', title: 'Escolha seus pixels',  desc: 'Mínimo 100px (10×10) por R$ 10. Quanto mais pixels, maior e mais visível seu bloco na grade.' },
-    { n: '02', icon: '✍️', title: 'Monte seu perfil',      desc: 'Adicione @, nicho, bio, foto e um vídeo de apresentação. Marcas veem tudo no popup.' },
-    { n: '03', icon: '💳', title: 'Pague uma única vez',   desc: 'Pix instantâneo ou cartão. R$ 0,10 por pixel. Sem mensalidade, sem renovação.' },
-    { n: '04', icon: '🗺️', title: 'Apareça para sempre',   desc: 'Seu bloco entra no mapa em tempo real. Marcas te acham com um hover. Para sempre.' },
+    {
+      n: '01', icon: '🎯',
+      title: 'Escolha seus pixels',
+      desc: 'Mínimo 100px (10×10) por R$ 10. Quanto mais pixels, maior e mais visível seu bloco na grade.',
+      color: '#FFD700',
+    },
+    {
+      n: '02', icon: '✨',
+      title: 'Monte seu perfil',
+      desc: 'Adicione @, nicho, bio, foto e links das suas redes. Marcas e seguidores veem tudo no popup.',
+      color: '#E1306C',
+    },
+    {
+      n: '03', icon: '⚡',
+      title: 'Pague uma única vez',
+      desc: 'Pix instantâneo ou cartão. R$ 0,10 por pixel. Sem mensalidade, sem renovação. Nunca.',
+      color: '#405DE6',
+    },
+    {
+      n: '04', icon: '🗺️',
+      title: 'Apareça para sempre',
+      desc: 'Seu bloco entra no mapa em tempo real. Marcas te acham com um hover. Para sempre.',
+      color: '#1ed760',
+    },
   ]
 
   return (
-    <section id="como-funciona" className="bg-dark-2 px-4 py-24">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-14 text-center">
+    <section id="como-funciona" className="relative overflow-hidden px-4 py-24">
+      {/* Fundo sutil */}
+      <div className="pointer-events-none absolute inset-0 bg-dark-2" />
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-0 top-1/2 h-[400px] w-[400px] -translate-y-1/2 rounded-full bg-gold/3 blur-[100px]" />
+        <div className="absolute right-0 top-1/2 h-[400px] w-[400px] -translate-y-1/2 rounded-full bg-pink/3 blur-[100px]" />
+      </div>
+
+      <div className="relative mx-auto max-w-5xl">
+        <div className="mb-16 text-center">
           <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-pink">
             Como funciona
           </p>
@@ -28,16 +55,45 @@ export function HowItWorksSection() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map(s => (
-            <div key={s.n} className="card-dark rounded-2xl p-6 transition-transform hover:-translate-y-1">
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/5 font-display text-sm tracking-wider text-gold">
+          {steps.map((s, i) => (
+            <div
+              key={s.n}
+              className="group relative overflow-hidden rounded-2xl border border-white/5 bg-dark-3 p-6 transition-all hover:-translate-y-1 hover:border-white/10"
+            >
+              {/* Número grande decorativo */}
+              <div
+                className="pointer-events-none absolute -right-3 -top-4 font-display text-8xl font-bold opacity-5"
+                style={{ color: s.color }}
+              >
+                {i + 1}
+              </div>
+
+              {/* Badge do passo */}
+              <div
+                className="mb-4 inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider"
+                style={{ background: s.color + '22', color: s.color }}
+              >
                 {s.n}
               </div>
+
               <div className="mb-3 text-3xl">{s.icon}</div>
               <h3 className="mb-2 text-sm font-bold text-white">{s.title}</h3>
               <p className="text-xs leading-relaxed text-white/40">{s.desc}</p>
+
+              {/* Linha colorida no bottom */}
+              <div
+                className="absolute bottom-0 left-0 h-0.5 w-0 transition-all duration-500 group-hover:w-full"
+                style={{ background: s.color }}
+              />
             </div>
           ))}
+        </div>
+
+        {/* CTA inline */}
+        <div className="mt-12 text-center">
+          <Link href="/comprar" className="btn-gold px-8 py-3.5 text-sm">
+            Começar agora — R$ 10 →
+          </Link>
         </div>
       </div>
     </section>
@@ -47,18 +103,22 @@ export function HowItWorksSection() {
 // ─── Preços ───────────────────────────────────────────────
 export function PricingSection() {
   const plans = [
-    { name: 'Micro',   pixels: 100,   side: 10,  price: '10',    featured: false },
-    { name: 'Básico',  pixels: 400,   side: 20,  price: '40',    featured: false },
-    { name: 'Médio',   pixels: 900,   side: 30,  price: '90',    featured: true  },
-    { name: 'Grande',  pixels: 2500,  side: 50,  price: '250',   featured: false },
-    { name: 'Premium', pixels: 10000, side: 100, price: '1.000', featured: false },
-    { name: 'Marca',   pixels: 40000, side: 200, price: '4.000', featured: false },
+    { name: 'Micro',   pixels: 100,   side: 10,  price: '10',    niche: 'fitness',     featured: false },
+    { name: 'Básico',  pixels: 400,   side: 20,  price: '40',    niche: 'tecnologia',  featured: false },
+    { name: 'Médio',   pixels: 900,   side: 30,  price: '90',    niche: 'moda',        featured: true  },
+    { name: 'Grande',  pixels: 2500,  side: 50,  price: '250',   niche: 'viagens',     featured: false },
+    { name: 'Premium', pixels: 10000, side: 100, price: '1.000', niche: 'games',       featured: false },
+    { name: 'Marca',   pixels: 40000, side: 200, price: '4.000', niche: 'financas',    featured: false },
   ]
 
   return (
-    <section id="precos" className="px-4 py-24">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-14 text-center">
+    <section id="precos" className="relative overflow-hidden px-4 py-24">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/4 blur-[120px]" />
+      </div>
+
+      <div className="relative mx-auto max-w-5xl">
+        <div className="mb-16 text-center">
           <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-gold">
             Preços
           </p>
@@ -72,53 +132,77 @@ export function PricingSection() {
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {plans.map(p => (
-            <div
-              key={p.name}
-              className={`relative overflow-hidden rounded-2xl p-5 transition-transform hover:-translate-y-1 ${
-                p.featured
-                  ? 'border border-gold/30 bg-gold/5'
-                  : 'card-dark'
-              }`}
-            >
-              {p.featured && (
-                <div className="absolute right-3 top-3">
-                  <span className="badge-gold text-[9px]">Mais popular</span>
-                </div>
-              )}
+          {plans.map(p => {
+            const color = NICHE_COLORS[p.niche as keyof typeof NICHE_COLORS] || '#E1306C'
+            const previewSize = Math.min(p.side, 72)
 
-              {/* Preview do bloco */}
+            return (
               <div
-                className="mb-4 rounded-lg border border-pink/20 bg-pink/10"
-                style={{
-                  width:  Math.min(p.side, 80) + 'px',
-                  height: Math.min(p.side, 80) + 'px',
-                }}
-              />
-
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">{p.name}</p>
-              <p className="mt-1 text-xs text-white/20">
-                {p.pixels.toLocaleString('pt-BR')} pixels · {p.side}×{p.side}
-              </p>
-
-              <p className="mt-3 font-display text-4xl text-white">
-                R${p.price}
-              </p>
-              <p className="mt-1 text-[10px] text-white/25">pagamento único · vitalício</p>
-
-              <Link
-                href={`/comprar?pixels=${p.pixels}`}
-                className={`mt-4 block rounded-xl py-2.5 text-center text-xs font-bold transition-all ${
+                key={p.name}
+                className={`group relative overflow-hidden rounded-2xl p-5 transition-all hover:-translate-y-1 ${
                   p.featured
-                    ? 'btn-gold'
-                    : 'border border-white/10 text-white/50 hover:border-white/20 hover:text-white/80'
+                    ? 'border border-gold/30 bg-gold/5'
+                    : 'border border-white/5 bg-dark-2 hover:border-white/10'
                 }`}
               >
-                Escolher
-              </Link>
-            </div>
-          ))}
+                {p.featured && (
+                  <div className="absolute right-3 top-3">
+                    <span className="badge-gold text-[9px]">Mais popular</span>
+                  </div>
+                )}
+
+                {/* Preview do bloco com cor real */}
+                <div className="mb-4 relative">
+                  <div
+                    className="rounded-lg"
+                    style={{
+                      width:      previewSize + 'px',
+                      height:     previewSize + 'px',
+                      background: color + '33',
+                      border:     `1.5px solid ${color}66`,
+                      boxShadow:  p.featured ? `0 0 20px ${color}33` : `0 0 8px ${color}22`,
+                    }}
+                  />
+                  {/* Mini grid simulado */}
+                  <div
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                      backgroundImage: `repeating-linear-gradient(0deg, ${color}44 0px, transparent 1px, transparent 8px), repeating-linear-gradient(90deg, ${color}44 0px, transparent 1px, transparent 8px)`,
+                      width:  previewSize + 'px',
+                      height: previewSize + 'px',
+                      borderRadius: '8px',
+                    }}
+                  />
+                </div>
+
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">{p.name}</p>
+                <p className="mt-0.5 text-xs text-white/20">
+                  {p.pixels.toLocaleString('pt-BR')} pixels · {p.side}×{p.side}
+                </p>
+
+                <p className="mt-3 font-display text-4xl text-white">
+                  R${p.price}
+                </p>
+                <p className="mt-0.5 text-[10px] text-white/25">pagamento único · vitalício</p>
+
+                <Link
+                  href={`/comprar?pixels=${p.pixels}`}
+                  className={`mt-4 block rounded-xl py-2.5 text-center text-xs font-bold transition-all ${
+                    p.featured
+                      ? 'btn-gold'
+                      : 'border border-white/10 text-white/50 hover:border-white/20 hover:text-white/80'
+                  }`}
+                >
+                  Escolher
+                </Link>
+              </div>
+            )
+          })}
         </div>
+
+        <p className="mt-8 text-center text-xs text-white/25">
+          Não sabe qual escolher? Comece com o Micro por R$ 10 e expanda quando quiser.
+        </p>
       </div>
     </section>
   )
@@ -126,14 +210,18 @@ export function PricingSection() {
 
 // ─── Ranking ──────────────────────────────────────────────
 export async function RankingSection() {
-  const top = await getTopBlocks(10)
-  const medals = ['🥇', '🥈', '🥉']
+  const top     = await getTopBlocks(10)
+  const medals  = ['🥇', '🥈', '🥉']
 
   return (
-    <section className="bg-dark-2 px-4 py-24">
-      <div className="mx-auto max-w-2xl">
+    <section className="relative overflow-hidden bg-dark-2 px-4 py-24">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute right-0 top-0 h-[300px] w-[300px] rounded-full bg-gold/4 blur-[80px]" />
+      </div>
+
+      <div className="relative mx-auto max-w-2xl">
         <div className="mb-10 text-center">
-          <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-purple">
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-widest" style={{ color: '#833AB4' }}>
             Ranking
           </p>
           <h2 className="font-display text-5xl tracking-wide text-white md:text-6xl">
@@ -145,38 +233,36 @@ export async function RankingSection() {
         <div className="space-y-2">
           {top.map((b, i) => {
             const initials = (b.displayName || b.instagramHandle).slice(0, 2).toUpperCase()
+            const color    = b.colorHex || '#E1306C'
             return (
               <Link
                 key={b.id}
                 href={`/influencer/${b.instagramHandle}`}
-                className="flex items-center gap-3 rounded-xl border border-white/5 bg-dark-3 px-4 py-3 transition-all hover:-translate-y-0.5 hover:border-white/10"
+                className="group flex items-center gap-3 rounded-xl border border-white/5 bg-dark-3 px-4 py-3 transition-all hover:-translate-y-0.5 hover:border-white/10"
               >
-                <span className="w-8 text-center text-xl">
-                  {medals[i] ?? `#${i + 1}`}
+                <span className="w-8 shrink-0 text-center text-lg">
+                  {medals[i] ?? <span className="text-sm font-bold text-white/20">#{i + 1}</span>}
                 </span>
                 <div
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                  style={{ background: b.colorHex }}
+                  className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-bold text-white"
+                  style={{ background: color }}
                 >
                   {b.avatarUrl
                     ? <img src={b.avatarUrl} alt="" className="h-full w-full rounded-full object-cover" />
                     : initials}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="truncate text-sm font-bold text-white">
-                    @{b.instagramHandle}
-                  </p>
+                  <p className="truncate text-sm font-bold text-white">@{b.instagramHandle}</p>
                   <p className="text-xs text-white/30">
                     {NICHE_LABELS[b.niche as keyof typeof NICHE_LABELS] ?? b.niche}
                     {b.city ? ` · ${b.city}` : ''}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-gold">
-                    {b.pixelCount.toLocaleString('pt-BR')}
-                  </p>
+                <div className="shrink-0 text-right">
+                  <p className="text-sm font-bold text-gold">{b.pixelCount.toLocaleString('pt-BR')}</p>
                   <p className="text-[10px] text-white/25">pixels</p>
                 </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-white/15 group-hover:text-white/40 transition-colors"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
             )
           })}
@@ -194,24 +280,61 @@ export async function RankingSection() {
 
 // ─── Footer CTA ───────────────────────────────────────────
 export function FooterCTA() {
+  const footerLinks = [
+    { label: 'Início',         href: '/' },
+    { label: 'Como funciona',  href: '#como-funciona' },
+    { label: 'Preços',         href: '#precos' },
+    { label: 'Ranking',        href: '/ranking' },
+    { label: 'Para marcas',    href: '/marcas' },
+    { label: 'Meu painel',     href: '/meu-painel' },
+    { label: 'Termos',         href: '/termos' },
+  ]
+
   return (
-    <section className="px-4 py-24">
-      <div className="mx-auto max-w-2xl text-center">
+    <section className="relative overflow-hidden px-4 py-24">
+      {/* Glow de fundo */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/5 blur-[120px]" />
+      </div>
+
+      <div className="relative mx-auto max-w-2xl text-center">
+        {/* Urgência */}
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-4 py-1.5 text-xs text-red-400">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
+          Pixels esgotando — {(991200).toLocaleString('pt-BR')} restantes
+        </div>
+
         <h2 className="font-display text-5xl tracking-wide text-white md:text-7xl">
           SUA VEZ<br />
           <span className="text-gold">DE APARECER</span>
         </h2>
         <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-white/40">
-          Pixels esgotando. Quando acabar, acabou. Espaço permanente a partir de R$ 10.
+          Quando acabar, acabou. Espaço permanente a partir de R$ 10. Sem renovação. Para sempre.
         </p>
-        <Link href="/comprar" className="btn-gold mt-8 inline-flex px-10 py-4 text-base">
-          Garantir meu espaço permanente →
-        </Link>
+
+        {/* CTAs */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Link href="/comprar" className="btn-gold px-10 py-4 text-base">
+            Garantir meu espaço permanente →
+          </Link>
+          <Link href="/marcas" className="btn-ghost px-8 py-4 text-sm">
+            Sou uma marca
+          </Link>
+        </div>
+
+        {/* Garantias */}
+        <div className="mt-10 flex flex-wrap justify-center gap-6 text-xs text-white/25">
+          {['✓ Pagamento único', '✓ Sem mensalidade', '✓ Vitalício', '✓ Suporte por e-mail'].map(g => (
+            <span key={g}>{g}</span>
+          ))}
+        </div>
 
         {/* Footer links */}
-        <div className="mt-16 flex flex-wrap justify-center gap-6 border-t border-white/5 pt-10 text-xs text-white/20">
-          {['Início', 'Como funciona', 'Preços', 'Ranking', 'Para marcas', 'Meu painel', 'Termos'].map(l => (
-            <a key={l} href="#" className="hover:text-white/50">{l}</a>
+        <div className="mt-16 flex flex-wrap justify-center gap-x-6 gap-y-2 border-t border-white/5 pt-10 text-xs text-white/20">
+          {footerLinks.map(l => (
+            <Link key={l.label} href={l.href} className="hover:text-white/50 transition-colors">
+              {l.label}
+            </Link>
           ))}
         </div>
         <p className="mt-6 text-[11px] text-white/15">
