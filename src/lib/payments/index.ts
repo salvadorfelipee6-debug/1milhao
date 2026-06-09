@@ -18,7 +18,7 @@ const mp = new MercadoPagoConfig({
 })
 
 // ─── Preço por pixel ──────────────────────────────────────
-export const PIXEL_PRICE_BRL = 0.10
+export const PIXEL_PRICE_BRL = 0.99
 
 export function calculatePrice(pixelCount: number) {
   return Math.round(pixelCount * PIXEL_PRICE_BRL * 100) / 100
@@ -35,40 +35,28 @@ export function calculateDimensions(pixelCount: number) {
 
 // ─── Stripe ───────────────────────────────────────────────
 export async function createStripeCheckout({
-  blockId,
-  pixelCount,
-  email,
-  instagramHandle,
+  blockId, pixelCount, email, instagramHandle,
 }: {
-  blockId:         string
-  pixelCount:      number
-  email:           string
-  instagramHandle: string
+  blockId: string; pixelCount: number; email: string; instagramHandle: string
 }) {
   const price = calculatePrice(pixelCount)
 
   const session = await stripe.checkout.sessions.create({
-    mode:           'payment',
+    mode:                 'payment',
     payment_method_types: ['card'],
-    customer_email: email,
-    line_items: [
-      {
-        quantity: 1,
-        price_data: {
-          currency:     'brl',
-          unit_amount:  Math.round(price * 100),
-          product_data: {
-            name:        `${pixelCount.toLocaleString('pt-BR')} pixels — 1 Milhão de Influencer`,
-            description: `Espaço permanente de @${instagramHandle} na grade`,
-          },
+    customer_email:       email,
+    line_items: [{
+      quantity:   1,
+      price_data: {
+        currency:     'brl',
+        unit_amount:  Math.round(price * 100),
+        product_data: {
+          name:        `${pixelCount.toLocaleString('pt-BR')} pixels — 1 Milhão de Influencer`,
+          description: `Espaço permanente de @${instagramHandle} na grade`,
         },
       },
-    ],
-    metadata: {
-      blockId,
-      pixelCount: pixelCount.toString(),
-      instagramHandle,
-    },
+    }],
+    metadata:    { blockId, pixelCount: pixelCount.toString(), instagramHandle },
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/comprar/sucesso?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url:  `${process.env.NEXT_PUBLIC_APP_URL}/comprar?cancelado=1`,
     expires_at:  Math.floor(Date.now() / 1000) + 30 * 60,
@@ -89,11 +77,7 @@ export async function createStripeCheckout({
 export async function handleStripeWebhook(payload: string, signature: string) {
   let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(
-      payload,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    )
+    event = stripe.webhooks.constructEvent(payload, signature, process.env.STRIPE_WEBHOOK_SECRET!)
   } catch {
     throw new Error('Webhook Stripe inválido')
   }
@@ -108,32 +92,24 @@ export async function handleStripeWebhook(payload: string, signature: string) {
 
 // ─── Mercado Pago ─────────────────────────────────────────
 export async function createMercadoPagoPreference({
-  blockId,
-  pixelCount,
-  email,
-  instagramHandle,
+  blockId, pixelCount, email, instagramHandle,
 }: {
-  blockId:         string
-  pixelCount:      number
-  email:           string
-  instagramHandle: string
+  blockId: string; pixelCount: number; email: string; instagramHandle: string
 }) {
   const price  = calculatePrice(pixelCount)
   const client = new Preference(mp)
 
   const preference = await client.create({
     body: {
-      items: [
-        {
-          id:          blockId,
-          title:       `${pixelCount.toLocaleString('pt-BR')} pixels — 1 Milhão de Influencer`,
-          description: `Espaço permanente de @${instagramHandle}`,
-          quantity:    1,
-          unit_price:  price,
-          currency_id: 'BRL',
-        },
-      ],
-      payer:           { email },
+      items: [{
+        id:          blockId,
+        title:       `${pixelCount.toLocaleString('pt-BR')} pixels — 1 Milhão de Influencer`,
+        description: `Espaço permanente de @${instagramHandle}`,
+        quantity:    1,
+        unit_price:  price,
+        currency_id: 'BRL',
+      }],
+      payer:        { email },
       back_urls: {
         success: `${process.env.NEXT_PUBLIC_APP_URL}/comprar/sucesso`,
         failure: `${process.env.NEXT_PUBLIC_APP_URL}/comprar?cancelado=1`,
@@ -155,52 +131,35 @@ export async function createMercadoPagoPreference({
     status:     'pending',
   })
 
-  return {
-    preferenceId: preference.id,
-    initPoint:    preference.init_point,
-    pixUrl:       null,
-  }
+  return { preferenceId: preference.id, initPoint: preference.init_point, pixUrl: null }
 }
 
 export async function handleMercadoPagoWebhook(body: { type: string; data: { id: string } }) {
   if (body.type !== 'payment') return
 
-  const res = await fetch(
-    `https://api.mercadopago.com/v1/payments/${body.data.id}`,
-    { headers: { Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}` } }
-  )
+  const res     = await fetch(`https://api.mercadopago.com/v1/payments/${body.data.id}`, {
+    headers: { Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}` },
+  })
   const payment = await res.json()
   if (payment.status !== 'approved') return
 
   const blockId = payment.external_reference as string
-  const block   = await db.query.blocks.findFirst({
-    where: (b, { eq }) => eq(b.id, blockId),
-  })
+  const block   = await db.query.blocks.findFirst({ where: (b, { eq }) => eq(b.id, blockId) })
   if (!block) return
 
   await confirmPayment({ blockId, externalId: body.data.id, instagramHandle: block.instagramHandle })
 }
 
-// ─── Confirma pagamento ───────────────────────────────────
-async function confirmPayment({
-  blockId,
-  externalId,
-  instagramHandle,
-}: {
-  blockId:         string
-  externalId:      string
-  instagramHandle: string
+async function confirmPayment({ blockId, externalId, instagramHandle }: {
+  blockId: string; externalId: string; instagramHandle: string
 }) {
-  await db
-    .update(schema.payments)
+  await db.update(schema.payments)
     .set({ status: 'paid', paidAt: new Date() })
     .where(eq(schema.payments.externalId, externalId))
 
   await activateBlock(blockId)
 
-  const block = await db.query.blocks.findFirst({
-    where: (b, { eq }) => eq(b.id, blockId),
-  })
+  const block = await db.query.blocks.findFirst({ where: (b, { eq }) => eq(b.id, blockId) })
   if (!block) return
 
   await publishBlockActivated(block)

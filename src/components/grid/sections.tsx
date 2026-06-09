@@ -103,12 +103,12 @@ export function HowItWorksSection() {
 // ─── Preços ───────────────────────────────────────────────
 export function PricingSection() {
   const plans = [
-    { name: 'Micro',   pixels: 100,   side: 10,  price: '10',    niche: 'fitness',     featured: false },
-    { name: 'Básico',  pixels: 400,   side: 20,  price: '40',    niche: 'tecnologia',  featured: false },
-    { name: 'Médio',   pixels: 900,   side: 30,  price: '90',    niche: 'moda',        featured: true  },
-    { name: 'Grande',  pixels: 2500,  side: 50,  price: '250',   niche: 'viagens',     featured: false },
-    { name: 'Premium', pixels: 10000, side: 100, price: '1.000', niche: 'games',       featured: false },
-    { name: 'Marca',   pixels: 40000, side: 200, price: '4.000', niche: 'financas',    featured: false },
+    { name: 'Micro',   pixels: 100,   side: 10,  price: '99',     niche: 'fitness',     featured: false },
+    { name: 'Básico',  pixels: 400,   side: 20,  price: '396',    niche: 'tecnologia',  featured: false },
+    { name: 'Médio',   pixels: 900,   side: 30,  price: '891',    niche: 'moda',        featured: true  },
+    { name: 'Grande',  pixels: 2500,  side: 50,  price: '2.475',  niche: 'viagens',     featured: false },
+    { name: 'Premium', pixels: 10000, side: 100, price: '9.900',  niche: 'games',       featured: false },
+    { name: 'Marca',   pixels: 40000, side: 200, price: '39.600', niche: 'financas',    featured: false },
   ]
 
   return (
@@ -127,7 +127,7 @@ export function PricingSection() {
             <span className="text-gold">SEU ESPAÇO</span>
           </h2>
           <p className="mt-4 text-sm text-white/35">
-            Cada real investido é permanente. Não existe renovação.
+            Cada real investido é permanente. Não existe renovação. R$ 0,99/pixel.
           </p>
         </div>
 

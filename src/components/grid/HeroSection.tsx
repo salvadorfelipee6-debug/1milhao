@@ -1,13 +1,23 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useRef } from 'react'
-import type { GridStats } from '@/types'
+import { useEffect, useRef, useState } from 'react'
+import type { GridStats, GridBlock } from '@/types'
 import { LiveVisitors } from '@/components/ui/LiveVisitors'
+import { NICHE_COLORS } from '@/types'
 
-// Canvas com pixels flutuantes no background
-function PixelBackground() {
+const PIXEL_PRICE = 0.99
+
+interface HeroSectionProps {
+  stats:     GridStats
+  blocks:    GridBlock[]
+  highlight?: string
+}
+
+// Mini canvas do grid no hero
+function MiniGrid({ blocks }: { blocks: GridBlock[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const frameRef  = useRef<number>(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -16,163 +26,236 @@ function PixelBackground() {
     if (!ctx) return
 
     function resize() {
-      canvas!.width  = canvas!.offsetWidth
-      canvas!.height = canvas!.offsetHeight
+      canvas!.width  = canvas!.offsetWidth  || 420
+      canvas!.height = canvas!.offsetHeight || 480
+      draw(0)
     }
+
+    function draw(ts: number) {
+      const W = canvas!.width, H = canvas!.height
+      ctx!.fillStyle = '#0d0d0d'
+      ctx!.fillRect(0, 0, W, H)
+
+      // Grade sutil
+      ctx!.strokeStyle = 'rgba(255,255,255,0.025)'
+      ctx!.lineWidth   = 0.5
+      const cs = W / 300  // mostra 300 pixels de largura
+      for (let x = 0; x < W; x += cs * 10) {
+        ctx!.beginPath(); ctx!.moveTo(x, 0); ctx!.lineTo(x, H); ctx!.stroke()
+      }
+      for (let y = 0; y < H; y += cs * 10) {
+        ctx!.beginPath(); ctx!.moveTo(0, y); ctx!.lineTo(W, y); ctx!.stroke()
+      }
+
+      // Blocos reais
+      for (const b of blocks.slice(0, 30)) {
+        const bx = b.pixelX * cs, by = b.pixelY * cs
+        const bw = b.pixelWidth * cs, bh = b.pixelHeight * cs
+        if (bx > W || by > H) continue
+        const color = b.colorHex || '#E1306C'
+
+        ctx!.shadowColor = color + '55'
+        ctx!.shadowBlur  = 6
+        ctx!.fillStyle   = color + '44'
+        ctx!.fillRect(bx, by, bw, bh)
+        ctx!.shadowBlur  = 0
+        ctx!.strokeStyle = color + 'cc'
+        ctx!.lineWidth   = 1
+        ctx!.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh - 1)
+
+        if (bw > 16 && bh > 16) {
+          const initials = (b.displayName || b.instagramHandle).slice(0, 2).toUpperCase()
+          const r = Math.min(bw, bh) * 0.22
+          ctx!.beginPath(); ctx!.arc(bx + bw/2, by + bh/2, r, 0, Math.PI * 2)
+          ctx!.fillStyle = color + 'cc'; ctx!.fill()
+          ctx!.fillStyle = 'rgba(0,0,0,0.85)'
+          ctx!.font = `bold ${Math.max(6, r * 0.85)}px Inter,sans-serif`
+          ctx!.textAlign = 'center'; ctx!.textBaseline = 'middle'
+          ctx!.fillText(initials, bx + bw/2, by + bh/2)
+        }
+      }
+
+      // Seleção animada pulsante
+      const pulse = Math.sin(ts / 400) * 0.3 + 0.7
+      const sx = 140 * cs, sy = 80 * cs, sw = 60 * cs, sh = 60 * cs
+      ctx!.strokeStyle = `rgba(255,215,0,${pulse})`
+      ctx!.lineWidth   = 1.5
+      ctx!.setLineDash([5, 4])
+      ctx!.strokeRect(sx, sy, sw, sh)
+      ctx!.setLineDash([])
+      ctx!.fillStyle = `rgba(255,215,0,${0.06 * pulse})`
+      ctx!.fillRect(sx, sy, sw, sh)
+
+      // Cantos em L
+      const cornerSize = 8
+      ctx!.strokeStyle = `rgba(255,215,0,${pulse})`
+      ctx!.lineWidth   = 2
+      for (const [cx, cy, dx, dy] of [
+        [sx, sy, 1, 1], [sx+sw, sy, -1, 1],
+        [sx, sy+sh, 1, -1], [sx+sw, sy+sh, -1, -1],
+      ] as [number,number,number,number][]) {
+        ctx!.beginPath()
+        ctx!.moveTo(cx + dx * cornerSize, cy)
+        ctx!.lineTo(cx, cy)
+        ctx!.lineTo(cx, cy + dy * cornerSize)
+        ctx!.stroke()
+      }
+
+      ctx!.globalAlpha = 1
+      frameRef.current = requestAnimationFrame(draw)
+    }
+
     resize()
     window.addEventListener('resize', resize)
-
-    const COLORS = ['#FFD700', '#E1306C', '#405DE6', '#833AB4', '#1ed760', '#00B4D8']
-    const pixels = Array.from({ length: 40 }, () => ({
-      x:     Math.random() * canvas!.width,
-      y:     Math.random() * canvas!.height,
-      size:  4 + Math.random() * 14,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)] as string,
-      vx:    (Math.random() - 0.5) * 0.3,
-      vy:    (Math.random() - 0.5) * 0.3,
-      alpha: 0.03 + Math.random() * 0.08,
-    }))
-
-    let frame: number
-    function draw() {
-      ctx!.clearRect(0, 0, canvas!.width, canvas!.height)
-      for (const p of pixels) {
-        p.x += p.vx; p.y += p.vy
-        if (p.x < -p.size) p.x = canvas!.width + p.size
-        if (p.x > canvas!.width + p.size) p.x = -p.size
-        if (p.y < -p.size) p.y = canvas!.height + p.size
-        if (p.y > canvas!.height + p.size) p.y = -p.size
-        ctx!.fillStyle = p.color
-        ctx!.globalAlpha = p.alpha
-        ctx!.fillRect(p.x, p.y, p.size, p.size)
-      }
-      ctx!.globalAlpha = 1
-      frame = requestAnimationFrame(draw)
-    }
-    frame = requestAnimationFrame(draw)
-
     return () => {
-      cancelAnimationFrame(frame)
       window.removeEventListener('resize', resize)
+      cancelAnimationFrame(frameRef.current)
     }
-  }, [])
+  }, [blocks])
 
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none absolute inset-0 h-full w-full"
+      className="h-full w-full"
+      style={{ display: 'block' }}
+      aria-hidden="true"
     />
   )
 }
 
-interface HeroSectionProps { stats: GridStats }
-
-export function HeroSection({ stats }: HeroSectionProps) {
+export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
   const pct   = Math.round((stats.sold / 1_000_000) * 100)
   const avail = (1_000_000 - stats.sold).toLocaleString('pt-BR')
+  const minPrice = (100 * PIXEL_PRICE).toFixed(0)
 
   return (
-    <section className="relative min-h-[90vh] overflow-hidden bg-dark">
+    <section className="relative overflow-hidden bg-dark">
 
-      {/* Canvas de pixels animados */}
-      <PixelBackground />
-
-      {/* Gradientes de fundo */}
+      {/* Glow de fundo */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-0 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-gold/6 blur-[120px]" />
-        <div className="absolute bottom-0 left-0 h-[300px] w-[500px] rounded-full bg-pink/5 blur-[100px]" />
-        <div className="absolute bottom-0 right-0 h-[300px] w-[500px] rounded-full bg-indigo-500/5 blur-[100px]" />
+        <div className="absolute left-1/4 top-0 h-[500px] w-[500px] rounded-full bg-gold/5 blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 h-[300px] w-[400px] rounded-full bg-pink/4 blur-[80px]" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-5xl px-4 pb-24 pt-28 text-center">
+      {/* Layout duas colunas */}
+      <div className="relative z-10 grid min-h-[calc(100vh-28px)] grid-cols-1 lg:grid-cols-2">
 
-        {/* Badges ao vivo */}
-        <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
-          <div className="badge-gold inline-flex items-center">
-            <span className="animate-pulse-dot mr-2 h-1.5 w-1.5 rounded-full bg-gold" />
-            {avail} pixels disponíveis · ao vivo
-          </div>
-          <LiveVisitors />
-        </div>
+        {/* ── Coluna esquerda: copy ── */}
+        <div className="flex flex-col justify-center px-6 py-12 lg:px-12 lg:py-16">
 
-        {/* Título */}
-        <h1 className="mb-6 font-display leading-none tracking-wide">
-          <span className="block text-[clamp(32px,8vw,80px)] text-white/90">
-            O MAPA DE
-          </span>
-          <span
-            className="animate-float block text-[clamp(64px,16vw,160px)]"
-            style={{
-              color: '#FFD700',
-              textShadow: '0 0 80px rgba(255,215,0,0.4), 0 0 160px rgba(255,215,0,0.15)',
-            }}
-          >
-            1
-          </span>
-          <span className="block text-[clamp(28px,7vw,72px)] text-white/90">
-            MILHÃO DE
-          </span>
-          <span
-            className="block text-[clamp(24px,5vw,56px)] tracking-[0.15em]"
-            style={{
-              background: 'linear-gradient(135deg, #E1306C, #833AB4, #405DE6)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            INFLUENCERS
-          </span>
-        </h1>
-
-        {/* Subtítulo */}
-        <p className="mx-auto mb-10 max-w-lg text-base leading-relaxed text-white/40 md:text-lg">
-          <span className="font-semibold text-white/70">1.000.000 de pixels.</span>{' '}
-          Cada pixel, um influencer. Compre seu espaço uma vez e apareça para marcas e seguidores{' '}
-          <span className="font-semibold text-white/70">para sempre.</span>
-        </p>
-
-        {/* CTAs */}
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Link href="/comprar" className="btn-gold px-8 py-4 text-base">
-            Garantir meu espaço — R$ 10
-          </Link>
-          <a href="#grade" className="btn-ghost px-8 py-4 text-base">
-            Ver o mapa ao vivo ↓
-          </a>
-        </div>
-
-        {/* Stats */}
-        <div className="mx-auto mt-16 flex max-w-lg flex-wrap justify-center gap-8 border-t border-white/6 pt-10">
-          {[
-            { n: '1.000.000',                        l: 'pixels totais' },
-            { n: stats.sold.toLocaleString('pt-BR'), l: 'já vendidos' },
-            { n: stats.active.toString(),            l: 'influencers' },
-            { n: 'R$ 0,10',                          l: 'por pixel' },
-          ].map(s => (
-            <div key={s.l} className="text-center">
-              <p className="stat-number">{s.n}</p>
-              <p className="mt-1 text-[10px] uppercase tracking-widest text-white/25">{s.l}</p>
+          {/* Badges */}
+          <div className="mb-6 flex flex-wrap gap-2">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-red-500/25 bg-red-500/10 px-3 py-1 text-[11px] text-red-400">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
+              {avail} pixels restantes
             </div>
-          ))}
+            <LiveVisitors />
+          </div>
+
+          {/* Título */}
+          <h1 className="mb-4 font-display leading-none tracking-wide">
+            <span className="block text-[clamp(28px,5vw,52px)] text-white/90">O MAPA PERMANENTE</span>
+            <span className="block text-[clamp(28px,5vw,52px)] text-white/90">DOS</span>
+            <span
+              className="block text-[clamp(36px,7vw,72px)]"
+              style={{ color: '#FFD700', textShadow: '0 0 60px rgba(255,215,0,0.35)' }}
+            >
+              INFLUENCERS
+            </span>
+            <span
+              className="block text-[clamp(24px,4vw,48px)]"
+              style={{ background: 'linear-gradient(135deg,#E1306C,#833AB4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+            >
+              DO BRASIL
+            </span>
+          </h1>
+
+          {/* Subtítulo */}
+          <p className="mb-6 max-w-md text-sm leading-relaxed text-white/45 lg:text-base">
+            Compre seu espaço <strong className="text-white/75">uma única vez</strong> e apareça para marcas e seguidores{' '}
+            <strong className="text-white/75">para sempre.</strong>{' '}
+            Sem mensalidade. Sem renovação. R$ 0,99 por pixel.
+          </p>
+
+          {/* CTAs */}
+          <div className="mb-8 flex flex-wrap gap-3">
+            <Link href="/comprar" className="btn-gold px-7 py-3.5 text-sm">
+              Garantir meu espaço — R$ {minPrice} →
+            </Link>
+            <Link href="/marcas" className="btn-ghost px-6 py-3.5 text-sm">
+              Sou uma marca
+            </Link>
+          </div>
+
+          {/* Stats */}
+          <div className="flex gap-0 border-t border-white/6 pt-6">
+            {[
+              { n: stats.sold.toLocaleString('pt-BR'), l: 'pixels vendidos' },
+              { n: stats.active.toString(),            l: 'influencers' },
+              { n: 'R$0,99',                           l: 'por pixel' },
+              { n: '∞',                                l: 'vitalício' },
+            ].map((s, i) => (
+              <div key={s.l} className={`flex-1 text-center ${i > 0 ? 'border-l border-white/6' : ''}`}>
+                <p className="font-display text-xl text-gold">{s.n}</p>
+                <p className="mt-0.5 text-[9px] uppercase tracking-widest text-white/20">{s.l}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Barra de progresso */}
+          <div className="mt-5">
+            <div className="mb-1 flex justify-between text-[11px] text-white/20">
+              <span>{pct}% do mapa ocupado</span>
+              <span>{avail} disponíveis</span>
+            </div>
+            <div className="h-1 w-full overflow-hidden rounded-full bg-white/5">
+              <div
+                className="h-full rounded-full"
+                style={{ width: `${Math.max(pct, 0.5)}%`, background: 'linear-gradient(90deg,#FFD700,#E1306C)' }}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Barra de progresso */}
-        <div className="mx-auto mt-8 max-w-md">
-          <div className="mb-2 flex justify-between text-xs text-white/25">
-            <span>{pct}% vendido</span>
-            <span>{avail} restantes</span>
+        {/* ── Coluna direita: mini grid ao vivo ── */}
+        <div className="relative hidden border-l border-white/5 lg:block">
+          <MiniGrid blocks={blocks} />
+
+          {/* Overlays */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-dark to-transparent" />
+
+          {/* Badge ao vivo */}
+          <div className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full border border-green-500/20 bg-black/70 px-3 py-1.5 text-[11px] text-green-400 backdrop-blur-sm">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-400" />
+            Ao vivo agora
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
-            <div
-              className="h-full rounded-full transition-all duration-1000"
-              style={{
-                width:      `${Math.max(pct, 0.5)}%`,
-                background: 'linear-gradient(90deg, #FFD700, #E1306C)',
-              }}
-            />
+
+          {/* Label de instrução */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-xl border border-gold/20 bg-black/80 px-4 py-2 text-center backdrop-blur-sm">
+            <p className="text-xs font-semibold text-gold">↓ Role para ver o mapa completo</p>
+            <p className="text-[10px] text-white/30">Clique e arraste para selecionar sua área</p>
           </div>
         </div>
 
+      </div>
+
+      {/* Header da seção do mapa — já visível */}
+      <div id="grade" className="relative z-10 border-t border-white/5 px-6 py-5 lg:px-12">
+        <div className="mx-auto max-w-6xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="badge-gold inline-flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold" />
+              Ao vivo agora
+            </div>
+            <div>
+              <h2 className="font-display text-2xl tracking-wide text-white">O MAPA EM TEMPO REAL</h2>
+              <p className="text-xs text-white/30">Passe o mouse em qualquer bloco · Clique para ver o perfil completo</p>
+            </div>
+          </div>
+          <Link href="/comprar" className="hidden btn-gold px-5 py-2.5 text-sm sm:inline-flex">
+            Garantir espaço →
+          </Link>
+        </div>
       </div>
     </section>
   )

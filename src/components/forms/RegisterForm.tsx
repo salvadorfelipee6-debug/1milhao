@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import type { GridStats, Niche } from '@/types'
 import { NICHE_LABELS } from '@/types'
 
-const PIXEL_PRICE = 0.10
+const PIXEL_PRICE = 0.99
 const MIN_PIXELS  = 100
 const MAX_PIXELS  = 40000
 

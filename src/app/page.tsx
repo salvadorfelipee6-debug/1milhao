@@ -8,11 +8,11 @@ import { PricingSection }    from '@/components/grid/PricingSection'
 import { RankingSection }    from '@/components/grid/RankingSection'
 import { FooterCTA }         from '@/components/grid/FooterCTA'
 import { GridSkeleton }      from '@/components/grid/GridSkeleton'
+import { TickerBanner }      from '@/components/ui/TickerBanner'
 
 export const metadata: Metadata = {
   title: '1 Milhão de Influencer — O mapa permanente dos influencers do Brasil',
-  description:
-    '1.000.000 de pixels. Cada pixel, um influencer. Compre seu espaço e apareça para marcas e seguidores para sempre. A partir de R$ 10.',
+  description: '1.000.000 de pixels. Cada pixel, um influencer. Compre seu espaço e apareça para marcas e seguidores para sempre. A partir de R$ 99.',
 }
 
 export const revalidate = 60
@@ -32,29 +32,17 @@ export default async function HomePage({ searchParams }: PageProps) {
 
   return (
     <main>
-      <HeroSection stats={stats} />
+      {/* Faixa ticker */}
+      <TickerBanner />
 
-      <section id="grade" className="px-4 py-12">
+      {/* Hero com grid embutido */}
+      <HeroSection stats={stats} blocks={blocks} highlight={highlight || undefined} />
+
+      {/* Grid completo */}
+      <section id="grade" className="px-4 pb-12 pt-4">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-8 text-center">
-            <p className="badge-gold mb-3 inline-flex">
-              <span className="animate-pulse-dot h-1.5 w-1.5 rounded-full bg-gold" />
-              Ao vivo agora
-            </p>
-            <h2 className="font-display text-4xl tracking-wide text-white md:text-6xl">
-              O MAPA EM TEMPO REAL
-            </h2>
-            <p className="mt-3 text-sm text-white/40">
-              Passe o mouse em qualquer bloco · Clique para ver o perfil completo
-            </p>
-          </div>
-
           <Suspense fallback={<GridSkeleton />}>
-            <PixelGrid
-              initialBlocks={blocks}
-              stats={stats}
-              highlight={highlight || undefined}
-            />
+            <PixelGrid initialBlocks={blocks} stats={stats} highlight={highlight || undefined} />
           </Suspense>
         </div>
       </section>
