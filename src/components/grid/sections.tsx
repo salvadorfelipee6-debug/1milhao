@@ -278,6 +278,133 @@ export async function RankingSection() {
   )
 }
 
+// ─── FAQ ──────────────────────────────────────────────────
+export function FAQSection() {
+  const faqs = [
+    {
+      category: 'Para Influencers',
+      color: '#FFD700',
+      items: [
+        {
+          q: 'O que é o 1 Milhão de Influencer?',
+          a: 'É um mapa digital permanente com 1.000.000 de pixels onde cada influencer compra seu espaço. Você aparece para marcas e seguidores para sempre, sem pagar mensalidade.',
+        },
+        {
+          q: 'Quanto custa e como funciona o pagamento?',
+          a: 'R$ 0,99 por pixel. O mínimo é 100 pixels (10×10) por R$ 99. O pagamento é único — você paga uma vez e seu espaço fica no mapa para sempre. Aceitamos Pix e cartão de crédito.',
+        },
+        {
+          q: 'O que aparece no meu bloco?',
+          a: 'Sua foto ou logo, seu @, nome, nicho e cidade. Quando alguém passa o mouse no seu bloco, aparece um popup completo com suas redes sociais, bio e botão de contato para marcas.',
+        },
+        {
+          q: 'Posso editar meu perfil depois de comprar?',
+          a: 'Sim! Você recebe um link de edição no e-mail após a compra. Com ele você pode atualizar foto, bio, redes sociais e links personalizados a qualquer momento, sem custo adicional.',
+        },
+        {
+          q: 'O que é o link-in-bio incluso?',
+          a: 'Cada influencer ganha uma página em 1milhao.com.br/influencer/seuarroba — uma página profissional com todas as suas redes, links e botão de contato para marcas. Substitui o Linktree gratuitamente.',
+        },
+        {
+          q: 'Quanto maior meu bloco, mais visível fico?',
+          a: 'Sim. Blocos maiores ocupam mais espaço no mapa e são mais fáceis de ver. Mas mesmo o menor bloco (10×10) aparece no mapa e no ranking, e tem a mesma página de perfil completa.',
+        },
+      ],
+    },
+    {
+      category: 'Para Marcas',
+      color: '#E1306C',
+      items: [
+        {
+          q: 'Como encontro influencers para minha campanha?',
+          a: 'Acesse o portal de marcas em /marcas e filtre por nicho (fitness, moda, tecnologia...), cidade e tamanho de audiência. Clique no perfil e entre em contato direto pelo WhatsApp ou Instagram.',
+        },
+        {
+          q: 'O contato com os influencers é direto?',
+          a: 'Sim, 100% direto. Não há intermediários nem taxas de agência. Você clica em "Anunciar" no perfil do influencer e é redirecionado direto para o WhatsApp ou Instagram dele.',
+        },
+        {
+          q: 'É grátis para marcas usar o portal?',
+          a: 'Sim. O portal de marcas é completamente gratuito. Você pode buscar, filtrar e entrar em contato com qualquer influencer sem pagar nada.',
+        },
+        {
+          q: 'Quais informações vejo sobre cada influencer?',
+          a: 'Número de seguidores, nicho, cidade, bio, todas as redes sociais e links. Tudo que você precisa para avaliar se o influencer é o parceiro certo para sua campanha.',
+        },
+      ],
+    },
+  ]
+
+  return (
+    <section id="faq" className="relative overflow-hidden bg-dark-2 px-4 py-24">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-0 h-[300px] w-[500px] -translate-x-1/2 rounded-full bg-gold/3 blur-[100px]" />
+      </div>
+
+      <div className="relative mx-auto max-w-3xl">
+        <div className="mb-14 text-center">
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-gold">
+            Dúvidas frequentes
+          </p>
+          <h2 className="font-display text-5xl tracking-wide text-white md:text-6xl">
+            PERGUNTAS &<br />
+            <span className="text-gold">RESPOSTAS</span>
+          </h2>
+        </div>
+
+        <div className="space-y-10">
+          {faqs.map(cat => (
+            <div key={cat.category}>
+              <div
+                className="mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold"
+                style={{ background: cat.color + '22', color: cat.color }}
+              >
+                {cat.category}
+              </div>
+              <div className="space-y-2">
+                {cat.items.map((item, i) => (
+                  <details
+                    key={i}
+                    className="group rounded-2xl border border-white/5 bg-dark-3 transition-all open:border-white/10"
+                  >
+                    <summary className="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 text-sm font-semibold text-white list-none">
+                      {item.q}
+                      <span
+                        className="shrink-0 text-lg text-white/30 transition-transform group-open:rotate-45"
+                        style={{ lineHeight: 1 }}
+                      >
+                        +
+                      </span>
+                    </summary>
+                    <div className="px-5 pb-4 pt-0">
+                      <p className="text-sm leading-relaxed text-white/50">{item.a}</p>
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-12 rounded-2xl border border-gold/15 bg-gold/5 p-6 text-center">
+          <p className="text-sm font-bold text-gold mb-1">Ainda tem dúvidas?</p>
+          <p className="text-xs text-white/40 mb-4">
+            Entre em contato pelo Instagram ou e-mail — respondemos em até 24h.
+          </p>
+          <a
+            href="https://instagram.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-ghost px-6 py-2.5 text-sm"
+          >
+            Falar com a gente →
+          </a>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // ─── Footer CTA ───────────────────────────────────────────
 export function FooterCTA() {
   const footerLinks = [

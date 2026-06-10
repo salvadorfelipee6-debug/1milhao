@@ -6,6 +6,7 @@ import { PixelGrid }         from '@/components/grid/PixelGrid'
 import { HowItWorksSection } from '@/components/grid/HowItWorksSection'
 import { PricingSection }    from '@/components/grid/PricingSection'
 import { RankingSection }    from '@/components/grid/RankingSection'
+import { FAQSection }        from '@/components/grid/FAQSection'
 import { FooterCTA }         from '@/components/grid/FooterCTA'
 import { GridSkeleton }      from '@/components/grid/GridSkeleton'
 import { TickerBanner }      from '@/components/ui/TickerBanner'
@@ -50,6 +51,7 @@ export default async function HomePage({ searchParams }: PageProps) {
       <HowItWorksSection />
       <PricingSection />
       <RankingSection />
+      <FAQSection />
       <FooterCTA />
     </main>
   )
