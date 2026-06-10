@@ -20,7 +20,7 @@ export function TickerBanner() {
     >
       <div
         className="flex gap-0 whitespace-nowrap"
-        style={{ animation: 'ticker 22s linear infinite' }}
+        style={{ animation: 'ticker 40s linear infinite' }}
       >
         {allItems.map((item, i) => (
           <span

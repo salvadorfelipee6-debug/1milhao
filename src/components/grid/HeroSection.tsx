@@ -124,9 +124,18 @@ function MiniGrid({ blocks }: { blocks: GridBlock[] }) {
 }
 
 export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
-  const pct   = Math.round((stats.sold / 1_000_000) * 100)
-  const avail = (1_000_000 - stats.sold).toLocaleString('pt-BR')
+  const pct      = Math.round((stats.sold / 1_000_000) * 100)
+  const avail    = (1_000_000 - stats.sold).toLocaleString('pt-BR')
   const minPrice = (100 * PIXEL_PRICE).toFixed(0)
+
+  // Auto-scroll para o grid após 6 segundos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const grade = document.getElementById('grade')
+      if (grade) grade.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 6000)
+    return () => clearTimeout(timer)
+  }, [])
 
   return (
     <section className="relative overflow-hidden bg-dark">
@@ -171,9 +180,9 @@ export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
           </h1>
 
           {/* Subtítulo */}
-          <p className="mb-6 max-w-md text-sm leading-relaxed text-white/45 lg:text-base">
-            Compre seu espaço <strong className="text-white/75">uma única vez</strong> e apareça para marcas e seguidores{' '}
-            <strong className="text-white/75">para sempre.</strong>{' '}
+          <p className="mb-6 max-w-md text-sm leading-relaxed text-white/55 lg:text-base">
+            Compre seu espaço <strong className="text-white/85">uma única vez</strong> e apareça para marcas e seguidores{' '}
+            <strong className="text-white/85">para sempre.</strong>{' '}
             Sem mensalidade. Sem renovação. R$ 0,99 por pixel.
           </p>
 
@@ -187,28 +196,28 @@ export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
             </Link>
           </div>
 
-          {/* Stats */}
-          <div className="flex gap-0 border-t border-white/6 pt-6">
+          {/* Stats — contraste aumentado */}
+          <div className="flex gap-0 border-t border-white/15 pt-6">
             {[
               { n: stats.sold.toLocaleString('pt-BR'), l: 'pixels vendidos' },
               { n: stats.active.toString(),            l: 'influencers' },
               { n: 'R$0,99',                           l: 'por pixel' },
               { n: '∞',                                l: 'vitalício' },
             ].map((s, i) => (
-              <div key={s.l} className={`flex-1 text-center ${i > 0 ? 'border-l border-white/6' : ''}`}>
+              <div key={s.l} className={`flex-1 text-center ${i > 0 ? 'border-l border-white/15' : ''}`}>
                 <p className="font-display text-xl text-gold">{s.n}</p>
-                <p className="mt-0.5 text-[9px] uppercase tracking-widest text-white/20">{s.l}</p>
+                <p className="mt-0.5 text-[10px] uppercase tracking-widest text-white/40">{s.l}</p>
               </div>
             ))}
           </div>
 
-          {/* Barra de progresso */}
+          {/* Barra de progresso — mais visível */}
           <div className="mt-5">
-            <div className="mb-1 flex justify-between text-[11px] text-white/20">
+            <div className="mb-1.5 flex justify-between text-xs text-white/50">
               <span>{pct}% do mapa ocupado</span>
               <span>{avail} disponíveis</span>
             </div>
-            <div className="h-1 w-full overflow-hidden rounded-full bg-white/5">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
               <div
                 className="h-full rounded-full"
                 style={{ width: `${Math.max(pct, 0.5)}%`, background: 'linear-gradient(90deg,#FFD700,#E1306C)' }}
@@ -217,11 +226,22 @@ export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
           </div>
         </div>
 
-        {/* ── Coluna direita: mini grid ao vivo ── */}
-        <div className="relative hidden border-l border-white/5 lg:block">
+        {/* ── Coluna direita: mini grid clicável → vai para #grade ── */}
+        <a
+          href="#grade"
+          className="relative hidden border-l border-white/5 lg:block cursor-pointer"
+          onClick={(e) => {
+            e.preventDefault()
+            document.getElementById('grade')?.scrollIntoView({ behavior: 'smooth' })
+          }}
+          aria-label="Ver o mapa completo e selecionar sua área"
+        >
           <MiniGrid blocks={blocks} />
 
-          {/* Overlays */}
+          {/* Overlay clicável com instrução */}
+          <div className="absolute inset-0 bg-transparent transition-all hover:bg-white/2" />
+
+          {/* Overlay esquerdo */}
           <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-dark to-transparent" />
 
           {/* Badge ao vivo */}
@@ -230,17 +250,17 @@ export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
             Ao vivo agora
           </div>
 
-          {/* Label de instrução */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-xl border border-gold/20 bg-black/80 px-4 py-2 text-center backdrop-blur-sm">
-            <p className="text-xs font-semibold text-gold">↓ Role para ver o mapa completo</p>
-            <p className="text-[10px] text-white/30">Clique e arraste para selecionar sua área</p>
+          {/* CTA sobre o grid */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-xl border border-gold/30 bg-black/85 px-5 py-2.5 text-center backdrop-blur-sm">
+            <p className="text-sm font-bold text-gold">Clique para selecionar sua área →</p>
+            <p className="text-[10px] text-white/40 mt-0.5">Arraste no mapa e garanta seu espaço</p>
           </div>
-        </div>
+        </a>
 
       </div>
 
       {/* Header da seção do mapa — já visível */}
-      <div id="grade" className="relative z-10 border-t border-white/5 px-6 py-5 lg:px-12">
+      <div id="grade" className="relative z-10 border-t border-white/10 px-6 py-5 lg:px-12">
         <div className="mx-auto max-w-6xl flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="badge-gold inline-flex items-center gap-1.5">
@@ -249,7 +269,7 @@ export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
             </div>
             <div>
               <h2 className="font-display text-2xl tracking-wide text-white">O MAPA EM TEMPO REAL</h2>
-              <p className="text-xs text-white/30">Passe o mouse em qualquer bloco · Clique para ver o perfil completo</p>
+              <p className="text-xs text-white/50">Passe o mouse em qualquer bloco · Clique para ver o perfil completo</p>
             </div>
           </div>
           <Link href="/comprar" className="hidden btn-gold px-5 py-2.5 text-sm sm:inline-flex">
