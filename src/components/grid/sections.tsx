@@ -278,6 +278,135 @@ export async function RankingSection() {
   )
 }
 
+// ─── Prova Social ─────────────────────────────────────────
+export async function SocialProofSection() {
+  const top = await getTopBlocks(6)
+
+  return (
+    <section className="relative overflow-hidden px-4 py-24">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-1/2 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-pink/4 blur-[120px]" />
+      </div>
+
+      <div className="relative mx-auto max-w-5xl">
+        <div className="mb-14 text-center">
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-pink">
+            Quem já garantiu
+          </p>
+          <h2 className="font-display text-5xl tracking-wide text-white md:text-6xl">
+            OS PRIMEIROS<br />
+            <span className="text-gold">DO MAPA</span>
+          </h2>
+          <p className="mt-4 text-sm text-white/35">
+            Esses influencers já garantiram seu espaço permanente. O seu ainda está disponível.
+          </p>
+        </div>
+
+        {/* Cards dos early adopters */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {top.map((b) => {
+            const initials   = (b.displayName || b.instagramHandle).slice(0, 2).toUpperCase()
+            const color      = b.colorHex || '#E1306C'
+            const nicheLabel = NICHE_LABELS[b.niche as keyof typeof NICHE_LABELS] ?? b.niche
+
+            return (
+              <Link
+                key={b.id}
+                href={`/influencer/${b.instagramHandle}`}
+                className="group relative overflow-hidden rounded-2xl border border-white/5 bg-dark-2 p-5 transition-all hover:-translate-y-1 hover:border-white/10"
+              >
+                {/* Badge early adopter */}
+                <div className="absolute right-3 top-3 rounded-full bg-gold/15 px-2 py-0.5 text-[9px] font-bold text-gold">
+                  Early adopter
+                </div>
+
+                {/* Header */}
+                <div className="mb-4 flex items-center gap-3">
+                  <div
+                    className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl text-sm font-bold text-white"
+                    style={{ background: color }}
+                  >
+                    {b.avatarUrl
+                      ? <img src={b.avatarUrl} alt="" className="h-full w-full object-cover" />
+                      : initials}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold text-white">@{b.instagramHandle}</p>
+                    <p className="text-xs" style={{ color: color + 'bb' }}>{nicheLabel}</p>
+                  </div>
+                </div>
+
+                {/* Bio */}
+                {b.bio && (
+                  <p className="mb-4 text-xs leading-relaxed text-white/45 line-clamp-2">
+                    "{b.bio}"
+                  </p>
+                )}
+
+                {/* Stats */}
+                <div className="flex gap-3 border-t border-white/5 pt-3">
+                  {b.followers && (
+                    <div>
+                      <p className="text-sm font-bold text-gold">{b.followers}</p>
+                      <p className="text-[9px] uppercase tracking-wide text-white/25">seguidores</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-bold text-gold">{b.pixelCount.toLocaleString('pt-BR')}</p>
+                    <p className="text-[9px] uppercase tracking-wide text-white/25">pixels</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-white/60">{b.pixelWidth}×{b.pixelHeight}</p>
+                    <p className="text-[9px] uppercase tracking-wide text-white/25">tamanho</p>
+                  </div>
+                  {b.city && (
+                    <div className="ml-auto text-right">
+                      <p className="text-xs text-white/30">📍 {b.city}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Hover: ver perfil */}
+                <div className="absolute inset-x-0 bottom-0 flex items-center justify-center rounded-b-2xl bg-gradient-to-t from-dark-2 py-2 opacity-0 transition-opacity group-hover:opacity-100">
+                  <span className="text-xs font-semibold text-gold">Ver perfil completo →</span>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+
+        {/* Counters de prova social */}
+        <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {[
+            { icon: '🗺️', n: '991.200',  l: 'pixels disponíveis' },
+            { icon: '⚡', n: 'R$ 0,99',  l: 'por pixel' },
+            { icon: '∞',  n: 'vitalício', l: 'sem renovação' },
+            { icon: '🔗', n: 'gratuito',  l: 'link-in-bio incluso' },
+          ].map(s => (
+            <div
+              key={s.l}
+              className="rounded-2xl border border-white/5 bg-dark-2 p-5 text-center"
+            >
+              <div className="mb-2 text-2xl">{s.icon}</div>
+              <p className="font-display text-xl text-gold">{s.n}</p>
+              <p className="mt-1 text-[10px] uppercase tracking-widest text-white/30">{s.l}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-10 text-center">
+          <Link href="/comprar" className="btn-gold px-8 py-3.5 text-sm">
+            Garantir meu espaço agora →
+          </Link>
+          <p className="mt-3 text-xs text-white/25">
+            Seja um dos primeiros. Quando o mapa encher, não haverá mais espaço.
+          </p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // ─── FAQ ──────────────────────────────────────────────────
 export function FAQSection() {
   const faqs = [

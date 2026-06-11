@@ -3,11 +3,12 @@ import { Suspense } from 'react'
 import { getActiveBlocksForGrid, getGridStats } from '@/lib/db/blocks'
 import { HeroSection }       from '@/components/grid/HeroSection'
 import { PixelGrid }         from '@/components/grid/PixelGrid'
-import { HowItWorksSection } from '@/components/grid/HowItWorksSection'
-import { PricingSection }    from '@/components/grid/PricingSection'
-import { RankingSection }    from '@/components/grid/RankingSection'
-import { FAQSection }        from '@/components/grid/FAQSection'
-import { FooterCTA }         from '@/components/grid/FooterCTA'
+import { HowItWorksSection }  from '@/components/grid/HowItWorksSection'
+import { PricingSection }     from '@/components/grid/PricingSection'
+import { RankingSection }     from '@/components/grid/RankingSection'
+import { SocialProofSection } from '@/components/grid/SocialProofSection'
+import { FAQSection }         from '@/components/grid/FAQSection'
+import { FooterCTA }          from '@/components/grid/FooterCTA'
 import { GridSkeleton }      from '@/components/grid/GridSkeleton'
 import { TickerBanner }      from '@/components/ui/TickerBanner'
 
@@ -51,6 +52,7 @@ export default async function HomePage({ searchParams }: PageProps) {
       <HowItWorksSection />
       <PricingSection />
       <RankingSection />
+      <SocialProofSection />
       <FAQSection />
       <FooterCTA />
     </main>
