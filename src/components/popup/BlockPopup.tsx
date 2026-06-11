@@ -89,13 +89,13 @@ export function BlockPopup({ block, onClose }: BlockPopupProps) {
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-4"
       onClick={(e) => { if (e.target === overlayRef.current) onClose() }}
       role="dialog"
       aria-modal="true"
       aria-label={`Perfil de @${block.instagramHandle}`}
     >
-      <div className="popup-enter relative w-full max-w-sm overflow-hidden rounded-2xl shadow-2xl" style={{ background: '#111' }}>
+      <div className="popup-enter relative w-full max-w-sm overflow-hidden shadow-2xl sm:rounded-2xl" style={{ background: '#111', maxHeight: '90vh', overflowY: 'auto', borderRadius: '16px 16px 0 0' }}>
 
         {/* Botão fechar */}
         <button

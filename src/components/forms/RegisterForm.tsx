@@ -6,8 +6,8 @@ import type { GridStats, Niche } from '@/types'
 import { NICHE_LABELS } from '@/types'
 
 const PIXEL_PRICE = 0.99
-const MIN_PIXELS  = 100
-const MAX_PIXELS  = 40000
+const MIN_PIXELS  = 1
+const MAX_PIXELS  = 1000000
 
 const NICHE_COLORS: Record<string, string> = {
   fitness:     '#FF6B35',
@@ -422,20 +422,21 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                   <>
                     <input
                       type="range"
-                      min={MIN_PIXELS}
+                      min={1}
                       max={Math.min(MAX_PIXELS, stats.available)}
-                      step={100}
+                      step={1}
                       value={pixels}
                       onChange={e => setPixels(Number(e.target.value))}
                       className="w-full accent-pink"
                     />
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {[
-                        { label: 'Micro',   n: 100 },
-                        { label: 'Básico',  n: 400 },
-                        { label: 'Médio',   n: 900 },
-                        { label: 'Grande',  n: 2500 },
-                        { label: 'Premium', n: 10000 },
+                        { label: '1px',    n: 1 },
+                        { label: '10px',   n: 10 },
+                        { label: '100px',  n: 100 },
+                        { label: '500px',  n: 500 },
+                        { label: '1.000px', n: 1000 },
+                        { label: '10.000px', n: 10000 },
                       ].map(pkg => (
                         <button key={pkg.n} type="button" onClick={() => setPixels(pkg.n)}
                           className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${

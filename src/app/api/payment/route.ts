@@ -28,7 +28,7 @@ const bodySchema = z.object({
   websiteUrl:       urlOrEmpty,
   avatarUrl:        urlOrEmpty,
   email:            z.string().email(),
-  pixelCount:       z.number().int().min(100).max(40000),
+  pixelCount:       z.number().int().min(1).max(1000000),
   paymentProvider:  z.enum(['stripe', 'mercadopago']),
   // Redes sociais
   whatsappUrl:      z.string().max(30).optional(),

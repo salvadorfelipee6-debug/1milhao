@@ -150,7 +150,7 @@ export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
       <div className="relative z-10 grid min-h-[calc(100vh-28px)] grid-cols-1 lg:grid-cols-2">
 
         {/* ── Coluna esquerda: copy ── */}
-        <div className="flex flex-col justify-center px-6 py-12 lg:px-12 lg:py-16">
+        <div className="flex flex-col justify-center px-6 py-16 pt-20 lg:px-12 lg:py-16 lg:pt-16">
 
           {/* Badges */}
           <div className="mb-6 flex flex-wrap gap-2">

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Inter, Bebas_Neue } from 'next/font/google'
 import './globals.css'
+import { MobileNav } from '@/components/ui/MobileNav'
 
 const bebasNeue = Bebas_Neue({
   weight:   '400',
@@ -32,15 +33,12 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
       <html lang="pt-BR" className={`${bebasNeue.variable} ${inter.variable}`}>
         <body className="bg-dark text-white antialiased">
+          <MobileNav />
           {children}
         </body>
       </html>

@@ -25,7 +25,7 @@ export function calculatePrice(pixelCount: number) {
 }
 
 export function calculateDimensions(pixelCount: number) {
-  const side = Math.max(10, Math.round(Math.sqrt(pixelCount)))
+  const side = Math.max(1, Math.round(Math.sqrt(pixelCount)))
   return {
     width:  side,
     height: side,

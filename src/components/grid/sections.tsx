@@ -92,7 +92,7 @@ export function HowItWorksSection() {
         {/* CTA inline */}
         <div className="mt-12 text-center">
           <Link href="/comprar" className="btn-gold px-8 py-3.5 text-sm">
-            Começar agora — R$ 10 →
+            Começar agora — R$ 99 →
           </Link>
         </div>
       </div>
@@ -103,12 +103,12 @@ export function HowItWorksSection() {
 // ─── Preços ───────────────────────────────────────────────
 export function PricingSection() {
   const plans = [
-    { name: 'Micro',   pixels: 100,   side: 10,  price: '99',     niche: 'fitness',     featured: false },
-    { name: 'Básico',  pixels: 400,   side: 20,  price: '396',    niche: 'tecnologia',  featured: false },
-    { name: 'Médio',   pixels: 900,   side: 30,  price: '891',    niche: 'moda',        featured: true  },
-    { name: 'Grande',  pixels: 2500,  side: 50,  price: '2.475',  niche: 'viagens',     featured: false },
-    { name: 'Premium', pixels: 10000, side: 100, price: '9.900',  niche: 'games',       featured: false },
-    { name: 'Marca',   pixels: 40000, side: 200, price: '39.600', niche: 'financas',    featured: false },
+    { name: 'Micro',   pixels: 1,      side: 1,   price: '0,99',   niche: 'fitness',     featured: false },
+    { name: 'Básico',  pixels: 100,    side: 10,  price: '99',     niche: 'tecnologia',  featured: false },
+    { name: 'Médio',   pixels: 900,    side: 30,  price: '891',    niche: 'moda',        featured: true  },
+    { name: 'Grande',  pixels: 2500,   side: 50,  price: '2.475',  niche: 'viagens',     featured: false },
+    { name: 'Premium', pixels: 10000,  side: 100, price: '9.900',  niche: 'games',       featured: false },
+    { name: 'Marca',   pixels: 40000,  side: 200, price: '39.600', niche: 'financas',    featured: false },
   ]
 
   return (
@@ -565,7 +565,7 @@ export function FooterCTA() {
           <span className="text-gold">DE APARECER</span>
         </h2>
         <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-white/40">
-          Quando acabar, acabou. Espaço permanente a partir de R$ 10. Sem renovação. Para sempre.
+          Quando acabar, acabou. Espaço permanente a partir de R$ 99. Sem renovação. Para sempre.
         </p>
 
         {/* CTAs */}

@@ -610,21 +610,52 @@ export function PixelGrid({ initialBlocks, stats, highlight }: PixelGridProps) {
 
         {/* ── Painel de seleção ── */}
         {selection && !selOccupied && (() => {
-          const pos = getSelectionScreenPos(selection)
-          if (!pos) return null
-          const centerX  = (pos.left + pos.right) / 2
-          const spaceBelow = window.innerHeight - pos.bottom
-          const goAbove  = spaceBelow < 80
+          const pos       = getSelectionScreenPos(selection)
+          const isMobile  = typeof window !== 'undefined' && window.innerWidth < 1024
+          if (!pos && !isMobile) return null
+
+          // Mobile: painel fixo no bottom
+          if (isMobile) {
+            return (
+              <div
+                className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl border-t border-gold/30 bg-dark-2/98 px-4 py-4 backdrop-blur-md shadow-2xl"
+                style={{
+                  opacity:    selAnimated ? 1 : 0,
+                  transform:  `translateY(${selAnimated ? '0px' : '20px'})`,
+                  transition: 'opacity 0.2s ease, transform 0.2s ease',
+                }}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex gap-4">
+                    <div>
+                      <p className="font-display text-lg text-gold">{selPixels.toLocaleString('pt-BR')} pixels</p>
+                      <p className="text-[10px] text-white/30">{selection.w}×{selection.h} · R${selPrice.replace('.', ',')}</p>
+                    </div>
+                  </div>
+                  <button onClick={clearSelection} className="text-white/30 hover:text-white/60 text-xl px-2">✕</button>
+                </div>
+                <button onClick={handleBuySelection} className="btn-gold w-full py-3.5 text-sm font-bold">
+                  Garantir esse espaço — R${selPrice.replace('.', ',')} →
+                </button>
+              </div>
+            )
+          }
+
+          // Desktop: flutuante próximo à seleção
+          const centerX    = (pos!.left + pos!.right) / 2
+          const spaceBelow = window.innerHeight - pos!.bottom
+          const goAbove    = spaceBelow < 80
           return (
             <div
               className="fixed z-50 flex items-center gap-3 rounded-2xl border border-gold/30 bg-dark-2/95 px-5 py-3 backdrop-blur-md shadow-2xl"
               style={{
                 left:       `${centerX}px`,
-                top:        goAbove ? undefined : `${pos.bottom + 12}px`,
-                bottom:     goAbove ? `${window.innerHeight - pos.top + 12}px` : undefined,
+                top:        goAbove ? undefined : `${pos!.bottom + 12}px`,
+                bottom:     goAbove ? `${window.innerHeight - pos!.top + 12}px` : undefined,
                 transform:  `translateX(-50%) translateY(${selAnimated ? '0px' : '8px'})`,
                 opacity:    selAnimated ? 1 : 0,
                 transition: 'opacity 0.2s ease, transform 0.2s ease',
+                maxWidth:   'calc(100vw - 32px)',
               }}
             >
               <div className="text-center">
@@ -643,7 +674,7 @@ export function PixelGrid({ initialBlocks, stats, highlight }: PixelGridProps) {
               </div>
               <div className="h-8 w-px bg-white/10" />
               <button onClick={handleBuySelection} className="btn-gold px-4 py-2 text-sm font-bold">
-                Garantir esse espaço →
+                Garantir →
               </button>
               <button onClick={clearSelection} className="text-white/30 hover:text-white/60 text-lg leading-none">
                 ✕
