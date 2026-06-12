@@ -28,6 +28,7 @@ export interface GridBlock {
   spotifyUrl?:     string | null
   // Links personalizados
   customLinks?:    CustomLink[] | null
+  editToken?:      string | null
 }
 
 export interface CustomLink {
