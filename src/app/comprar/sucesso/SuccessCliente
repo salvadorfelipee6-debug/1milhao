@@ -204,7 +204,7 @@ export function SuccessClient() {
     async function connect() {
       try {
         ably = new Ably.Realtime({ authUrl: '/api/ably-token' })
-        const channel = ably.channels.get('grid-updates')
+        const channel = ably.channels.get('1milhao:grid')
 
         channel.subscribe('block-activated', (msg) => {
           const b = msg.data as GridBlock

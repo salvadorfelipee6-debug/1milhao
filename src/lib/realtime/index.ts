@@ -21,21 +21,25 @@ const GRID_CHANNEL = '1milhao:grid'
 
 // Publica quando um novo bloco é ativado
 // Todos os browsers conectados recebem e renderizam o novo bloco
-export async function publishBlockActivated(block: BlockForGrid & { id: string }) {
+export async function publishBlockActivated(
+  block: BlockForGrid & { id: string; editToken?: string | null }
+) {
   const client  = getServerClient()
   const channel = client.channels.get(GRID_CHANNEL)
 
-  await channel.publish('block:activated', {
+  await channel.publish('block-activated', {
     id:              block.id,
     instagramHandle: block.instagramHandle,
     displayName:     block.displayName,
     niche:           block.niche,
     colorHex:        block.colorHex,
+    avatarUrl:       (block as any).avatarUrl ?? null,
     pixelX:          block.pixelX,
     pixelY:          block.pixelY,
     pixelWidth:      block.pixelWidth,
     pixelHeight:     block.pixelHeight,
     pixelCount:      block.pixelCount,
+    editToken:       block.editToken ?? null,
   })
 }
 
