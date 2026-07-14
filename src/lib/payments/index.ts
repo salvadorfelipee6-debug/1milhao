@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm'
 import { activateBlock } from '../db/blocks'
 import { publishBlockActivated } from '../realtime'
 import { sendWelcomeEmail } from '../email'
+import { PIXEL_PRICE } from '@/types'
 
 // ─── Clientes ─────────────────────────────────────────────
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -18,7 +19,7 @@ const mp = new MercadoPagoConfig({
 })
 
 // ─── Preço por pixel ──────────────────────────────────────
-export const PIXEL_PRICE_BRL = 0.99
+export const PIXEL_PRICE_BRL = PIXEL_PRICE
 
 export function calculatePrice(pixelCount: number) {
   return Math.round(pixelCount * PIXEL_PRICE_BRL * 100) / 100

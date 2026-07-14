@@ -192,10 +192,10 @@ export function PainelClient({ block, token, initialCustomLinks }: Props) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-bold text-white">@{block.instagramHandle}</p>
-          <p className="text-xs text-white/40 mt-0.5">
+          <p className="text-xs text-white/65 mt-0.5">
             {block.pixelWidth}×{block.pixelHeight}px · {block.pixelCount.toLocaleString('pt-BR')} pixels
           </p>
-          <p className="text-xs text-white/30 mt-0.5">
+          <p className="text-xs text-white/55 mt-0.5">
             Posição: {block.pixelX},{block.pixelY} no mapa
           </p>
           <div className="mt-2 flex gap-2">
@@ -210,7 +210,7 @@ export function PainelClient({ block, token, initialCustomLinks }: Props) {
             </a>
             <Link
               href={`/?highlight=${block.instagramHandle}`}
-              className="rounded-lg border border-white/10 px-3 py-1 text-xs text-white/50 hover:text-white/80"
+              className="rounded-lg border border-white/10 px-3 py-1 text-xs text-white/70 hover:text-white/80"
             >
               Ver no mapa ↗
             </Link>
@@ -227,7 +227,7 @@ export function PainelClient({ block, token, initialCustomLinks }: Props) {
           </code>
           <button
             onClick={() => navigator.clipboard.writeText(profileUrl)}
-            className="shrink-0 rounded-lg border border-white/10 px-3 py-2 text-xs text-white/50 hover:text-white transition-colors"
+            className="shrink-0 rounded-lg border border-white/10 px-3 py-2 text-xs text-white/70 hover:text-white transition-colors"
           >
             copiar
           </button>
@@ -239,7 +239,7 @@ export function PainelClient({ block, token, initialCustomLinks }: Props) {
         {(['perfil', 'redes', 'links'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`flex-1 rounded-lg py-2 text-xs font-semibold capitalize transition-all ${
-              tab === t ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/60'
+              tab === t ? 'bg-white/10 text-white' : 'text-white/65 hover:text-white/60'
             }`}
           >
             {t === 'perfil' ? 'Perfil' : t === 'redes' ? 'Redes sociais' : 'Links'}
@@ -252,13 +252,13 @@ export function PainelClient({ block, token, initialCustomLinks }: Props) {
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs font-semibold text-white/50">Nome de exibição</label>
+              <label className="mb-1 block text-xs font-semibold text-white/70">Nome de exibição</label>
               <input type="text" value={form.displayName}
                 onChange={e => setField('displayName', e.target.value)}
                 className="input-dark" />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-white/50">Nicho</label>
+              <label className="mb-1 block text-xs font-semibold text-white/70">Nicho</label>
               <select value={form.niche} onChange={e => setField('niche', e.target.value)} className="select-dark">
                 {NICHE_OPTIONS.map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
@@ -266,33 +266,33 @@ export function PainelClient({ block, token, initialCustomLinks }: Props) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs font-semibold text-white/50">Cidade</label>
+              <label className="mb-1 block text-xs font-semibold text-white/70">Cidade</label>
               <input type="text" value={form.city}
                 onChange={e => setField('city', e.target.value)}
                 placeholder="São Paulo, SP" className="input-dark" />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-white/50">Seguidores</label>
+              <label className="mb-1 block text-xs font-semibold text-white/70">Seguidores</label>
               <input type="text" value={form.followers}
                 onChange={e => setField('followers', e.target.value)}
                 placeholder="ex: 50k" className="input-dark" />
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-white/50">
+            <label className="mb-1 block text-xs font-semibold text-white/70">
               Bio curta <span className="font-normal opacity-50">({form.bio.length}/120)</span>
             </label>
             <textarea value={form.bio} onChange={e => setField('bio', e.target.value)}
               maxLength={120} rows={2} className="input-dark resize-none" />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-white/50">Foto / Avatar (URL)</label>
+            <label className="mb-1 block text-xs font-semibold text-white/70">Foto / Avatar (URL)</label>
             <input type="url" value={form.avatarUrl}
               onChange={e => setField('avatarUrl', e.target.value)}
               placeholder="https://..." className="input-dark" />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-white/50">Vídeo de apresentação</label>
+            <label className="mb-1 block text-xs font-semibold text-white/70">Vídeo de apresentação</label>
             <input type="url" value={form.videoUrl}
               onChange={e => setField('videoUrl', e.target.value)}
               placeholder="YouTube, Reels, TikTok..." className="input-dark" />
@@ -305,12 +305,12 @@ export function PainelClient({ block, token, initialCustomLinks }: Props) {
         <div className="space-y-3">
           <div className="rounded-xl border border-gold/20 bg-gold/5 p-3 mb-1">
             <p className="text-xs font-bold text-gold mb-0.5">💰 WhatsApp para receber propostas</p>
-            <p className="text-[11px] text-white/40">Marcas clicam em "Anunciar" e vão direto para cá.</p>
+            <p className="text-[11px] text-white/65">Marcas clicam em "Anunciar" e vão direto para cá.</p>
             <div className="flex overflow-hidden rounded-xl border border-white/10 mt-2 focus-within:border-gold/40">
               <span className="flex items-center bg-white/4 px-3 text-sm">📱</span>
               <input type="tel" value={form.whatsappUrl}
                 onChange={e => setField('whatsappUrl', e.target.value)}
-                placeholder="(11) 99999-9999" className="flex-1 bg-transparent px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none" />
+                placeholder="(11) 99999-9999" className="flex-1 bg-transparent px-3 py-2.5 text-sm text-white placeholder-white/35 outline-none" />
             </div>
           </div>
           {([
@@ -336,7 +336,7 @@ export function PainelClient({ block, token, initialCustomLinks }: Props) {
               <input type="url" value={(form as any)[s.key] || ''}
                 onChange={e => setField(s.key as any, e.target.value)}
                 placeholder={s.placeholder}
-                className="flex-1 bg-transparent px-3 py-2.5 text-xs text-white placeholder-white/20 outline-none" />
+                className="flex-1 bg-transparent px-3 py-2.5 text-xs text-white placeholder-white/35 outline-none" />
             </div>
           ))}
         </div>
@@ -345,7 +345,7 @@ export function PainelClient({ block, token, initialCustomLinks }: Props) {
       {/* Tab: Links */}
       {tab === 'links' && (
         <div className="space-y-3">
-          <p className="text-xs text-white/40">Adicione links livres — loja, curso, mídia kit, portfólio...</p>
+          <p className="text-xs text-white/65">Adicione links livres — loja, curso, mídia kit, portfólio...</p>
           {customLinks.map((link, i) => (
             <div key={i} className="flex gap-2 items-center">
               <input type="text" value={link.emoji ?? '🔗'}
@@ -355,18 +355,18 @@ export function PainelClient({ block, token, initialCustomLinks }: Props) {
               <input type="text" value={link.label}
                 onChange={e => updateCustomLink(i, 'label', e.target.value)}
                 placeholder="Nome do link"
-                className="flex-1 rounded-lg border border-white/8 bg-transparent px-2.5 py-2.5 text-xs text-white placeholder-white/20 outline-none focus:border-white/20" />
+                className="flex-1 rounded-lg border border-white/8 bg-transparent px-2.5 py-2.5 text-xs text-white placeholder-white/35 outline-none focus:border-white/20" />
               <input type="url" value={link.url}
                 onChange={e => updateCustomLink(i, 'url', e.target.value)}
                 placeholder="https://..."
-                className="flex-1 rounded-lg border border-white/8 bg-transparent px-2.5 py-2.5 text-xs text-white placeholder-white/20 outline-none focus:border-white/20" />
+                className="flex-1 rounded-lg border border-white/8 bg-transparent px-2.5 py-2.5 text-xs text-white placeholder-white/35 outline-none focus:border-white/20" />
               <button type="button" onClick={() => removeCustomLink(i)}
-                className="text-white/30 hover:text-red-400 text-sm px-1">✕</button>
+                className="text-white/55 hover:text-red-400 text-sm px-1">✕</button>
             </div>
           ))}
           {customLinks.length < 6 && (
             <button type="button" onClick={addCustomLink}
-              className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/15 py-3 text-xs text-white/30 hover:border-white/30 hover:text-white/50 transition-all">
+              className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/15 py-3 text-xs text-white/55 hover:border-white/30 hover:text-white/70 transition-all">
               + Adicionar link
             </button>
           )}
@@ -390,7 +390,7 @@ export function PainelClient({ block, token, initialCustomLinks }: Props) {
         {saving ? 'Salvando...' : saved ? '✓ Salvo com sucesso!' : 'Salvar alterações'}
       </button>
 
-      <p className="text-center text-xs text-white/20">
+      <p className="text-center text-xs text-white/45">
         Alterações aparecem no mapa em até 5 minutos.
       </p>
     </div>

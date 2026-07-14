@@ -5,7 +5,7 @@ import { RegisterForm } from '@/components/forms/RegisterForm'
 
 export const metadata: Metadata = {
   title: 'Garantir meu espaço',
-  description: 'Compre pixels no 1 Milhão de Influencer. Pagamento único e vitalício a partir de R$ 10.',
+  description: 'Compre pixels no 1 Milhão de Influencer. Pagamento único e vitalício a partir de R$ 0,99.',
 }
 
 export default async function ComprarPage() {
@@ -25,7 +25,7 @@ export default async function ComprarPage() {
             GARANTA<br />
             <span className="text-gold">SEU ESPAÇO</span>
           </h1>
-          <p className="mt-4 text-sm text-white/40">
+          <p className="mt-4 text-sm text-white/65">
             Pagamento único · Vitalício · Seu bloco fica no mapa para sempre
           </p>
         </div>

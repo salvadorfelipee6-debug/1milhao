@@ -123,7 +123,7 @@
   /* Input */
   .input-dark {
     @apply w-full rounded-xl border bg-transparent px-4 py-3
-           text-sm text-white placeholder-white/30
+           text-sm text-white placeholder-white/40
            outline-none transition-colors;
     border-color: var(--border);
   }

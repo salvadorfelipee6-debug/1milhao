@@ -9,6 +9,7 @@ import {
 import {
   findFreePosition,
   isHandleTaken,
+  isAreaOccupied,
   getGridStats,
 } from '@/lib/db/blocks'
 import { rateLimit } from '@/lib/cache'
@@ -39,6 +40,12 @@ const bodySchema = z.object({
   kwaiUrl:          urlOrEmpty,
   onlyfansUrl:      urlOrEmpty,
   spotifyUrl:       urlOrEmpty,
+  // Links personalizados (loja, curso, mídia kit...)
+  customLinks:      z.array(z.object({
+    label: z.string().min(1).max(60),
+    url:   z.string().min(1).max(300),
+    emoji: z.string().max(4).optional(),
+  })).max(6).optional(),
   // Coordenadas opcionais (quando vem da seleção do grid)
   pixelX:           z.number().int().optional(),
   pixelY:           z.number().int().optional(),
@@ -96,6 +103,23 @@ export async function POST(req: NextRequest) {
     // Posição — usa a selecionada no grid ou encontra uma livre
     let pos: { x: number; y: number }
     if (data.pixelX !== undefined && data.pixelY !== undefined) {
+      // Valida a seleção no servidor: dentro do mapa e área ainda livre
+      if (
+        data.pixelX < 0 || data.pixelY < 0 ||
+        data.pixelX + dims.width  > 1000 ||
+        data.pixelY + dims.height > 1000
+      ) {
+        return NextResponse.json(
+          { error: 'Área selecionada fora do mapa.' },
+          { status: 400 }
+        )
+      }
+      if (await isAreaOccupied(data.pixelX, data.pixelY, dims.width, dims.height)) {
+        return NextResponse.json(
+          { error: 'Essa área acabou de ser ocupada — volte ao mapa e escolha outro espaço.' },
+          { status: 409 }
+        )
+      }
       pos = { x: data.pixelX, y: data.pixelY }
     } else {
       const found = await findFreePosition(dims.width, dims.height)
@@ -136,6 +160,7 @@ export async function POST(req: NextRequest) {
         kwaiUrl:         data.kwaiUrl      || null,
         onlyfansUrl:     data.onlyfansUrl  || null,
         spotifyUrl:      data.spotifyUrl   || null,
+        customLinks:     data.customLinks?.length ? JSON.stringify(data.customLinks) : null,
         // Posição
         pixelX:          pos.x,
         pixelY:          pos.y,

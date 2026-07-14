@@ -129,7 +129,7 @@ export default async function InfluencerProfilePage({ params }: Props) {
           <div className="mb-4">
             <h1 className="text-xl font-bold text-white">{block.displayName}</h1>
             <p className="text-sm font-semibold" style={{ color }}>{`@${block.instagramHandle}`}</p>
-            <p className="mt-0.5 text-xs text-white/40">
+            <p className="mt-0.5 text-xs text-white/65">
               {nicheLabel}{block.city ? ` · ${block.city}` : ''}
             </p>
           </div>
@@ -139,22 +139,22 @@ export default async function InfluencerProfilePage({ params }: Props) {
             {block.followers && (
               <div className="rounded-xl py-2.5 text-center" style={{ background: 'rgba(255,255,255,0.05)' }}>
                 <p className="text-sm font-bold" style={{ color: '#FFD700' }}>{block.followers}</p>
-                <p className="text-[10px] uppercase tracking-wide text-white/30">seguidores</p>
+                <p className="text-[10px] uppercase tracking-wide text-white/55">seguidores</p>
               </div>
             )}
             <div className="rounded-xl py-2.5 text-center" style={{ background: 'rgba(255,255,255,0.05)' }}>
               <p className="text-sm font-bold" style={{ color: '#FFD700' }}>{block.pixelCount.toLocaleString('pt-BR')}</p>
-              <p className="text-[10px] uppercase tracking-wide text-white/30">pixels</p>
+              <p className="text-[10px] uppercase tracking-wide text-white/55">pixels</p>
             </div>
             <div className="rounded-xl py-2.5 text-center" style={{ background: 'rgba(255,255,255,0.05)' }}>
               <p className="text-sm font-bold text-white/70">{block.pixelWidth}×{block.pixelHeight}</p>
-              <p className="text-[10px] uppercase tracking-wide text-white/30">tamanho</p>
+              <p className="text-[10px] uppercase tracking-wide text-white/55">tamanho</p>
             </div>
           </div>
 
           {/* Bio */}
           {block.bio && (
-            <p className="mb-5 text-sm leading-relaxed text-white/50">{block.bio}</p>
+            <p className="mb-5 text-sm leading-relaxed text-white/70">{block.bio}</p>
           )}
 
           {/* BOTÃO DE ANUNCIAR — destaque máximo */}
@@ -172,7 +172,7 @@ export default async function InfluencerProfilePage({ params }: Props) {
           {/* Redes sociais */}
           {(activeSocials.length > 0 || true) && (
             <div className="mb-3 space-y-2">
-              <p className="text-[10px] uppercase tracking-widest text-white/25 mb-2">Redes sociais</p>
+              <p className="text-[10px] uppercase tracking-widest text-white/50 mb-2">Redes sociais</p>
 
               {/* Instagram sempre primeiro */}
               <a
@@ -207,7 +207,7 @@ export default async function InfluencerProfilePage({ params }: Props) {
           {/* Links personalizados */}
           {customLinks.length > 0 && (
             <div className="mb-3 space-y-2">
-              <p className="text-[10px] uppercase tracking-widest text-white/25 mb-2">Links</p>
+              <p className="text-[10px] uppercase tracking-widest text-white/50 mb-2">Links</p>
               {customLinks.map((link, i) => (
                 <a
                   key={i}
@@ -219,7 +219,7 @@ export default async function InfluencerProfilePage({ params }: Props) {
                 >
                   {link.emoji && <span className="text-lg">{link.emoji}</span>}
                   <span className="flex-1 text-sm font-semibold">{link.label}</span>
-                  <span className="text-xs text-white/30">↗</span>
+                  <span className="text-xs text-white/55">↗</span>
                 </a>
               ))}
             </div>
@@ -239,21 +239,21 @@ export default async function InfluencerProfilePage({ params }: Props) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-gold">Espaço permanente no mapa</p>
-              <p className="text-[10px] text-white/30">1 Milhão de Influencer · ver meu bloco →</p>
+              <p className="text-[10px] text-white/55">1 Milhão de Influencer · ver meu bloco →</p>
             </div>
           </Link>
 
           {/* Footer */}
           <div className="text-center">
-            <p className="text-[11px] text-white/20">
+            <p className="text-[11px] text-white/45">
               Powered by{' '}
               <Link href="/" className="text-gold/50 hover:text-gold/80">
                 1 Milhão de Influencer
               </Link>
             </p>
-            <p className="mt-2 text-[10px] text-white/15">
+            <p className="mt-2 text-[10px] text-white/40">
               Quer um link na bio como esse?{' '}
-              <Link href="/comprar" className="underline hover:text-white/40">
+              <Link href="/comprar" className="underline hover:text-white/65">
                 Garanta seu espaço →
               </Link>
             </p>

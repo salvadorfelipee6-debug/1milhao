@@ -53,7 +53,7 @@ export default async function MarcasPage({ searchParams }: PageProps) {
             <span className="text-gold">INFLUENCER</span><br />
             IDEAL
           </h1>
-          <p className="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-white/40">
+          <p className="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-white/65">
             {stats.active.toLocaleString('pt-BR')} influencers cadastrados. Filtre por nicho, cidade e audiência. Entre em contato direto pelo WhatsApp ou Instagram.
           </p>
 
@@ -67,7 +67,7 @@ export default async function MarcasPage({ searchParams }: PageProps) {
             ].map(s => (
               <div key={s.l} className="text-center">
                 <p className="font-display text-2xl text-gold">{s.n}</p>
-                <p className="text-[10px] uppercase tracking-widest text-white/25">{s.l}</p>
+                <p className="text-[10px] uppercase tracking-widest text-white/50">{s.l}</p>
               </div>
             ))}
           </div>

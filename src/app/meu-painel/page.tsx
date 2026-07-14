@@ -24,10 +24,10 @@ export default async function MeuPainelPage({ searchParams }: PageProps) {
         <div className="max-w-sm w-full text-center space-y-4">
           <div className="text-4xl">🔐</div>
           <h1 className="font-display text-3xl text-white">ACESSO NEGADO</h1>
-          <p className="text-sm text-white/40">
+          <p className="text-sm text-white/65">
             Você precisa do link de edição enviado para o seu e-mail após a compra.
           </p>
-          <p className="text-xs text-white/20">
+          <p className="text-xs text-white/45">
             Não encontrou o e-mail? Verifique sua caixa de spam ou entre em contato.
           </p>
         </div>
@@ -62,7 +62,7 @@ export default async function MeuPainelPage({ searchParams }: PageProps) {
             EDITAR<br />
             <span className="text-gold">MEU BLOCO</span>
           </h1>
-          <p className="mt-3 text-sm text-white/40">
+          <p className="mt-3 text-sm text-white/65">
             Alterações aparecem no mapa em até 5 minutos.
           </p>
         </div>

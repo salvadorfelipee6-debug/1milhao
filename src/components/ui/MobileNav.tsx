@@ -63,7 +63,7 @@ export function MobileNav() {
                   className="flex items-center justify-between rounded-xl px-4 py-3 text-sm text-white/70 hover:bg-white/5 hover:text-white transition-all"
                 >
                   {l.label}
-                  <span className="text-white/20">→</span>
+                  <span className="text-white/45">→</span>
                 </Link>
               ))}
             </div>
@@ -75,7 +75,7 @@ export function MobileNav() {
                 className="block rounded-2xl py-4 text-center text-sm font-bold"
                 style={{ background: '#FFD700', color: '#111' }}
               >
-                Garantir meu espaço — R$ 99 →
+                Garantir meu espaço — a partir de R$ 0,99 →
               </Link>
             </div>
           </div>

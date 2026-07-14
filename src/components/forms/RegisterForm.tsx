@@ -3,9 +3,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import type { GridStats, Niche } from '@/types'
-import { NICHE_LABELS } from '@/types'
+import { NICHE_LABELS, PIXEL_PRICE } from '@/types'
 
-const PIXEL_PRICE = 0.99
 const MIN_PIXELS  = 1
 const MAX_PIXELS  = 1000000
 
@@ -24,7 +23,7 @@ const NICHE_COLORS: Record<string, string> = {
 interface RegisterFormProps { stats: GridStats }
 
 function calcDims(n: number) {
-  const side = Math.max(10, Math.round(Math.sqrt(n)))
+  const side = Math.max(1, Math.round(Math.sqrt(n)))
   return { width: side, height: side, actual: side * side }
 }
 
@@ -175,7 +174,7 @@ function ImageUpload({
 
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-semibold text-white/50">
+      <label className="mb-1.5 block text-xs font-semibold text-white/70">
         Foto / Logo do bloco
       </label>
 
@@ -203,14 +202,14 @@ function ImageUpload({
           }`}
         >
           {uploading ? (
-            <p className="text-xs text-white/40">Enviando...</p>
+            <p className="text-xs text-white/65">Enviando...</p>
           ) : (
             <>
               <span className="text-2xl">🖼️</span>
-              <p className="text-xs font-semibold text-white/50">
+              <p className="text-xs font-semibold text-white/70">
                 Arraste ou clique para enviar
               </p>
-              <p className="text-[10px] text-white/25">JPG, PNG, WebP · máx 2MB</p>
+              <p className="text-[10px] text-white/50">JPG, PNG, WebP · máx 2MB</p>
             </>
           )}
         </div>
@@ -250,7 +249,10 @@ export function RegisterForm({ stats }: RegisterFormProps) {
   const gridW      = searchParams.get('w')
   const gridH      = searchParams.get('h')
 
-  const [step,     setStep]     = useState<1 | 2 | 3>(1)
+  // Se já escolheu o espaço (seleção no mapa ou card de preço), pula direto pro perfil
+  const [step,     setStep]     = useState<1 | 2 | 3>(
+    (gridW && gridH) || gridPixels ? 2 : 1
+  )
   const [pixels,   setPixels]   = useState(gridPixels ?? 400)
   const [loading,  setLoading]  = useState(false)
   const [error,    setError]    = useState('')
@@ -293,6 +295,25 @@ export function RegisterForm({ stats }: RegisterFormProps) {
   const setField = useCallback((k: keyof typeof form, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
   }, [])
+
+  // ─── Pré-preenchimento pelo @ ────────────────────────────
+  const [avatarLookup, setAvatarLookup] = useState<'idle' | 'loading' | 'done'>('idle')
+
+  // Ao sair do campo @: busca a foto do perfil (unavatar.io) e sugere o nome
+  function prefillFromHandle() {
+    const handle = form.instagramHandle.replace('@', '').trim().toLowerCase()
+    if (!handle) return
+    if (!form.displayName.trim()) {
+      setField('displayName', handle.charAt(0).toUpperCase() + handle.slice(1))
+    }
+    if (form.avatarUrl || avatarLookup !== 'idle') return
+    setAvatarLookup('loading')
+    const url = `https://unavatar.io/instagram/${encodeURIComponent(handle)}?fallback=false`
+    const img = new window.Image()
+    img.onload  = () => { setField('avatarUrl', url); setAvatarLookup('done') }
+    img.onerror = () => setAvatarLookup('done')
+    img.src = url
+  }
 
   // Dimensões — se veio do grid usa w×h, senão calcula
   const dims = gridW && gridH
@@ -366,12 +387,12 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                 className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all ${
                   active ? 'bg-gold text-dark'
                   : done  ? 'bg-gold/30 text-gold cursor-pointer'
-                  :         'bg-white/8 text-white/30'
+                  :         'bg-white/8 text-white/55'
                 }`}
               >
                 {done ? '✓' : s}
               </button>
-              <span className={`text-xs font-semibold ${active ? 'text-white' : 'text-white/30'}`}>
+              <span className={`text-xs font-semibold ${active ? 'text-white' : 'text-white/55'}`}>
                 {label}
               </span>
               {i < 2 && <div className={`h-px flex-1 ${step > s ? 'bg-gold/40' : 'bg-white/8'}`} />}
@@ -387,7 +408,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
           {/* Preview + calculadora lado a lado */}
           <div className="grid grid-cols-5 gap-4">
             <div className="col-span-2">
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/55">
                 Preview do bloco
               </p>
               <div className="overflow-hidden rounded-xl border border-white/8 bg-dark-2">
@@ -400,14 +421,14 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                   color={blockColor}
                 />
               </div>
-              <p className="mt-1.5 text-center text-[10px] text-white/25">
+              <p className="mt-1.5 text-center text-[10px] text-white/50">
                 {dims.width}×{dims.height} px
               </p>
             </div>
 
             <div className="col-span-3 space-y-4">
               <div className="card-dark rounded-2xl p-4">
-                <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-white/30">
+                <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-white/55">
                   {gridW && gridH
                     ? '✅ Área selecionada no grid'
                     : 'Quantos pixels você quer?'}
@@ -416,7 +437,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                 {gridW && gridH ? (
                   <div className="rounded-xl border border-gold/20 bg-gold/5 px-4 py-3 text-center">
                     <p className="font-display text-2xl text-gold">{dims.width}×{dims.height}</p>
-                    <p className="text-xs text-white/40">pixels selecionados no mapa</p>
+                    <p className="text-xs text-white/65">pixels selecionados no mapa</p>
                   </div>
                 ) : (
                   <>
@@ -431,18 +452,18 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                     />
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {[
-                        { label: '1px',    n: 1 },
-                        { label: '10px',   n: 10 },
-                        { label: '100px',  n: 100 },
-                        { label: '500px',  n: 500 },
-                        { label: '1.000px', n: 1000 },
+                        { label: '1px',      n: 1 },
+                        { label: '100px',    n: 100 },
+                        { label: '400px',    n: 400 },
+                        { label: '900px',    n: 900 },
+                        { label: '2.500px',  n: 2500 },
                         { label: '10.000px', n: 10000 },
                       ].map(pkg => (
                         <button key={pkg.n} type="button" onClick={() => setPixels(pkg.n)}
                           className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
                             pixels === pkg.n
                               ? 'bg-pink text-white'
-                              : 'border border-white/10 text-white/40 hover:border-white/20 hover:text-white/70'
+                              : 'border border-white/10 text-white/65 hover:border-white/20 hover:text-white/70'
                           }`}
                         >
                           {pkg.label}
@@ -457,13 +478,13 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                     <p className="font-display text-xl text-white">
                       {dims.actual.toLocaleString('pt-BR')}
                     </p>
-                    <p className="text-[9px] uppercase tracking-widest text-white/30">pixels</p>
+                    <p className="text-[9px] uppercase tracking-widest text-white/55">pixels</p>
                   </div>
                   <div className="rounded-xl bg-gold/8 py-2">
                     <p className="font-display text-xl text-gold">
                       R${price.replace('.', ',')}
                     </p>
-                    <p className="text-[9px] uppercase tracking-widest text-white/30">pagamento único</p>
+                    <p className="text-[9px] uppercase tracking-widest text-white/55">pagamento único</p>
                   </div>
                 </div>
               </div>
@@ -488,7 +509,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
           <div className="grid grid-cols-5 gap-4">
             {/* Preview ao vivo */}
             <div className="col-span-2 space-y-2">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/55">
                 Preview ao vivo
               </p>
               <div className="overflow-hidden rounded-xl border border-white/8 bg-dark-2">
@@ -508,12 +529,12 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                     @{form.instagramHandle || 'seuarroba'}
                   </p>
                   {form.niche && (
-                    <p className="text-white/40" style={{ color: blockColor + 'bb' }}>
+                    <p className="text-white/65" style={{ color: blockColor + 'bb' }}>
                       {NICHE_LABELS[form.niche as Niche]}
                     </p>
                   )}
                   {form.bio && (
-                    <p className="mt-1 text-white/35 leading-relaxed line-clamp-2">{form.bio}</p>
+                    <p className="mt-1 text-white/60 leading-relaxed line-clamp-2">{form.bio}</p>
                   )}
                 </div>
               )}
@@ -523,22 +544,26 @@ export function RegisterForm({ stats }: RegisterFormProps) {
             <div className="col-span-3 space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="mb-1 block text-[10px] font-semibold text-white/50">
+                  <label className="mb-1 block text-[10px] font-semibold text-white/70">
                     @ Instagram <span className="text-pink">*</span>
                   </label>
                   <div className="flex overflow-hidden rounded-xl border border-white/8 focus-within:border-white/20">
-                    <span className="flex items-center bg-white/4 px-2.5 text-sm text-white/30">@</span>
+                    <span className="flex items-center bg-white/4 px-2.5 text-sm text-white/55">@</span>
                     <input
                       type="text"
                       value={form.instagramHandle}
-                      onChange={e => setField('instagramHandle', e.target.value)}
+                      onChange={e => { setField('instagramHandle', e.target.value); setAvatarLookup('idle') }}
+                      onBlur={prefillFromHandle}
                       placeholder="seuarroba"
-                      className="flex-1 bg-transparent px-2.5 py-2.5 text-sm text-white placeholder-white/20 outline-none"
+                      className="flex-1 bg-transparent px-2.5 py-2.5 text-sm text-white placeholder-white/35 outline-none"
                     />
                   </div>
+                  {avatarLookup === 'loading' && (
+                    <p className="mt-1 text-[10px] text-gold/80">Buscando sua foto de perfil…</p>
+                  )}
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] font-semibold text-white/50">
+                  <label className="mb-1 block text-[10px] font-semibold text-white/70">
                     Nome <span className="text-pink">*</span>
                   </label>
                   <input type="text" value={form.displayName}
@@ -549,7 +574,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="mb-1 block text-[10px] font-semibold text-white/50">
+                  <label className="mb-1 block text-[10px] font-semibold text-white/70">
                     Nicho <span className="text-pink">*</span>
                   </label>
                   <select value={form.niche} onChange={e => setField('niche', e.target.value)} className="select-dark">
@@ -560,7 +585,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] font-semibold text-white/50">Cidade</label>
+                  <label className="mb-1 block text-[10px] font-semibold text-white/70">Cidade</label>
                   <input type="text" value={form.city}
                     onChange={e => setField('city', e.target.value)}
                     placeholder="São Paulo, SP" className="input-dark" />
@@ -568,14 +593,14 @@ export function RegisterForm({ stats }: RegisterFormProps) {
               </div>
 
               <div>
-                <label className="mb-1 block text-[10px] font-semibold text-white/50">Seguidores</label>
+                <label className="mb-1 block text-[10px] font-semibold text-white/70">Seguidores</label>
                 <input type="text" value={form.followers}
                   onChange={e => setField('followers', e.target.value)}
                   placeholder="ex: 50k, 1.2M" className="input-dark" />
               </div>
 
               <div>
-                <label className="mb-1 block text-[10px] font-semibold text-white/50">
+                <label className="mb-1 block text-[10px] font-semibold text-white/70">
                   Bio curta
                   <span className="ml-1.5 font-normal opacity-50">({form.bio.length}/120)</span>
                 </label>
@@ -594,7 +619,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                     <label className="block text-xs font-bold text-gold mb-0.5">
                       WhatsApp para receber propostas
                     </label>
-                    <p className="text-[11px] text-white/40 leading-relaxed">
+                    <p className="text-[11px] text-white/65 leading-relaxed">
                       Quando uma marca clicar em <strong className="text-white/60">"Anunciar"</strong> no seu bloco, ela será direcionada direto para o seu WhatsApp. Coloque seu número com DDD.
                     </p>
                   </div>
@@ -606,7 +631,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                     value={(form as any).whatsappUrl || ''}
                     onChange={e => setField('whatsappUrl' as any, e.target.value)}
                     placeholder="(11) 99999-9999"
-                    className="flex-1 bg-transparent px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none"
+                    className="flex-1 bg-transparent px-3 py-2.5 text-sm text-white placeholder-white/35 outline-none"
                   />
                 </div>
               </div>
@@ -614,12 +639,12 @@ export function RegisterForm({ stats }: RegisterFormProps) {
               {/* Redes sociais */}
               <div className="rounded-xl border border-white/8 bg-white/2 p-3 space-y-2">
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+                  <label className="text-[10px] font-semibold uppercase tracking-widest text-white/65">
                     Suas redes sociais
                   </label>
-                  <span className="text-[10px] text-white/25">opcional</span>
+                  <span className="text-[10px] text-white/50">opcional</span>
                 </div>
-                <p className="text-[11px] text-white/35 leading-relaxed mb-2">
+                <p className="text-[11px] text-white/60 leading-relaxed mb-2">
                   Aparecem como botões no seu perfil. Marcas e seguidores clicam diretamente. Cole o link completo de cada perfil.
                 </p>
                 {([
@@ -650,14 +675,14 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                       value={(form as any)[s.key] || ''}
                       onChange={e => setField(s.key as any, e.target.value)}
                       placeholder={s.placeholder}
-                      className="flex-1 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/20 outline-none"
+                      className="flex-1 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/35 outline-none"
                     />
                   </div>
                 ))}
               </div>
 
               <div>
-                <label className="mb-1 block text-[10px] font-semibold text-white/50">Mídia kit / site (opcional)</label>
+                <label className="mb-1 block text-[10px] font-semibold text-white/70">Mídia kit / site (opcional)</label>
                 <input type="url" value={form.websiteUrl}
                   onChange={e => setField('websiteUrl', e.target.value)}
                   placeholder="Link do seu mídia kit ou site pessoal..." className="input-dark" />
@@ -667,12 +692,12 @@ export function RegisterForm({ stats }: RegisterFormProps) {
               <div className="rounded-xl border border-white/8 bg-white/2 p-3 space-y-2">
                 <div className="flex items-center justify-between">
                   <div>
-                    <label className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+                    <label className="text-[10px] font-semibold uppercase tracking-widest text-white/65">
                       Links personalizados
                     </label>
-                    <p className="text-[11px] text-white/30 mt-0.5">Loja, curso, mídia kit, portfólio, WhatsApp...</p>
+                    <p className="text-[11px] text-white/55 mt-0.5">Loja, curso, mídia kit, portfólio, WhatsApp...</p>
                   </div>
-                  <span className="text-[10px] text-white/25">{customLinks.length}/6</span>
+                  <span className="text-[10px] text-white/50">{customLinks.length}/6</span>
                 </div>
 
                 {customLinks.map((link, i) => (
@@ -690,23 +715,23 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                       value={link.label}
                       onChange={e => updateCustomLink(i, 'label', e.target.value)}
                       placeholder="Nome do link"
-                      className="flex-1 rounded-lg border border-white/8 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/20 outline-none focus:border-white/20"
+                      className="flex-1 rounded-lg border border-white/8 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/35 outline-none focus:border-white/20"
                     />
                     <input
                       type="url"
                       value={link.url}
                       onChange={e => updateCustomLink(i, 'url', e.target.value)}
                       placeholder="https://..."
-                      className="flex-1 rounded-lg border border-white/8 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/20 outline-none focus:border-white/20"
+                      className="flex-1 rounded-lg border border-white/8 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/35 outline-none focus:border-white/20"
                     />
                     <button type="button" onClick={() => removeCustomLink(i)}
-                      className="text-white/30 hover:text-red-400 text-sm">✕</button>
+                      className="text-white/55 hover:text-red-400 text-sm">✕</button>
                   </div>
                 ))}
 
                 {customLinks.length < 6 && (
                   <button type="button" onClick={addCustomLink}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-white/15 py-2 text-xs text-white/30 hover:border-white/30 hover:text-white/50 transition-all">
+                    className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-white/15 py-2 text-xs text-white/55 hover:border-white/30 hover:text-white/70 transition-all">
                     + Adicionar link
                   </button>
                 )}
@@ -718,7 +743,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                   <span className="text-2xl">✨</span>
                   <div>
                     <p className="text-sm font-bold text-gold">Use como link na bio do Instagram!</p>
-                    <p className="mt-1 text-[12px] leading-relaxed text-white/50">
+                    <p className="mt-1 text-[12px] leading-relaxed text-white/70">
                       Após garantir seu espaço, você terá uma página profissional em{' '}
                       <span className="text-white/70 font-semibold">1milhao.com.br/influencer/seuarroba</span>{' '}
                       com todas as suas redes, links e botão de contato para marcas.{' '}
@@ -750,7 +775,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
 
           {/* Resumo do pedido */}
           <div className="card-dark rounded-2xl p-5">
-            <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-white/30">
+            <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-white/55">
               Resumo do pedido
             </p>
             <div className="flex gap-4">
@@ -766,17 +791,17 @@ export function RegisterForm({ stats }: RegisterFormProps) {
               </div>
               <div className="flex-1 space-y-1">
                 <p className="font-bold text-white">@{form.instagramHandle}</p>
-                <p className="text-sm text-white/40">
+                <p className="text-sm text-white/65">
                   {form.displayName}
                   {form.niche && ` · ${NICHE_LABELS[form.niche as Niche]}`}
                 </p>
-                <p className="text-sm text-white/40">
+                <p className="text-sm text-white/65">
                   {dims.width}×{dims.height} px · {dims.actual.toLocaleString('pt-BR')} pixels
                   {gridX && gridY && ` · posição (${gridX},${gridY})`}
                 </p>
                 <p className="font-display text-lg text-gold">
                   R${price.replace('.', ',')}
-                  <span className="ml-2 text-xs font-normal text-white/30">pagamento único · vitalício</span>
+                  <span className="ml-2 text-xs font-normal text-white/55">pagamento único · vitalício</span>
                 </p>
               </div>
             </div>
@@ -784,20 +809,20 @@ export function RegisterForm({ stats }: RegisterFormProps) {
 
           {/* Email */}
           <div className="card-dark rounded-2xl p-5">
-            <label className="mb-1.5 block text-xs font-semibold text-white/50">
+            <label className="mb-1.5 block text-xs font-semibold text-white/70">
               Seu e-mail <span className="text-pink">*</span>
             </label>
             <input type="email" value={form.email}
               onChange={e => setField('email', e.target.value)}
               placeholder="seuemail@exemplo.com" className="input-dark" required />
-            <p className="mt-1.5 text-[11px] text-white/25">
+            <p className="mt-1.5 text-[11px] text-white/50">
               Você receberá o link de edição do seu bloco por aqui.
             </p>
           </div>
 
           {/* Forma de pagamento */}
           <div className="card-dark rounded-2xl p-5">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/55">
               Forma de pagamento
             </p>
             <div className="grid grid-cols-2 gap-3">
@@ -814,7 +839,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                 >
                   <span className="text-lg">{opt.icon}</span>
                   <p className="mt-1 text-xs font-bold text-white">{opt.label}</p>
-                  <p className="text-[10px] text-white/30">{opt.sub}</p>
+                  <p className="text-[10px] text-white/55">{opt.sub}</p>
                 </button>
               ))}
             </div>
@@ -842,10 +867,10 @@ export function RegisterForm({ stats }: RegisterFormProps) {
             </button>
           </div>
 
-          <p className="text-center text-xs text-white/20">
+          <p className="text-center text-xs text-white/45">
             Pagamento único · Vitalício · Sem renovação.<br />
             Ao continuar você concorda com os{' '}
-            <a href="/termos" className="underline hover:text-white/40">termos de uso</a>.
+            <a href="/termos" className="underline hover:text-white/65">termos de uso</a>.
           </p>
         </div>
       )}

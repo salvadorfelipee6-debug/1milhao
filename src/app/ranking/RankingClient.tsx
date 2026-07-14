@@ -93,7 +93,7 @@ export function RankingClient({ blocks, initialNiche, initialKeyword, initialCit
       {/* Barra de busca */}
       <form onSubmit={handleSearch} className="flex gap-2">
         <div className="flex flex-1 overflow-hidden rounded-xl border border-white/10 bg-dark-2 focus-within:border-white/20">
-          <span className="flex items-center pl-3 text-white/30">
+          <span className="flex items-center pl-3 text-white/55">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           </span>
           <input
@@ -101,7 +101,7 @@ export function RankingClient({ blocks, initialNiche, initialKeyword, initialCit
             value={keyword}
             onChange={e => setKeyword(e.target.value)}
             placeholder="Buscar por @ ou nome..."
-            className="flex-1 bg-transparent px-3 py-3 text-sm text-white placeholder-white/25 outline-none"
+            className="flex-1 bg-transparent px-3 py-3 text-sm text-white placeholder-white/40 outline-none"
           />
         </div>
         <input
@@ -109,7 +109,7 @@ export function RankingClient({ blocks, initialNiche, initialKeyword, initialCit
           value={city}
           onChange={e => setCity(e.target.value)}
           placeholder="Cidade..."
-          className="w-32 rounded-xl border border-white/10 bg-dark-2 px-3 py-3 text-sm text-white placeholder-white/25 outline-none focus:border-white/20"
+          className="w-32 rounded-xl border border-white/10 bg-dark-2 px-3 py-3 text-sm text-white placeholder-white/40 outline-none focus:border-white/20"
         />
         <button type="submit" className="btn-gold px-4 py-3 text-sm">
           Buscar
@@ -117,11 +117,11 @@ export function RankingClient({ blocks, initialNiche, initialKeyword, initialCit
         {/* Toggle lista/grid */}
         <div className="flex overflow-hidden rounded-xl border border-white/10">
           <button type="button" onClick={() => setView('list')}
-            className={`px-3 py-3 text-sm transition-all ${view === 'list' ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/60'}`}>
+            className={`px-3 py-3 text-sm transition-all ${view === 'list' ? 'bg-white/10 text-white' : 'text-white/55 hover:text-white/60'}`}>
             ☰
           </button>
           <button type="button" onClick={() => setView('grid')}
-            className={`px-3 py-3 text-sm transition-all ${view === 'grid' ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/60'}`}>
+            className={`px-3 py-3 text-sm transition-all ${view === 'grid' ? 'bg-white/10 text-white' : 'text-white/55 hover:text-white/60'}`}>
             ⊞
           </button>
         </div>
@@ -136,7 +136,7 @@ export function RankingClient({ blocks, initialNiche, initialKeyword, initialCit
             className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-all ${
               niche === n.key
                 ? 'text-dark'
-                : 'border border-white/10 text-white/40 hover:border-white/20 hover:text-white/70'
+                : 'border border-white/10 text-white/65 hover:border-white/20 hover:text-white/70'
             }`}
             style={niche === n.key ? {
               background: n.key ? NICHE_COLORS[n.key] : '#FFD700',
@@ -149,7 +149,7 @@ export function RankingClient({ blocks, initialNiche, initialKeyword, initialCit
 
       {/* Contagem */}
       <div className="flex items-center justify-between">
-        <p className="text-xs text-white/30">
+        <p className="text-xs text-white/55">
           {filtered.length} influencer{filtered.length !== 1 ? 's' : ''}
           {niche ? ` em ${NICHE_LABELS[niche as keyof typeof NICHE_LABELS]}` : ''}
           {city ? ` · ${city}` : ''}
@@ -157,7 +157,7 @@ export function RankingClient({ blocks, initialNiche, initialKeyword, initialCit
         {(niche || keyword || city) && (
           <button
             onClick={() => { setNiche(''); setKeyword(''); setCity(''); applyFilters('', '', '') }}
-            className="text-xs text-white/30 hover:text-white/60"
+            className="text-xs text-white/55 hover:text-white/60"
           >
             limpar filtros ✕
           </button>
@@ -168,8 +168,8 @@ export function RankingClient({ blocks, initialNiche, initialKeyword, initialCit
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-white/8 bg-dark-2 py-16 text-center">
           <p className="text-2xl">🔍</p>
-          <p className="mt-3 text-sm text-white/40">Nenhum influencer encontrado</p>
-          <p className="mt-1 text-xs text-white/20">Tente outros filtros</p>
+          <p className="mt-3 text-sm text-white/65">Nenhum influencer encontrado</p>
+          <p className="mt-1 text-xs text-white/45">Tente outros filtros</p>
         </div>
       ) : view === 'list' ? (
         <div className="space-y-2">
@@ -190,7 +190,7 @@ export function RankingClient({ blocks, initialNiche, initialKeyword, initialCit
                   {i < 3 ? (
                     <span className="text-lg">{MEDALS[i]}</span>
                   ) : (
-                    <span className="text-sm font-bold text-white/20">#{i + 1}</span>
+                    <span className="text-sm font-bold text-white/45">#{i + 1}</span>
                   )}
                 </div>
 
@@ -223,7 +223,7 @@ export function RankingClient({ blocks, initialNiche, initialKeyword, initialCit
                         style={{ width: `${pct}%`, background: color }}
                       />
                     </div>
-                    <span className="text-[11px] text-white/30 shrink-0">
+                    <span className="text-[11px] text-white/55 shrink-0">
                       {b.city ? `${b.city} · ` : ''}{b.pixelWidth}×{b.pixelHeight}px
                     </span>
                   </div>
@@ -232,17 +232,17 @@ export function RankingClient({ blocks, initialNiche, initialKeyword, initialCit
                 {/* Pixels + seguidores */}
                 <div className="shrink-0 text-right">
                   <p className="text-sm font-bold text-gold">{b.pixelCount.toLocaleString('pt-BR')}</p>
-                  <p className="text-[10px] text-white/25">pixels</p>
+                  <p className="text-[10px] text-white/50">pixels</p>
                 </div>
                 {b.followers && (
                   <div className="shrink-0 text-right hidden sm:block">
                     <p className="text-sm font-bold text-white/70">{b.followers}</p>
-                    <p className="text-[10px] text-white/25">seguidores</p>
+                    <p className="text-[10px] text-white/50">seguidores</p>
                   </div>
                 )}
 
                 {/* Seta */}
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-white/20 group-hover:text-white/50 transition-colors"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-white/45 group-hover:text-white/70 transition-colors"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
             )
           })}
@@ -276,10 +276,10 @@ export function RankingClient({ blocks, initialNiche, initialKeyword, initialCit
                 <p className="mt-0.5 text-center text-[10px]" style={{ color: color + 'bb' }}>{nicheLabel}</p>
                 <div className="mt-2 text-center">
                   <p className="text-sm font-bold text-gold">{b.pixelCount.toLocaleString('pt-BR')}</p>
-                  <p className="text-[9px] text-white/25">pixels</p>
+                  <p className="text-[9px] text-white/50">pixels</p>
                 </div>
                 {b.followers && (
-                  <p className="mt-1 text-center text-[10px] text-white/30">{b.followers} seguidores</p>
+                  <p className="mt-1 text-center text-[10px] text-white/55">{b.followers} seguidores</p>
                 )}
               </Link>
             )
@@ -290,7 +290,7 @@ export function RankingClient({ blocks, initialNiche, initialKeyword, initialCit
       {/* CTA para marcas */}
       <div className="rounded-2xl border border-gold/15 bg-gold/5 p-6 text-center">
         <p className="text-sm font-bold text-gold mb-1">Você é uma marca?</p>
-        <p className="text-xs text-white/40 mb-4">
+        <p className="text-xs text-white/65 mb-4">
           Use os filtros acima para encontrar o influencer ideal para sua campanha. Clique no perfil e entre em contato direto.
         </p>
         <Link href="/marcas" className="btn-gold px-6 py-2.5 text-sm">

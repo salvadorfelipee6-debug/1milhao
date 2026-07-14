@@ -1,3 +1,7 @@
+// ─── Preço ────────────────────────────────────────────────
+// Fonte única do preço por pixel — usado no grid, hero, form e checkout
+export const PIXEL_PRICE = 0.99
+
 // ─── Grade de pixels ──────────────────────────────────────
 
 export interface GridBlock {

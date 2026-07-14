@@ -117,6 +117,30 @@ export async function isHandleTaken(handle: string): Promise<boolean> {
   return rows.length > 0
 }
 
+// Verifica se uma área do grid já está (parcialmente) ocupada
+// Conta blocos pending também — área fica reservada durante o pagamento
+export async function isAreaOccupied(
+  x: number,
+  y: number,
+  w: number,
+  h: number
+): Promise<boolean> {
+  const rows = await db
+    .select({ id: schema.blocks.id })
+    .from(schema.blocks)
+    .where(
+      and(
+        sql`${schema.blocks.status} != 'suspended'`,
+        sql`${schema.blocks.pixelX} < ${x + w}`,
+        sql`${schema.blocks.pixelX} + ${schema.blocks.pixelWidth} > ${x}`,
+        sql`${schema.blocks.pixelY} < ${y + h}`,
+        sql`${schema.blocks.pixelY} + ${schema.blocks.pixelHeight} > ${y}`
+      )
+    )
+    .limit(1)
+  return rows.length > 0
+}
+
 // Busca blocos com filtros (para portal de marcas)
 export async function searchBlocks({
   niche,

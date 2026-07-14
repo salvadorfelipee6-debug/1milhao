@@ -112,14 +112,14 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
 
       {/* Painel de filtros */}
       <div className="rounded-2xl border border-white/8 bg-dark-2 p-5 space-y-4">
-        <p className="text-xs font-semibold uppercase tracking-widest text-white/30">
+        <p className="text-xs font-semibold uppercase tracking-widest text-white/55">
           Filtre o influencer ideal
         </p>
 
         {/* Busca + cidade */}
         <form onSubmit={handleSearch} className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="sm:col-span-2 flex overflow-hidden rounded-xl border border-white/10 focus-within:border-white/20">
-            <span className="flex items-center pl-3 text-white/30">
+            <span className="flex items-center pl-3 text-white/55">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             </span>
             <input
@@ -127,7 +127,7 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
               value={keyword}
               onChange={e => setKeyword(e.target.value)}
               placeholder="Busque por @, nome, palavra-chave na bio..."
-              className="flex-1 bg-transparent px-3 py-3 text-sm text-white placeholder-white/25 outline-none"
+              className="flex-1 bg-transparent px-3 py-3 text-sm text-white placeholder-white/40 outline-none"
             />
           </div>
           <div className="flex gap-2">
@@ -136,7 +136,7 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
               value={city}
               onChange={e => setCity(e.target.value)}
               placeholder="Cidade..."
-              className="flex-1 rounded-xl border border-white/10 bg-transparent px-3 py-3 text-sm text-white placeholder-white/25 outline-none focus:border-white/20"
+              className="flex-1 rounded-xl border border-white/10 bg-transparent px-3 py-3 text-sm text-white placeholder-white/40 outline-none focus:border-white/20"
             />
             <button type="submit" className="btn-gold px-4 text-sm shrink-0">
               Buscar
@@ -146,7 +146,7 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
 
         {/* Nicho */}
         <div>
-          <p className="mb-2 text-[10px] uppercase tracking-widest text-white/25">Nicho</p>
+          <p className="mb-2 text-[10px] uppercase tracking-widest text-white/50">Nicho</p>
           <div className="flex flex-wrap gap-2">
             {NICHES.map(n => (
               <button
@@ -155,7 +155,7 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
                 className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
                   niche === n.key
                     ? 'text-dark'
-                    : 'border border-white/10 text-white/40 hover:border-white/20 hover:text-white/70'
+                    : 'border border-white/10 text-white/65 hover:border-white/20 hover:text-white/70'
                 }`}
                 style={niche === n.key ? { background: n.key ? NICHE_COLORS[n.key] : '#FFD700' } : {}}
               >
@@ -167,7 +167,7 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
 
         {/* Tamanho */}
         <div>
-          <p className="mb-2 text-[10px] uppercase tracking-widest text-white/25">Tamanho do bloco</p>
+          <p className="mb-2 text-[10px] uppercase tracking-widest text-white/50">Tamanho do bloco</p>
           <div className="flex flex-wrap gap-2">
             {SIZE_FILTERS.map(s => (
               <button
@@ -176,7 +176,7 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
                 className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
                   minPixels === s.min
                     ? 'bg-gold text-dark'
-                    : 'border border-white/10 text-white/40 hover:border-white/20 hover:text-white/70'
+                    : 'border border-white/10 text-white/65 hover:border-white/20 hover:text-white/70'
                 }`}
               >
                 {s.label}
@@ -187,7 +187,7 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
 
         {/* Limpar */}
         {hasFilters && (
-          <button onClick={clearAll} className="text-xs text-white/30 hover:text-white/60">
+          <button onClick={clearAll} className="text-xs text-white/55 hover:text-white/60">
             ✕ Limpar todos os filtros
           </button>
         )}
@@ -198,7 +198,7 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
         <p className="text-sm font-semibold text-white">
           {filtered.length} influencer{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}
         </p>
-        <p className="text-xs text-white/30">
+        <p className="text-xs text-white/55">
           Clique para ver o perfil completo e entrar em contato
         </p>
       </div>
@@ -206,7 +206,7 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-white/8 bg-dark-2 py-16 text-center">
           <p className="text-3xl">🔍</p>
-          <p className="mt-3 text-sm text-white/50">Nenhum influencer encontrado com esses filtros</p>
+          <p className="mt-3 text-sm text-white/70">Nenhum influencer encontrado com esses filtros</p>
           <button onClick={clearAll} className="mt-3 text-xs text-gold hover:underline">
             Limpar filtros
           </button>
@@ -249,7 +249,7 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
                     <div className="min-w-0">
                       <p className="truncate text-sm font-bold text-white">@{b.instagramHandle}</p>
                       {b.displayName && (
-                        <p className="truncate text-[11px] text-white/40">{b.displayName}</p>
+                        <p className="truncate text-[11px] text-white/65">{b.displayName}</p>
                       )}
                     </div>
                     <span
@@ -265,27 +265,27 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
                     {b.followers && (
                       <div className="rounded-lg bg-white/4 px-1 py-1.5 text-center">
                         <p className="text-xs font-bold text-gold">{b.followers}</p>
-                        <p className="text-[9px] text-white/30">seguidores</p>
+                        <p className="text-[9px] text-white/55">seguidores</p>
                       </div>
                     )}
                     <div className="rounded-lg bg-white/4 px-1 py-1.5 text-center">
                       <p className="text-xs font-bold text-gold">{b.pixelCount.toLocaleString('pt-BR')}</p>
-                      <p className="text-[9px] text-white/30">pixels</p>
+                      <p className="text-[9px] text-white/55">pixels</p>
                     </div>
                     <div className="rounded-lg bg-white/4 px-1 py-1.5 text-center">
                       <p className="text-xs font-bold text-white/70">{b.pixelWidth}×{b.pixelHeight}</p>
-                      <p className="text-[9px] text-white/30">tamanho</p>
+                      <p className="text-[9px] text-white/55">tamanho</p>
                     </div>
                   </div>
 
                   {/* Bio */}
                   {b.bio && (
-                    <p className="mb-3 text-[11px] leading-relaxed text-white/40 line-clamp-2">{b.bio}</p>
+                    <p className="mb-3 text-[11px] leading-relaxed text-white/65 line-clamp-2">{b.bio}</p>
                   )}
 
                   {/* Cidade */}
                   {b.city && (
-                    <p className="mb-3 text-[11px] text-white/30">📍 {b.city}</p>
+                    <p className="mb-3 text-[11px] text-white/55">📍 {b.city}</p>
                   )}
 
                   {/* Ações */}
@@ -331,11 +331,11 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
       {/* CTA — seja um influencer */}
       <div className="rounded-2xl border border-white/8 bg-dark-2 p-6 text-center">
         <p className="text-sm font-bold text-white mb-1">Você é um influencer?</p>
-        <p className="text-xs text-white/40 mb-4">
+        <p className="text-xs text-white/65 mb-4">
           Garanta seu espaço permanente no mapa e apareça para marcas como essa.
         </p>
         <Link href="/comprar" className="btn-gold px-6 py-2.5 text-sm">
-          Garantir meu espaço — a partir de R$ 10 →
+          Garantir meu espaço — a partir de R$ 0,99 →
         </Link>
       </div>
 

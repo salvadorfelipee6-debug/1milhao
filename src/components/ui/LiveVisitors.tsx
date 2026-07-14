@@ -107,7 +107,7 @@ export function LiveVisitors({ className }: { className?: string }) {
         </span>
       )}
 
-      <span className="text-xs text-white/40">pessoas no mapa agora</span>
+      <span className="text-xs text-white/65">pessoas no mapa agora</span>
     </div>
   )
 }

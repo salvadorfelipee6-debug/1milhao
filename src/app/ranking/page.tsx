@@ -38,7 +38,7 @@ export default async function RankingPage({ searchParams }: PageProps) {
             RANKING DE<br />
             <span className="text-gold">INFLUENCERS</span>
           </h1>
-          <p className="mt-4 text-sm text-white/40">
+          <p className="mt-4 text-sm text-white/65">
             {stats.active.toLocaleString('pt-BR')} influencers · {stats.sold.toLocaleString('pt-BR')} pixels vendidos
           </p>
         </div>

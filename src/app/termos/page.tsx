@@ -55,7 +55,7 @@ export default function TermosPage() {
       <div className="mx-auto max-w-2xl">
 
         {/* Voltar */}
-        <Link href="/" className="mb-8 flex items-center gap-2 text-sm text-white/30 hover:text-white/60 transition-colors">
+        <Link href="/" className="mb-8 flex items-center gap-2 text-sm text-white/55 hover:text-white/60 transition-colors">
           ← Voltar para o início
         </Link>
 
@@ -68,7 +68,7 @@ export default function TermosPage() {
             TERMOS<br />
             <span className="text-gold">DE USO</span>
           </h1>
-          <p className="mt-4 text-sm text-white/40">
+          <p className="mt-4 text-sm text-white/65">
             Última atualização: {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
           </p>
         </div>
@@ -86,14 +86,14 @@ export default function TermosPage() {
           {sections.map(s => (
             <div key={s.title} className="border-t border-white/5 pt-8">
               <h2 className="mb-3 text-sm font-bold text-white">{s.title}</h2>
-              <p className="text-sm leading-relaxed text-white/50">{s.content}</p>
+              <p className="text-sm leading-relaxed text-white/70">{s.content}</p>
             </div>
           ))}
         </div>
 
         {/* Footer */}
         <div className="mt-16 border-t border-white/5 pt-10 text-center">
-          <p className="text-xs text-white/25">
+          <p className="text-xs text-white/50">
             © {new Date().getFullYear()} 1 Milhão de Influencer · Todos os direitos reservados
           </p>
           <Link href="/" className="mt-4 inline-block text-xs text-gold/50 hover:text-gold transition-colors">

@@ -14,7 +14,7 @@ import { TickerBanner }      from '@/components/ui/TickerBanner'
 
 export const metadata: Metadata = {
   title: '1 Milhão de Influencer — O mapa permanente dos influencers do Brasil',
-  description: '1.000.000 de pixels. Cada pixel, um influencer. Compre seu espaço e apareça para marcas e seguidores para sempre. A partir de R$ 99.',
+  description: '1.000.000 de pixels. Cada pixel, um influencer. Compre seu espaço e apareça para marcas e seguidores para sempre. A partir de R$ 0,99.',
 }
 
 export const revalidate = 60
@@ -35,7 +35,7 @@ export default async function HomePage({ searchParams }: PageProps) {
   return (
     <main>
       {/* Faixa ticker */}
-      <TickerBanner />
+      <TickerBanner available={stats.available} />
 
       {/* Hero com grid embutido */}
       <HeroSection stats={stats} blocks={blocks} highlight={highlight || undefined} />

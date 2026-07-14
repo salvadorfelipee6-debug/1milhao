@@ -1,11 +1,11 @@
 'use client'
 
-export function TickerBanner() {
+export function TickerBanner({ available }: { available?: number }) {
   const items = [
     '⚡ COMPRE SEU PIXEL APENAS R$ 0,99',
     '🔥 Espaço permanente no mapa dos influencers do Brasil',
     '💎 Pagamento único · sem renovação · vitalício',
-    '📍 991.200 pixels disponíveis — garanta o seu agora',
+    `📍 ${(available ?? 991200).toLocaleString('pt-BR')} pixels disponíveis — garanta o seu agora`,
     '✨ Link-in-bio profissional incluso gratuitamente',
     '🚀 Marcas buscando influencers agora nesse mapa',
   ]

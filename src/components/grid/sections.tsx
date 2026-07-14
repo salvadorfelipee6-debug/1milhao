@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getTopBlocks } from '@/lib/db/blocks'
+import { getTopBlocks, getGridStats } from '@/lib/db/blocks'
 import { NICHE_LABELS, NICHE_COLORS } from '@/types'
 
 // ─── Como Funciona ────────────────────────────────────────
@@ -8,7 +8,7 @@ export function HowItWorksSection() {
     {
       n: '01', icon: '🎯',
       title: 'Escolha seus pixels',
-      desc: 'Mínimo 100px (10×10) por R$ 10. Quanto mais pixels, maior e mais visível seu bloco na grade.',
+      desc: 'A partir de 1 pixel por R$ 0,99. Quanto mais pixels, maior e mais visível seu bloco na grade.',
       color: '#FFD700',
     },
     {
@@ -20,7 +20,7 @@ export function HowItWorksSection() {
     {
       n: '03', icon: '⚡',
       title: 'Pague uma única vez',
-      desc: 'Pix instantâneo ou cartão. R$ 0,10 por pixel. Sem mensalidade, sem renovação. Nunca.',
+      desc: 'Pix instantâneo ou cartão. R$ 0,99 por pixel. Sem mensalidade, sem renovação. Nunca.',
       color: '#405DE6',
     },
     {
@@ -49,7 +49,7 @@ export function HowItWorksSection() {
             4 PASSOS PARA<br />
             <span className="text-gold">APARECER</span>
           </h2>
-          <p className="mt-4 text-sm text-white/35">
+          <p className="mt-4 text-sm text-white/60">
             Sem assinatura. Sem renovação. Pague uma vez, apareça sempre.
           </p>
         </div>
@@ -78,7 +78,7 @@ export function HowItWorksSection() {
 
               <div className="mb-3 text-3xl">{s.icon}</div>
               <h3 className="mb-2 text-sm font-bold text-white">{s.title}</h3>
-              <p className="text-xs leading-relaxed text-white/40">{s.desc}</p>
+              <p className="text-xs leading-relaxed text-white/65">{s.desc}</p>
 
               {/* Linha colorida no bottom */}
               <div
@@ -92,7 +92,7 @@ export function HowItWorksSection() {
         {/* CTA inline */}
         <div className="mt-12 text-center">
           <Link href="/comprar" className="btn-gold px-8 py-3.5 text-sm">
-            Começar agora — R$ 99 →
+            Começar agora — a partir de R$ 0,99 →
           </Link>
         </div>
       </div>
@@ -126,7 +126,7 @@ export function PricingSection() {
             ESCOLHA<br />
             <span className="text-gold">SEU ESPAÇO</span>
           </h2>
-          <p className="mt-4 text-sm text-white/35">
+          <p className="mt-4 text-sm text-white/60">
             Cada real investido é permanente. Não existe renovação. R$ 0,99/pixel.
           </p>
         </div>
@@ -175,22 +175,22 @@ export function PricingSection() {
                   />
                 </div>
 
-                <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">{p.name}</p>
-                <p className="mt-0.5 text-xs text-white/20">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/55">{p.name}</p>
+                <p className="mt-0.5 text-xs text-white/45">
                   {p.pixels.toLocaleString('pt-BR')} pixels · {p.side}×{p.side}
                 </p>
 
                 <p className="mt-3 font-display text-4xl text-white">
                   R${p.price}
                 </p>
-                <p className="mt-0.5 text-[10px] text-white/25">pagamento único · vitalício</p>
+                <p className="mt-0.5 text-[10px] text-white/50">pagamento único · vitalício</p>
 
                 <Link
                   href={`/comprar?pixels=${p.pixels}`}
                   className={`mt-4 block rounded-xl py-2.5 text-center text-xs font-bold transition-all ${
                     p.featured
                       ? 'btn-gold'
-                      : 'border border-white/10 text-white/50 hover:border-white/20 hover:text-white/80'
+                      : 'border border-white/10 text-white/70 hover:border-white/20 hover:text-white/80'
                   }`}
                 >
                   Escolher
@@ -200,8 +200,8 @@ export function PricingSection() {
           })}
         </div>
 
-        <p className="mt-8 text-center text-xs text-white/25">
-          Não sabe qual escolher? Comece com o Micro por R$ 10 e expanda quando quiser.
+        <p className="mt-8 text-center text-xs text-white/50">
+          Não sabe qual escolher? Comece com o Micro por R$ 0,99 e expanda quando quiser.
         </p>
       </div>
     </section>
@@ -241,7 +241,7 @@ export async function RankingSection() {
                 className="group flex items-center gap-3 rounded-xl border border-white/5 bg-dark-3 px-4 py-3 transition-all hover:-translate-y-0.5 hover:border-white/10"
               >
                 <span className="w-8 shrink-0 text-center text-lg">
-                  {medals[i] ?? <span className="text-sm font-bold text-white/20">#{i + 1}</span>}
+                  {medals[i] ?? <span className="text-sm font-bold text-white/45">#{i + 1}</span>}
                 </span>
                 <div
                   className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-bold text-white"
@@ -253,16 +253,16 @@ export async function RankingSection() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="truncate text-sm font-bold text-white">@{b.instagramHandle}</p>
-                  <p className="text-xs text-white/30">
+                  <p className="text-xs text-white/55">
                     {NICHE_LABELS[b.niche as keyof typeof NICHE_LABELS] ?? b.niche}
                     {b.city ? ` · ${b.city}` : ''}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="text-sm font-bold text-gold">{b.pixelCount.toLocaleString('pt-BR')}</p>
-                  <p className="text-[10px] text-white/25">pixels</p>
+                  <p className="text-[10px] text-white/50">pixels</p>
                 </div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-white/15 group-hover:text-white/40 transition-colors"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-white/40 group-hover:text-white/65 transition-colors"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
             )
           })}
@@ -280,7 +280,7 @@ export async function RankingSection() {
 
 // ─── Prova Social ─────────────────────────────────────────
 export async function SocialProofSection() {
-  const top = await getTopBlocks(6)
+  const [top, stats] = await Promise.all([getTopBlocks(6), getGridStats()])
 
   return (
     <section className="relative overflow-hidden px-4 py-24">
@@ -297,7 +297,7 @@ export async function SocialProofSection() {
             OS PRIMEIROS<br />
             <span className="text-gold">DO MAPA</span>
           </h2>
-          <p className="mt-4 text-sm text-white/35">
+          <p className="mt-4 text-sm text-white/60">
             Esses influencers já garantiram seu espaço permanente. O seu ainda está disponível.
           </p>
         </div>
@@ -338,7 +338,7 @@ export async function SocialProofSection() {
 
                 {/* Bio */}
                 {b.bio && (
-                  <p className="mb-4 text-xs leading-relaxed text-white/45 line-clamp-2">
+                  <p className="mb-4 text-xs leading-relaxed text-white/70 line-clamp-2">
                     "{b.bio}"
                   </p>
                 )}
@@ -348,20 +348,20 @@ export async function SocialProofSection() {
                   {b.followers && (
                     <div>
                       <p className="text-sm font-bold text-gold">{b.followers}</p>
-                      <p className="text-[9px] uppercase tracking-wide text-white/25">seguidores</p>
+                      <p className="text-[9px] uppercase tracking-wide text-white/50">seguidores</p>
                     </div>
                   )}
                   <div>
                     <p className="text-sm font-bold text-gold">{b.pixelCount.toLocaleString('pt-BR')}</p>
-                    <p className="text-[9px] uppercase tracking-wide text-white/25">pixels</p>
+                    <p className="text-[9px] uppercase tracking-wide text-white/50">pixels</p>
                   </div>
                   <div>
                     <p className="text-sm font-bold text-white/60">{b.pixelWidth}×{b.pixelHeight}</p>
-                    <p className="text-[9px] uppercase tracking-wide text-white/25">tamanho</p>
+                    <p className="text-[9px] uppercase tracking-wide text-white/50">tamanho</p>
                   </div>
                   {b.city && (
                     <div className="ml-auto text-right">
-                      <p className="text-xs text-white/30">📍 {b.city}</p>
+                      <p className="text-xs text-white/55">📍 {b.city}</p>
                     </div>
                   )}
                 </div>
@@ -378,7 +378,7 @@ export async function SocialProofSection() {
         {/* Counters de prova social */}
         <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4">
           {[
-            { icon: '🗺️', n: '991.200',  l: 'pixels disponíveis' },
+            { icon: '🗺️', n: stats.available.toLocaleString('pt-BR'), l: 'pixels disponíveis' },
             { icon: '⚡', n: 'R$ 0,99',  l: 'por pixel' },
             { icon: '∞',  n: 'vitalício', l: 'sem renovação' },
             { icon: '🔗', n: 'gratuito',  l: 'link-in-bio incluso' },
@@ -389,7 +389,7 @@ export async function SocialProofSection() {
             >
               <div className="mb-2 text-2xl">{s.icon}</div>
               <p className="font-display text-xl text-gold">{s.n}</p>
-              <p className="mt-1 text-[10px] uppercase tracking-widest text-white/30">{s.l}</p>
+              <p className="mt-1 text-[10px] uppercase tracking-widest text-white/55">{s.l}</p>
             </div>
           ))}
         </div>
@@ -398,7 +398,7 @@ export async function SocialProofSection() {
           <Link href="/comprar" className="btn-gold px-8 py-3.5 text-sm">
             Garantir meu espaço agora →
           </Link>
-          <p className="mt-3 text-xs text-white/25">
+          <p className="mt-3 text-xs text-white/50">
             Seja um dos primeiros. Quando o mapa encher, não haverá mais espaço.
           </p>
         </div>
@@ -420,7 +420,7 @@ export function FAQSection() {
         },
         {
           q: 'Quanto custa e como funciona o pagamento?',
-          a: 'R$ 0,99 por pixel. O mínimo é 100 pixels (10×10) por R$ 99. O pagamento é único — você paga uma vez e seu espaço fica no mapa para sempre. Aceitamos Pix e cartão de crédito.',
+          a: 'R$ 0,99 por pixel, a partir de 1 pixel. O pagamento é único — você paga uma vez e seu espaço fica no mapa para sempre. Aceitamos Pix e cartão de crédito.',
         },
         {
           q: 'O que aparece no meu bloco?',
@@ -436,7 +436,7 @@ export function FAQSection() {
         },
         {
           q: 'Quanto maior meu bloco, mais visível fico?',
-          a: 'Sim. Blocos maiores ocupam mais espaço no mapa e são mais fáceis de ver. Mas mesmo o menor bloco (10×10) aparece no mapa e no ranking, e tem a mesma página de perfil completa.',
+          a: 'Sim. Blocos maiores ocupam mais espaço no mapa e são mais fáceis de ver. Mas mesmo o menor bloco aparece no mapa e no ranking, e tem a mesma página de perfil completa.',
         },
       ],
     },
@@ -499,14 +499,14 @@ export function FAQSection() {
                     <summary className="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 text-sm font-semibold text-white list-none">
                       {item.q}
                       <span
-                        className="shrink-0 text-lg text-white/30 transition-transform group-open:rotate-45"
+                        className="shrink-0 text-lg text-white/55 transition-transform group-open:rotate-45"
                         style={{ lineHeight: 1 }}
                       >
                         +
                       </span>
                     </summary>
                     <div className="px-5 pb-4 pt-0">
-                      <p className="text-sm leading-relaxed text-white/50">{item.a}</p>
+                      <p className="text-sm leading-relaxed text-white/70">{item.a}</p>
                     </div>
                   </details>
                 ))}
@@ -517,7 +517,7 @@ export function FAQSection() {
 
         <div className="mt-12 rounded-2xl border border-gold/15 bg-gold/5 p-6 text-center">
           <p className="text-sm font-bold text-gold mb-1">Ainda tem dúvidas?</p>
-          <p className="text-xs text-white/40 mb-4">
+          <p className="text-xs text-white/65 mb-4">
             Entre em contato pelo Instagram ou e-mail — respondemos em até 24h.
           </p>
           <a
@@ -535,7 +535,8 @@ export function FAQSection() {
 }
 
 // ─── Footer CTA ───────────────────────────────────────────
-export function FooterCTA() {
+export async function FooterCTA() {
+  const stats = await getGridStats()
   const footerLinks = [
     { label: 'Início',         href: '/' },
     { label: 'Como funciona',  href: '#como-funciona' },
@@ -557,15 +558,15 @@ export function FooterCTA() {
         {/* Urgência */}
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-4 py-1.5 text-xs text-red-400">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
-          Pixels esgotando — {(991200).toLocaleString('pt-BR')} restantes
+          Pixels esgotando — {stats.available.toLocaleString('pt-BR')} restantes
         </div>
 
         <h2 className="font-display text-5xl tracking-wide text-white md:text-7xl">
           SUA VEZ<br />
           <span className="text-gold">DE APARECER</span>
         </h2>
-        <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-white/40">
-          Quando acabar, acabou. Espaço permanente a partir de R$ 99. Sem renovação. Para sempre.
+        <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-white/65">
+          Quando acabar, acabou. Espaço permanente a partir de R$ 0,99. Sem renovação. Para sempre.
         </p>
 
         {/* CTAs */}
@@ -579,21 +580,21 @@ export function FooterCTA() {
         </div>
 
         {/* Garantias */}
-        <div className="mt-10 flex flex-wrap justify-center gap-6 text-xs text-white/25">
+        <div className="mt-10 flex flex-wrap justify-center gap-6 text-xs text-white/50">
           {['✓ Pagamento único', '✓ Sem mensalidade', '✓ Vitalício', '✓ Suporte por e-mail'].map(g => (
             <span key={g}>{g}</span>
           ))}
         </div>
 
         {/* Footer links */}
-        <div className="mt-16 flex flex-wrap justify-center gap-x-6 gap-y-2 border-t border-white/5 pt-10 text-xs text-white/20">
+        <div className="mt-16 flex flex-wrap justify-center gap-x-6 gap-y-2 border-t border-white/5 pt-10 text-xs text-white/45">
           {footerLinks.map(l => (
-            <Link key={l.label} href={l.href} className="hover:text-white/50 transition-colors">
+            <Link key={l.label} href={l.href} className="hover:text-white/70 transition-colors">
               {l.label}
             </Link>
           ))}
         </div>
-        <p className="mt-6 text-[11px] text-white/15">
+        <p className="mt-6 text-[11px] text-white/40">
           © {new Date().getFullYear()} 1 Milhão de Influencer · Todos os direitos reservados
         </p>
       </div>

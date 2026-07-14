@@ -151,7 +151,7 @@ function Confetti() {
       vy:  2 + Math.random() * 4,
       rot: Math.random() * Math.PI * 2,
       vr:  (Math.random() - 0.5) * 0.2,
-      color: ['#FFD700','#E1306C','#833AB4','#405DE6','#1ed760'][Math.floor(Math.random() * 5)],
+      color: ['#FFD700','#E1306C','#833AB4','#405DE6','#1ed760'][Math.floor(Math.random() * 5)] ?? '#FFD700',
     }))
 
     let frame: number
@@ -184,6 +184,103 @@ function Confetti() {
   )
 }
 
+// ─── Arte para stories (1080×1920) ────────────────────────
+async function generateStoryImage(block: GridBlock, shareUrl: string): Promise<Blob | null> {
+  const W = 1080, H = 1920
+  const canvas  = document.createElement('canvas')
+  canvas.width  = W
+  canvas.height = H
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return null
+
+  const color = block.colorHex || '#FFD700'
+
+  // Fundo
+  ctx.fillStyle = '#0d0d0d'
+  ctx.fillRect(0, 0, W, H)
+
+  // Grade sutil
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)'
+  ctx.lineWidth   = 1
+  ctx.beginPath()
+  for (let x = 0; x <= W; x += 54) { ctx.moveTo(x, 0); ctx.lineTo(x, H) }
+  for (let y = 0; y <= H; y += 54) { ctx.moveTo(0, y); ctx.lineTo(W, y) }
+  ctx.stroke()
+
+  // Glow central
+  const grad = ctx.createRadialGradient(W / 2, H / 2, 50, W / 2, H / 2, 700)
+  grad.addColorStop(0, 'rgba(255,215,0,0.12)')
+  grad.addColorStop(1, 'rgba(255,215,0,0)')
+  ctx.fillStyle = grad
+  ctx.fillRect(0, 0, W, H)
+
+  // Título
+  ctx.textAlign = 'center'
+  ctx.fillStyle = '#ffffff'
+  ctx.font      = 'bold 62px Inter, sans-serif'
+  ctx.fillText('GARANTI MEU ESPAÇO', W / 2, 320)
+  ctx.fillStyle = '#FFD700'
+  ctx.font      = 'bold 76px Inter, sans-serif'
+  ctx.fillText('NO MAPA DOS', W / 2, 420)
+  ctx.fillText('INFLUENCERS', W / 2, 515)
+
+  // Bloco central
+  const bs = 480
+  const bx = (W - bs) / 2, by = 660
+  ctx.shadowColor = color
+  ctx.shadowBlur  = 80
+  ctx.fillStyle   = color + '33'
+  ctx.fillRect(bx, by, bs, bs)
+  ctx.shadowBlur  = 0
+
+  // Avatar (só entra se o servidor da imagem permitir CORS — senão o canvas trava o download)
+  if (block.avatarUrl) {
+    try {
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const i = new window.Image()
+        i.crossOrigin = 'anonymous'
+        i.onload  = () => resolve(i)
+        i.onerror = reject
+        i.src = block.avatarUrl!
+      })
+      ctx.save()
+      ctx.beginPath(); ctx.rect(bx, by, bs, bs); ctx.clip()
+      ctx.globalAlpha = 0.45
+      ctx.drawImage(img, bx, by, bs, bs)
+      ctx.restore()
+      ctx.globalAlpha = 1
+    } catch { /* segue sem avatar */ }
+  }
+
+  ctx.strokeStyle = color
+  ctx.lineWidth   = 6
+  ctx.strokeRect(bx, by, bs, bs)
+
+  // Handle no bloco
+  ctx.fillStyle = '#ffffff'
+  ctx.font      = 'bold 56px Inter, sans-serif'
+  ctx.fillText('@' + block.instagramHandle, W / 2, by + bs / 2 + 20)
+
+  // Stats
+  ctx.fillStyle = '#FFD700'
+  ctx.font      = 'bold 54px Inter, sans-serif'
+  ctx.fillText(`${block.pixelCount.toLocaleString('pt-BR')} pixels · vitalício`, W / 2, by + bs + 120)
+
+  ctx.fillStyle = 'rgba(255,255,255,0.75)'
+  ctx.font      = '40px Inter, sans-serif'
+  ctx.fillText('Pagamento único · Para sempre no mapa', W / 2, by + bs + 190)
+
+  // Link
+  ctx.fillStyle = '#FFD700'
+  ctx.font      = 'bold 44px Inter, sans-serif'
+  ctx.fillText(shareUrl.replace(/^https?:\/\//, ''), W / 2, 1700)
+  ctx.fillStyle = 'rgba(255,255,255,0.55)'
+  ctx.font      = '36px Inter, sans-serif'
+  ctx.fillText('1 Milhão de Influencer', W / 2, 1770)
+
+  return new Promise(resolve => canvas.toBlob(b => resolve(b), 'image/png'))
+}
+
 // ─── Página principal ─────────────────────────────────────
 export function SuccessClient() {
   const searchParams = useSearchParams()
@@ -193,6 +290,7 @@ export function SuccessClient() {
   const [status,  setStatus]  = useState<'waiting' | 'confirmed' | 'timeout'>('waiting')
   const [showConfetti, setShowConfetti] = useState(false)
   const [copied,  setCopied]  = useState(false)
+  const [generating, setGenerating] = useState(false)
 
   const sessionId = searchParams.get('session_id')       // Stripe
   const blockId   = searchParams.get('block_id')         // fallback manual
@@ -261,6 +359,28 @@ export function SuccessClient() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  // Gera a arte e abre o share nativo (mobile) ou baixa o PNG
+  async function shareStory() {
+    if (!block || generating) return
+    setGenerating(true)
+    try {
+      const blob = await generateStoryImage(block, shareUrl)
+      if (!blob) return
+      const file = new File([blob], `1milhao-${block.instagramHandle}.png`, { type: 'image/png' })
+      if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file] }); return } catch { /* usuário cancelou */ }
+      }
+      const url = URL.createObjectURL(blob)
+      const a   = document.createElement('a')
+      a.href = url
+      a.download = file.name
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   const nicheLabel = block
     ? (NICHE_LABELS[block.niche as keyof typeof NICHE_LABELS] ?? block.niche)
     : ''
@@ -283,11 +403,11 @@ export function SuccessClient() {
             <div className="mx-auto h-16 w-16 animate-spin rounded-full border-2 border-white/10 border-t-gold" />
             <div>
               <h1 className="font-display text-4xl text-white">PROCESSANDO</h1>
-              <p className="mt-2 text-sm text-white/40">
+              <p className="mt-2 text-sm text-white/65">
                 Confirmando seu pagamento e acendendo seu bloco no mapa...
               </p>
             </div>
-            <div className="rounded-2xl border border-white/8 bg-dark-2 p-4 text-sm text-white/30">
+            <div className="rounded-2xl border border-white/8 bg-dark-2 p-4 text-sm text-white/55">
               <p>Isso costuma levar menos de 10 segundos.</p>
               <p className="mt-1">Não feche essa página.</p>
             </div>
@@ -311,7 +431,7 @@ export function SuccessClient() {
                 <span className="text-gold">ESPAÇO</span><br />
                 É SEU!
               </h1>
-              <p className="mt-4 text-sm text-white/40">
+              <p className="mt-4 text-sm text-white/65">
                 Permanente. Vitalício. Para sempre no mapa.
               </p>
             </div>
@@ -334,7 +454,7 @@ export function SuccessClient() {
                 </div>
                 <div>
                   <p className="font-bold text-white">@{block.instagramHandle}</p>
-                  <p className="text-xs text-white/40">
+                  <p className="text-xs text-white/65">
                     {nicheLabel}
                     {block.city ? ` · ${block.city}` : ''}
                   </p>
@@ -343,24 +463,24 @@ export function SuccessClient() {
                   <p className="font-display text-lg text-gold">
                     {block.pixelCount.toLocaleString('pt-BR')}
                   </p>
-                  <p className="text-[10px] text-white/30">pixels</p>
+                  <p className="text-[10px] text-white/55">pixels</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-2 text-center border-t border-white/5 pt-3">
                 <div>
                   <p className="text-sm font-bold text-white">{block.pixelWidth}×{block.pixelHeight}</p>
-                  <p className="text-[10px] text-white/30">tamanho</p>
+                  <p className="text-[10px] text-white/55">tamanho</p>
                 </div>
                 <div>
                   <p className="text-sm font-bold text-white">
                     {block.pixelX},{block.pixelY}
                   </p>
-                  <p className="text-[10px] text-white/30">posição</p>
+                  <p className="text-[10px] text-white/55">posição</p>
                 </div>
                 <div>
                   <p className="text-sm font-bold text-gold">∞</p>
-                  <p className="text-[10px] text-white/30">vitalício</p>
+                  <p className="text-[10px] text-white/55">vitalício</p>
                 </div>
               </div>
             </div>
@@ -368,7 +488,7 @@ export function SuccessClient() {
             {/* Destaque link-in-bio */}
             <div className="rounded-2xl border border-gold/20 bg-gold/5 p-4 text-left">
               <p className="text-sm font-bold text-gold mb-1">✨ Sua página profissional está pronta!</p>
-              <p className="text-xs leading-relaxed text-white/50">
+              <p className="text-xs leading-relaxed text-white/70">
                 Use <span className="text-white/80 font-semibold">1milhao.com.br/influencer/{block.instagramHandle}</span>{' '}
                 como link na bio do Instagram. Substitua o Linktree agora mesmo.
               </p>
@@ -376,14 +496,27 @@ export function SuccessClient() {
 
             {/* Compartilhar */}
             <div className="space-y-3">
-              <p className="text-xs text-white/30 uppercase tracking-widest">
+              <p className="text-xs text-white/55 uppercase tracking-widest">
                 Compartilhe seu espaço
               </p>
+
+              {/* Arte pronta para o stories — loop viral */}
+              <button
+                onClick={shareStory}
+                disabled={generating}
+                className="btn-gold w-full py-3.5 text-sm disabled:opacity-50"
+              >
+                {generating ? 'Gerando arte...' : '📲 Postar no Stories — arte pronta'}
+              </button>
+              <p className="text-[11px] text-white/50">
+                Baixe a imagem com seu bloco e poste marcando a gente. Seus seguidores encontram você no mapa pelo link.
+              </p>
+
               <div className="flex overflow-hidden rounded-xl border border-white/10 bg-dark-2">
                 <input
                   readOnly
                   value={shareUrl}
-                  className="flex-1 bg-transparent px-3 py-2.5 text-xs text-white/50 outline-none"
+                  className="flex-1 bg-transparent px-3 py-2.5 text-xs text-white/70 outline-none"
                 />
                 <button
                   onClick={copyShare}
@@ -435,7 +568,7 @@ export function SuccessClient() {
               </Link>
             </div>
 
-            <p className="text-xs text-white/20">
+            <p className="text-xs text-white/45">
               Você receberá um e-mail com o link para editar seu bloco a qualquer momento.
             </p>
           </div>
@@ -447,15 +580,15 @@ export function SuccessClient() {
             <div className="text-4xl">⏳</div>
             <div>
               <h1 className="font-display text-4xl text-white">QUASE LÁ</h1>
-              <p className="mt-3 text-sm leading-relaxed text-white/50">
+              <p className="mt-3 text-sm leading-relaxed text-white/70">
                 Seu pagamento foi recebido mas a confirmação está demorando um pouco mais que o esperado.
                 Isso é normal — seu bloco aparecerá no mapa em breve.
               </p>
             </div>
-            <div className="rounded-2xl border border-white/8 bg-dark-2 p-5 text-sm text-white/40 space-y-2">
+            <div className="rounded-2xl border border-white/8 bg-dark-2 p-5 text-sm text-white/65 space-y-2">
               <p>✅ Pagamento recebido</p>
               <p>⏳ Bloco sendo ativado...</p>
-              <p className="text-[11px] text-white/25 mt-3">
+              <p className="text-[11px] text-white/50 mt-3">
                 Você receberá um e-mail assim que seu espaço estiver ativo no mapa.
               </p>
             </div>

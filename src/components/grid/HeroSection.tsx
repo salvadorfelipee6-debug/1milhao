@@ -6,8 +6,6 @@ import type { GridStats, GridBlock } from '@/types'
 import { LiveVisitors } from '@/components/ui/LiveVisitors'
 import { NICHE_COLORS } from '@/types'
 
-const PIXEL_PRICE = 0.99
-
 interface HeroSectionProps {
   stats:     GridStats
   blocks:    GridBlock[]
@@ -124,9 +122,8 @@ function MiniGrid({ blocks }: { blocks: GridBlock[] }) {
 }
 
 export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
-  const pct      = Math.round((stats.sold / 1_000_000) * 100)
-  const avail    = (1_000_000 - stats.sold).toLocaleString('pt-BR')
-  const minPrice = (100 * PIXEL_PRICE).toFixed(0)
+  const pct   = Math.round((stats.sold / 1_000_000) * 100)
+  const avail = (1_000_000 - stats.sold).toLocaleString('pt-BR')
 
   // Auto-scroll para o grid após 6 segundos
   useEffect(() => {
@@ -180,7 +177,7 @@ export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
           </h1>
 
           {/* Subtítulo */}
-          <p className="mb-6 max-w-md text-sm leading-relaxed text-white/55 lg:text-base">
+          <p className="mb-6 max-w-md text-sm leading-relaxed text-white/75 lg:text-base">
             Compre seu espaço <strong className="text-white/85">uma única vez</strong> e apareça para marcas e seguidores{' '}
             <strong className="text-white/85">para sempre.</strong>{' '}
             Sem mensalidade. Sem renovação. R$ 0,99 por pixel.
@@ -189,7 +186,7 @@ export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
           {/* CTAs */}
           <div className="mb-8 flex flex-wrap gap-3">
             <Link href="/comprar" className="btn-gold px-7 py-3.5 text-sm">
-              Garantir meu espaço — R$ {minPrice} →
+              Garantir meu espaço — a partir de R$ 0,99 →
             </Link>
             <Link href="/marcas" className="btn-ghost px-6 py-3.5 text-sm">
               Sou uma marca
@@ -206,14 +203,14 @@ export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
             ].map((s, i) => (
               <div key={s.l} className={`flex-1 text-center ${i > 0 ? 'border-l border-white/15' : ''}`}>
                 <p className="font-display text-xl text-gold">{s.n}</p>
-                <p className="mt-0.5 text-[10px] uppercase tracking-widest text-white/40">{s.l}</p>
+                <p className="mt-0.5 text-[10px] uppercase tracking-widest text-white/65">{s.l}</p>
               </div>
             ))}
           </div>
 
           {/* Barra de progresso — mais visível */}
           <div className="mt-5">
-            <div className="mb-1.5 flex justify-between text-xs text-white/50">
+            <div className="mb-1.5 flex justify-between text-xs text-white/70">
               <span>{pct}% do mapa ocupado</span>
               <span>{avail} disponíveis</span>
             </div>
@@ -253,7 +250,7 @@ export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
           {/* CTA sobre o grid */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-xl border border-gold/30 bg-black/85 px-5 py-2.5 text-center backdrop-blur-sm">
             <p className="text-sm font-bold text-gold">Clique para selecionar sua área →</p>
-            <p className="text-[10px] text-white/40 mt-0.5">Arraste no mapa e garanta seu espaço</p>
+            <p className="text-[10px] text-white/65 mt-0.5">Arraste no mapa e garanta seu espaço</p>
           </div>
         </a>
 
@@ -269,7 +266,7 @@ export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
             </div>
             <div>
               <h2 className="font-display text-2xl tracking-wide text-white">O MAPA EM TEMPO REAL</h2>
-              <p className="text-xs text-white/50">Passe o mouse em qualquer bloco · Clique para ver o perfil completo</p>
+              <p className="text-xs text-white/70">Passe o mouse em qualquer bloco · Clique para ver o perfil completo</p>
             </div>
           </div>
           <Link href="/comprar" className="hidden btn-gold px-5 py-2.5 text-sm sm:inline-flex">
