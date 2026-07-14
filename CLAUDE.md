@@ -26,12 +26,21 @@ Comunicação com o usuário e toda a copy do site: **português brasileiro**.
 1. **Layout e funcionalidades** — foco agora.
 2. Pagamento (bugs conhecidos) e e-mails transacionais — **depois**, quando o dono pedir.
 
-### Pendências conhecidas para a fase de pagamento (não mexer agora, não esquecer)
+### Pendências conhecidas — fase de pagamento/e-mails (não mexer sem o dono pedir, não esquecer)
 
-- MP: `payments` grava `externalId = preference.id`, mas o webhook confirma por `payment.id` → registro nunca vira `paid` (`src/lib/payments/index.ts`).
-- E-mail de boas-vindas vai para `@placeholder.com` — o e-mail real do comprador não é persistido em lugar nenhum.
+- **MP externalId**: `payments` grava `externalId = preference.id`, mas o webhook confirma por `payment.id` → registro nunca vira `paid` (`src/lib/payments/index.ts`). Bagunça relatório de receita.
+- **E-mail do comprador não é salvo**: welcome email vai para `@placeholder.com` — o comprador pode nunca receber o `editToken` (perde acesso de edição). Persistir o e-mail (em `payments` ou `blocks`) e usar o real.
 - Webhook do Mercado Pago sem validação do header `x-signature`.
-- Condição de corrida em `findFreePosition` (duas compras simultâneas podem sobrepor blocos).
+- Condição de corrida em `findFreePosition` (caminho automático, sem posição do grid); o caminho com posição do grid já valida via `isAreaOccupied`.
+
+### Pendências de funcionalidade (podem ser feitas a qualquer momento)
+
+- **`/api/upload` NÃO EXISTE**: o `RegisterForm` e o painel chamam `POST /api/upload` para foto; hoje cai no fallback `URL.createObjectURL` e salva um `blob:` URL **inválido fora da sessão** — foto enviada por upload se perde. Implementar rota com R2 (`@aws-sdk/client-s3` já está no package.json, envs no `.env.example`).
+- Busca por cidade usa `like` (case-sensitive no Postgres) — trocar por `ilike` (`src/lib/db/blocks.ts`).
+- `brands` tem `passwordHash` próprio enquanto o site usa Clerk — dois sistemas de auth para manter.
+- Zero testes no projeto.
+- Zoom do mapa no mobile: os botões funcionam, mas o pan (arrastar o mapa com zoom) conflita com a seleção por toque — melhorar gesto (ex.: dois dedos para pan/pinch).
+- `LiveVisitors` e alguns números de prova social são simulados — decisão de produto a revisitar quando houver tráfego real.
 
 ## Stack e comandos
 
