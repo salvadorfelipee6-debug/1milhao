@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { PainelClient } from './PainelClient'
 import { getBlockStats } from '@/lib/db/analytics'
+import { getProposalsForBlock, markProposalsRead } from '@/lib/db/proposals'
 import type { CustomLink } from '@/types'
 
 export const metadata: Metadata = {
@@ -53,6 +54,9 @@ export default async function MeuPainelPage({ searchParams }: PageProps) {
 
   const stats = await getBlockStats(block.id)
 
+  const proposals = await getProposalsForBlock(block.id)
+  await markProposalsRead(block.id)
+
   return (
     <main className="min-h-screen bg-dark px-4 py-12">
       <div className="mx-auto max-w-2xl">
@@ -71,7 +75,7 @@ export default async function MeuPainelPage({ searchParams }: PageProps) {
         </div>
 
         <Suspense fallback={<div className="h-96 animate-pulse rounded-2xl bg-white/5" />}>
-          <PainelClient block={block as any} token={token} initialCustomLinks={customLinks} stats={stats} />
+          <PainelClient block={block as any} token={token} initialCustomLinks={customLinks} stats={stats} initialProposals={proposals} />
         </Suspense>
       </div>
     </main>

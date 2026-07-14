@@ -268,3 +268,44 @@ export async function getTopBlocks(limit = 50) {
     .limit(limit)
 }
 
+// Posição real de um bloco no ranking geral e dentro do próprio nicho
+export async function getBlockRanking(blockId: string) {
+  const [block] = await db
+    .select({ pixelCount: schema.blocks.pixelCount, niche: schema.blocks.niche })
+    .from(schema.blocks)
+    .where(eq(schema.blocks.id, blockId))
+    .limit(1)
+  if (!block) return null
+
+  const [overall] = await db
+    .select({ ahead: sql<number>`count(*)::int` })
+    .from(schema.blocks)
+    .where(and(eq(schema.blocks.status, 'active'), sql`${schema.blocks.pixelCount} > ${block.pixelCount}`))
+
+  const [inNiche] = await db
+    .select({ ahead: sql<number>`count(*)::int` })
+    .from(schema.blocks)
+    .where(and(
+      eq(schema.blocks.status, 'active'),
+      eq(schema.blocks.niche, block.niche),
+      sql`${schema.blocks.pixelCount} > ${block.pixelCount}`
+    ))
+
+  const [totals] = await db
+    .select({ total: sql<number>`count(*)::int` })
+    .from(schema.blocks)
+    .where(eq(schema.blocks.status, 'active'))
+
+  const [totalsNiche] = await db
+    .select({ total: sql<number>`count(*)::int` })
+    .from(schema.blocks)
+    .where(and(eq(schema.blocks.status, 'active'), eq(schema.blocks.niche, block.niche)))
+
+  return {
+    position:      (overall?.ahead ?? 0) + 1,
+    total:         totals?.total ?? 0,
+    nichePosition: (inNiche?.ahead ?? 0) + 1,
+    nicheTotal:    totalsNiche?.total ?? 0,
+  }
+}
+

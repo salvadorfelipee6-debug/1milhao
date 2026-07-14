@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { NICHE_LABELS } from '@/types'
 import type { schema } from '@/lib/db'
+import { SendBriefingButton } from '@/components/proposals/SendBriefingButton'
 
 type Block = schema.Block
 
@@ -321,6 +322,12 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
                       Ver perfil
                     </Link>
                   </div>
+
+                  <SendBriefingButton
+                    blockId={(b as any).id}
+                    instagramHandle={b.instagramHandle}
+                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-gold/25 bg-gold/8 py-2.5 text-xs font-bold text-gold transition-all hover:bg-gold/12"
+                  />
                 </div>
               </div>
             )

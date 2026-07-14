@@ -169,22 +169,24 @@ export const affiliates = pgTable(
 )
 
 // ─── Tabela: brands ───────────────────────────────────────
+// Auth via Clerk (clerkUserId) — mesmo sistema do resto do site,
+// sem senha própria pra manter.
 export const brands = pgTable(
   'brands',
   {
     id:               uuid('id').primaryKey().defaultRandom(),
+    clerkUserId:      varchar('clerk_user_id', { length: 255 }).notNull().unique(),
     companyName:      varchar('company_name', { length: 150 }).notNull(),
     segment:          varchar('segment', { length: 80 }),
     contactName:      varchar('contact_name', { length: 150 }).notNull(),
-    contactEmail:     varchar('contact_email', { length: 200 }).notNull().unique(),
+    contactEmail:     varchar('contact_email', { length: 200 }).notNull(),
     contactWhatsapp:  varchar('contact_whatsapp', { length: 30 }),
-    passwordHash:     text('password_hash').notNull(),
     plan:             brandPlanEnum('plan').notNull().default('free'),
     searchesUsed:     integer('searches_used').notNull().default(0),
     createdAt:        timestamp('created_at').notNull().defaultNow(),
   },
   (t) => ({
-    emailIdx: index('brands_email_idx').on(t.contactEmail),
+    clerkIdx: index('brands_clerk_idx').on(t.clerkUserId),
   })
 )
 
@@ -198,6 +200,7 @@ export const proposals = pgTable(
     message:       text('message').notNull(),
     budget:        varchar('budget', { length: 50 }),
     campaignType:  varchar('campaign_type', { length: 80 }),
+    deadline:      varchar('deadline', { length: 50 }),
     status:        proposalStatusEnum('status').notNull().default('sent'),
     sentAt:        timestamp('sent_at').notNull().defaultNow(),
     readAt:        timestamp('read_at'),

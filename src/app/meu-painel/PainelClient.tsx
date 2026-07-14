@@ -43,11 +43,27 @@ interface Stats {
   customLinkClicks: { index: number; count: number }[]
 }
 
+interface ProposalItem {
+  id:               string
+  message:          string
+  budget:           string | null
+  campaignType:     string | null
+  deadline:         string | null
+  status:           string
+  sentAt:           string | Date
+  companyName:      string
+  segment:          string | null
+  contactName:      string
+  contactEmail:     string
+  contactWhatsapp:  string | null
+}
+
 interface Props {
   block:               Block
   token:               string
   initialCustomLinks:  CustomLink[]
   stats:               Stats
+  initialProposals:    ProposalItem[]
 }
 
 const SOCIAL_LABELS: Record<string, string> = {
@@ -135,7 +151,25 @@ function BlockPreview({ block, handle, niche, avatarUrl }: {
   )
 }
 
-export function PainelClient({ block, token, initialCustomLinks, stats }: Props) {
+export function PainelClient({ block, token, initialCustomLinks, stats, initialProposals }: Props) {
+  const [proposals, setProposals] = useState<ProposalItem[]>(initialProposals)
+  const [respondingId, setRespondingId] = useState<string | null>(null)
+
+  async function respond(id: string, status: 'accepted' | 'declined') {
+    setRespondingId(id)
+    try {
+      const res = await fetch(`/api/proposals/${id}/respond`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ token, status }),
+      })
+      if (res.ok) {
+        setProposals(prev => prev.map(p => p.id === id ? { ...p, status } : p))
+      }
+    } finally {
+      setRespondingId(null)
+    }
+  }
   const [form, setForm] = useState({
     displayName:  block.displayName,
     niche:        block.niche,
@@ -159,7 +193,7 @@ export function PainelClient({ block, token, initialCustomLinks, stats }: Props)
   const [saving,      setSaving]      = useState(false)
   const [saved,       setSaved]       = useState(false)
   const [error,       setError]       = useState('')
-  const [tab,         setTab]         = useState<'perfil' | 'redes' | 'links' | 'estatisticas'>('perfil')
+  const [tab,         setTab]         = useState<'perfil' | 'redes' | 'links' | 'estatisticas' | 'propostas'>('perfil')
 
   const setField = useCallback((k: keyof typeof form, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -257,13 +291,18 @@ export function PainelClient({ block, token, initialCustomLinks, stats }: Props)
 
       {/* Tabs */}
       <div className="flex gap-1 rounded-xl border border-white/8 bg-dark-2 p-1">
-        {(['perfil', 'redes', 'links', 'estatisticas'] as const).map(t => (
+        {(['perfil', 'redes', 'links', 'propostas', 'estatisticas'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
-            className={`flex-1 rounded-lg py-2 text-xs font-semibold capitalize transition-all ${
+            className={`relative flex-1 rounded-lg py-2 text-xs font-semibold capitalize transition-all ${
               tab === t ? 'bg-white/10 text-white' : 'text-white/65 hover:text-white/60'
             }`}
           >
-            {t === 'perfil' ? 'Perfil' : t === 'redes' ? 'Redes' : t === 'links' ? 'Links' : '📊 Stats'}
+            {t === 'perfil' ? 'Perfil' : t === 'redes' ? 'Redes' : t === 'links' ? 'Links' : t === 'propostas' ? '💼' : '📊'}
+            {t === 'propostas' && proposals.filter(p => p.status === 'sent').length > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[9px] font-bold text-[#111]">
+                {proposals.filter(p => p.status === 'sent').length}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -385,6 +424,74 @@ export function PainelClient({ block, token, initialCustomLinks, stats }: Props)
               className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/15 py-3 text-xs text-white/55 hover:border-white/30 hover:text-white/70 transition-all">
               + Adicionar link
             </button>
+          )}
+        </div>
+      )}
+
+      {/* Tab: Propostas */}
+      {tab === 'propostas' && (
+        <div className="space-y-3">
+          <p className="text-xs text-white/65">Briefings de marcas que querem falar com você.</p>
+
+          {proposals.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-white/15 py-8 text-center">
+              <p className="text-sm text-white/65">Nenhuma proposta ainda.</p>
+              <p className="mt-1 text-xs text-white/45">Quando uma marca enviar um briefing, aparece aqui.</p>
+            </div>
+          ) : (
+            proposals.map(p => (
+              <div key={p.id} className="rounded-xl border border-white/8 bg-dark-2 p-4">
+                <div className="mb-2 flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-bold text-white">{p.companyName}</p>
+                    {p.segment && <p className="text-[11px] text-white/55">{p.segment}</p>}
+                  </div>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                    p.status === 'accepted' ? 'bg-green-500/15 text-green-400'
+                    : p.status === 'declined' ? 'bg-red-500/15 text-red-400'
+                    : p.status === 'sent' ? 'bg-gold/15 text-gold'
+                    : 'bg-white/10 text-white/60'
+                  }`}>
+                    {p.status === 'accepted' ? 'Aceita' : p.status === 'declined' ? 'Recusada' : p.status === 'sent' ? 'Novo' : 'Lida'}
+                  </span>
+                </div>
+
+                <div className="mb-2 flex flex-wrap gap-1.5 text-[11px]">
+                  {p.campaignType && <span className="rounded-lg bg-white/5 px-2 py-1 text-white/70">{p.campaignType}</span>}
+                  {p.budget       && <span className="rounded-lg bg-white/5 px-2 py-1 text-white/70">💰 {p.budget}</span>}
+                  {p.deadline     && <span className="rounded-lg bg-white/5 px-2 py-1 text-white/70">⏰ {p.deadline}</span>}
+                </div>
+
+                <p className="mb-3 text-xs leading-relaxed text-white/70">{p.message}</p>
+
+                {p.status === 'accepted' ? (
+                  <div className="rounded-lg bg-green-500/10 border border-green-500/20 p-3 text-xs">
+                    <p className="mb-1 font-semibold text-green-400">Contato liberado</p>
+                    <p className="text-white/70">{p.contactName} · {p.contactEmail}</p>
+                    {p.contactWhatsapp && <p className="text-white/70">WhatsApp: {p.contactWhatsapp}</p>}
+                  </div>
+                ) : p.status === 'declined' ? (
+                  <p className="text-xs text-white/45">Você recusou essa proposta.</p>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => respond(p.id, 'accepted')}
+                      disabled={respondingId === p.id}
+                      className="flex-1 rounded-lg bg-green-500/15 py-2 text-xs font-bold text-green-400 hover:bg-green-500/25 disabled:opacity-50"
+                    >
+                      ✓ Aceitar
+                    </button>
+                    <button
+                      onClick={() => respond(p.id, 'declined')}
+                      disabled={respondingId === p.id}
+                      className="flex-1 rounded-lg bg-white/5 py-2 text-xs font-bold text-white/60 hover:bg-white/10 disabled:opacity-50"
+                    >
+                      ✕ Recusar
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))
           )}
         </div>
       )}
