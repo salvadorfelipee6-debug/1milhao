@@ -4,6 +4,7 @@ import { db, schema } from '@/lib/db'
 import { eq } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { PainelClient } from './PainelClient'
+import { getBlockStats } from '@/lib/db/analytics'
 import type { CustomLink } from '@/types'
 
 export const metadata: Metadata = {
@@ -50,6 +51,8 @@ export default async function MeuPainelPage({ searchParams }: PageProps) {
     if (raw) customLinks = typeof raw === 'string' ? JSON.parse(raw) : raw
   } catch {}
 
+  const stats = await getBlockStats(block.id)
+
   return (
     <main className="min-h-screen bg-dark px-4 py-12">
       <div className="mx-auto max-w-2xl">
@@ -68,7 +71,7 @@ export default async function MeuPainelPage({ searchParams }: PageProps) {
         </div>
 
         <Suspense fallback={<div className="h-96 animate-pulse rounded-2xl bg-white/5" />}>
-          <PainelClient block={block as any} token={token} initialCustomLinks={customLinks} />
+          <PainelClient block={block as any} token={token} initialCustomLinks={customLinks} stats={stats} />
         </Suspense>
       </div>
     </main>

@@ -35,10 +35,30 @@ interface Block {
   spotifyUrl?:     string | null
 }
 
+interface Stats {
+  views:            number
+  advertiseClicks:  number
+  shares:           number
+  socialClicks:     { key: string; count: number }[]
+  customLinkClicks: { index: number; count: number }[]
+}
+
 interface Props {
   block:               Block
   token:               string
   initialCustomLinks:  CustomLink[]
+  stats:               Stats
+}
+
+const SOCIAL_LABELS: Record<string, string> = {
+  instagramUrl: 'Instagram',
+  youtubeUrl:   'YouTube',
+  tiktokUrl:    'TikTok',
+  twitterUrl:   'X / Twitter',
+  facebookUrl:  'Facebook',
+  kwaiUrl:      'Kwai',
+  onlyfansUrl:  'OnlyFans',
+  spotifyUrl:   'Spotify',
 }
 
 // Mini canvas preview
@@ -115,7 +135,7 @@ function BlockPreview({ block, handle, niche, avatarUrl }: {
   )
 }
 
-export function PainelClient({ block, token, initialCustomLinks }: Props) {
+export function PainelClient({ block, token, initialCustomLinks, stats }: Props) {
   const [form, setForm] = useState({
     displayName:  block.displayName,
     niche:        block.niche,
@@ -139,7 +159,7 @@ export function PainelClient({ block, token, initialCustomLinks }: Props) {
   const [saving,      setSaving]      = useState(false)
   const [saved,       setSaved]       = useState(false)
   const [error,       setError]       = useState('')
-  const [tab,         setTab]         = useState<'perfil' | 'redes' | 'links'>('perfil')
+  const [tab,         setTab]         = useState<'perfil' | 'redes' | 'links' | 'estatisticas'>('perfil')
 
   const setField = useCallback((k: keyof typeof form, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -237,13 +257,13 @@ export function PainelClient({ block, token, initialCustomLinks }: Props) {
 
       {/* Tabs */}
       <div className="flex gap-1 rounded-xl border border-white/8 bg-dark-2 p-1">
-        {(['perfil', 'redes', 'links'] as const).map(t => (
+        {(['perfil', 'redes', 'links', 'estatisticas'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`flex-1 rounded-lg py-2 text-xs font-semibold capitalize transition-all ${
               tab === t ? 'bg-white/10 text-white' : 'text-white/65 hover:text-white/60'
             }`}
           >
-            {t === 'perfil' ? 'Perfil' : t === 'redes' ? 'Redes sociais' : 'Links'}
+            {t === 'perfil' ? 'Perfil' : t === 'redes' ? 'Redes' : t === 'links' ? 'Links' : '📊 Stats'}
           </button>
         ))}
       </div>
@@ -365,6 +385,65 @@ export function PainelClient({ block, token, initialCustomLinks }: Props) {
               className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/15 py-3 text-xs text-white/55 hover:border-white/30 hover:text-white/70 transition-all">
               + Adicionar link
             </button>
+          )}
+        </div>
+      )}
+
+      {/* Tab: Estatísticas */}
+      {tab === 'estatisticas' && (
+        <div className="space-y-4">
+          <p className="text-xs text-white/65">Últimos 7 dias — atualiza conforme as visitas acontecem.</p>
+
+          {stats.views === 0 ? (
+            <div className="rounded-xl border border-dashed border-white/15 py-8 text-center">
+              <p className="text-sm text-white/65">Ainda sem dados.</p>
+              <p className="mt-1 text-xs text-white/45">Assim que alguém visitar seu perfil, as estatísticas aparecem aqui.</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="rounded-xl bg-dark-2 border border-white/8 py-3 text-center">
+                  <p className="font-display text-2xl text-gold">{stats.views}</p>
+                  <p className="text-[10px] text-white/55">visitas</p>
+                </div>
+                <div className="rounded-xl bg-dark-2 border border-white/8 py-3 text-center">
+                  <p className="font-display text-2xl text-gold">{stats.advertiseClicks}</p>
+                  <p className="text-[10px] text-white/55">cliques em anunciar</p>
+                </div>
+                <div className="rounded-xl bg-dark-2 border border-white/8 py-3 text-center">
+                  <p className="font-display text-2xl text-gold">{stats.shares}</p>
+                  <p className="text-[10px] text-white/55">compartilhamentos</p>
+                </div>
+              </div>
+
+              {stats.socialClicks.length > 0 && (
+                <div>
+                  <p className="mb-2 text-xs font-semibold text-white/70">Cliques por rede social</p>
+                  <div className="space-y-1.5">
+                    {stats.socialClicks.map(s => (
+                      <div key={s.key} className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 text-xs">
+                        <span className="text-white/70">{SOCIAL_LABELS[s.key] ?? s.key}</span>
+                        <span className="font-bold text-gold">{s.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {stats.customLinkClicks.length > 0 && (
+                <div>
+                  <p className="mb-2 text-xs font-semibold text-white/70">Cliques por link</p>
+                  <div className="space-y-1.5">
+                    {stats.customLinkClicks.map(c => (
+                      <div key={c.index} className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 text-xs">
+                        <span className="text-white/70">{customLinks[c.index]?.label ?? `Link ${c.index + 1}`}</span>
+                        <span className="font-bold text-gold">{c.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

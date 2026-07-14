@@ -5,7 +5,7 @@ import { rateLimit } from '@/lib/cache'
 
 const schema_ = z.object({
   blockId:   z.string().uuid(),
-  eventType: z.enum(['view','popup_open','ig_click','advertise_click','video_play']),
+  eventType: z.string().min(1).max(40).regex(/^[a-zA-Z0-9_:]+$/),
 })
 
 export async function POST(req: NextRequest) {

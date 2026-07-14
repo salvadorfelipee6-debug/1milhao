@@ -6,6 +6,8 @@ import { getBlockByHandle, getGridStats } from '@/lib/db/blocks'
 import { NICHE_LABELS }   from '@/types'
 import type { CustomLink } from '@/types'
 import { ShareButton }    from './ShareButton'
+import { ProfileTracking } from './ProfileTracking'
+import { QrCodeButton }   from './QrCodeButton'
 
 interface Props {
   params: Promise<{ handle: string }>
@@ -92,6 +94,7 @@ export default async function InfluencerProfilePage({ params }: Props) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <ProfileTracking blockId={block.id} />
 
       <main className="min-h-screen bg-dark">
 
@@ -134,7 +137,10 @@ export default async function InfluencerProfilePage({ params }: Props) {
               >
                 ✦ 1 Milhão
               </div>
-              <ShareButton url={shareUrl} />
+              <div className="flex gap-2">
+                <ShareButton url={shareUrl} blockId={block.id} />
+                <QrCodeButton url={shareUrl} blockId={block.id} />
+              </div>
             </div>
           </div>
 
@@ -175,6 +181,7 @@ export default async function InfluencerProfilePage({ params }: Props) {
             href={advertiseUrl}
             target="_blank"
             rel="noopener noreferrer"
+            data-track="advertise_click"
             className="animate-glow-pulse mb-3 flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold text-[#111] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
             style={{ background: 'var(--grad-gold)' }}
           >
@@ -196,6 +203,7 @@ export default async function InfluencerProfilePage({ params }: Props) {
                   href={s.href}
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-track={`social:${s.key}`}
                   className="animate-badge-pulse flex items-center gap-2.5 rounded-2xl px-4 py-3.5 transition-all hover:-translate-y-1 hover:scale-[1.03] hover:brightness-110 active:scale-[0.97]"
                   style={{
                     background: s.bg,
@@ -225,6 +233,7 @@ export default async function InfluencerProfilePage({ params }: Props) {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-track={`custom_link:${i}`}
                   className="flex w-full items-center gap-3 rounded-xl px-4 py-3 transition-all hover:-translate-y-0.5 hover:opacity-90"
                   style={{ background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.12)', color: '#fff' }}
                 >

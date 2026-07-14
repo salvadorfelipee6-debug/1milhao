@@ -2,10 +2,16 @@
 
 import { useState } from 'react'
 
-export function ShareButton({ url }: { url: string }) {
+export function ShareButton({ url, blockId }: { url: string; blockId: string }) {
   const [copied, setCopied] = useState(false)
 
   async function copy() {
+    fetch('/api/track', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ blockId, eventType: 'share' }),
+    }).catch(() => {})
+
     try {
       if (typeof navigator.share === 'function' && /Mobi/i.test(navigator.userAgent)) {
         await navigator.share({ url })
