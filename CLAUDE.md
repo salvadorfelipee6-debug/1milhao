@@ -19,8 +19,10 @@ Comunicação com o usuário e toda a copy do site: **português brasileiro**.
 
 ### Decisões do dono sobre ideias (não repropor as rejeitadas)
 
-- ✅ Aprovadas e implementadas (jul/2026): zoom no mapa com seleção até 1 pixel; pré-preenchimento de avatar/nome pelo @ (unavatar.io); arte para stories na página de sucesso.
+- ✅ Aprovadas e implementadas (jul/2026): zoom no mapa com seleção até 1 pixel; pré-preenchimento de avatar/nome pelo @ (unavatar.io); arte para stories na página de sucesso; login do anunciante (`/login`); upload de foto real via Vercel Blob; selos de rede social sólidos na cor do app com pulso; estatísticas de visitas/cliques + QR code na página `/influencer/[handle]`.
 - ❌ Rejeitada: preço maior em áreas "nobres" do mapa (escassez por região) — dono achou caro demais para o público.
+- ❌ Rejeitada (jul/2026): vídeo em tela cheia como capa da página `/influencer/[handle]` — quem chega já veio do Instagram e já viu os Reels, seria redundante e pesaria a página.
+- ❌ Rejeitada (jul/2026): mini-mapa vivo (mostrar o bloco dentro da grade real) no topo da página `/influencer/[handle]` — dono decidiu não precisar.
 
 ## Prioridade atual (julho/2026)
 
