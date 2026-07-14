@@ -19,7 +19,7 @@ Comunicação com o usuário e toda a copy do site: **português brasileiro**.
 
 ### Decisões do dono sobre ideias (não repropor as rejeitadas)
 
-- ✅ Aprovadas e implementadas (jul/2026): zoom no mapa com seleção até 1 pixel; pré-preenchimento de avatar/nome pelo @ (unavatar.io); arte para stories na página de sucesso; login do anunciante (`/login`); upload de foto real via Vercel Blob; selos de rede social sólidos na cor do app com pulso; estatísticas de visitas/cliques + QR code na página `/influencer/[handle]`.
+- ✅ Aprovadas e implementadas (jul/2026): zoom no mapa com seleção até 1 pixel; pré-preenchimento de avatar/nome pelo @ (unavatar.io); arte para stories na página de sucesso; login do anunciante (`/login`); upload de foto real via Vercel Blob; selos de rede social sólidos na cor do app com pulso; estatísticas de visitas/cliques + QR code na página `/influencer/[handle]`; ambiente de briefing marca↔influencer (login de marca via Clerk, proposta estruturada, aceitar/recusar no painel); mídia kit auto-gerado (`/influencer/[handle]/midia-kit`) com ranking real e download em imagem.
 - ❌ Rejeitada: preço maior em áreas "nobres" do mapa (escassez por região) — dono achou caro demais para o público.
 - ❌ Rejeitada (jul/2026): vídeo em tela cheia como capa da página `/influencer/[handle]` — quem chega já veio do Instagram e já viu os Reels, seria redundante e pesaria a página.
 - ❌ Rejeitada (jul/2026): mini-mapa vivo (mostrar o bloco dentro da grade real) no topo da página `/influencer/[handle]` — dono decidiu não precisar.
@@ -32,18 +32,23 @@ Comunicação com o usuário e toda a copy do site: **português brasileiro**.
 ### Pendências conhecidas — fase de pagamento/e-mails (não mexer sem o dono pedir, não esquecer)
 
 - **MP externalId**: `payments` grava `externalId = preference.id`, mas o webhook confirma por `payment.id` → registro nunca vira `paid` (`src/lib/payments/index.ts`). Bagunça relatório de receita.
-- **E-mail do comprador não é salvo**: welcome email vai para `@placeholder.com` — o comprador pode nunca receber o `editToken` (perde acesso de edição). Persistir o e-mail (em `payments` ou `blocks`) e usar o real.
+- **E-mail do comprador não é salvo**: welcome email vai para `@placeholder.com` — o comprador pode nunca receber o `editToken` (perde acesso de edição). Persistir o e-mail (em `payments` ou `blocks`) e usar o real. Ver `blockContactEmail()` em `src/lib/payments/index.ts` — é o único lugar a trocar quando isso for corrigido (também usado por `/api/auth/recover`).
 - Webhook do Mercado Pago sem validação do header `x-signature`.
 - Condição de corrida em `findFreePosition` (caminho automático, sem posição do grid); o caminho com posição do grid já valida via `isAreaOccupied`.
+
+### Pendência de segurança (rotação de credenciais — deferida pelo dono)
+
+`.env.local` foi commitado no **repositório público** do GitHub desde o primeiro commit, expondo `DATABASE_URL`, `CLERK_SECRET_KEY` e `UPSTASH_REDIS_REST_TOKEN` reais. Parado de versionar em jul/2026 (`git rm --cached` + `.gitignore`), mas isso **não remove do histórico** — quem já clonou o repo antes continua com a cópia antiga. Dono decidiu adiar a rotação ("o site não tem nenhum acesso ainda"). Antes de qualquer lançamento real ou quando houver tráfego, lembrar de rotacionar as 3 credenciais nos respectivos dashboards (Neon/Clerk/Upstash) e atualizar `.env.local` + Environment Variables da Vercel.
 
 ### Pendências de funcionalidade (podem ser feitas a qualquer momento)
 
 - **Upload de foto usa Vercel Blob** (trocado de Cloudflare R2 em jul/2026): `/api/upload` (`src/app/api/upload/route.ts` + `src/lib/storage/index.ts`, pacote `@vercel/blob`). Store conectada e testada ponta a ponta em jul/2026 — **a store precisa ser criada como "Public" desde o início**; o modo de acesso não pode ser trocado depois (só apagar e recriar).
 - Busca por cidade usa `like` (case-sensitive no Postgres) — trocar por `ilike` (`src/lib/db/blocks.ts`).
-- `brands` tem `passwordHash` próprio enquanto o site usa Clerk — dois sistemas de auth para manter.
 - Zero testes no projeto.
 - Zoom do mapa no mobile: os botões funcionam, mas o pan (arrastar o mapa com zoom) conflita com a seleção por toque — melhorar gesto (ex.: dois dedos para pan/pinch).
-- `LiveVisitors` e alguns números de prova social são simulados — decisão de produto a revisitar quando houver tráfego real.
+- `LiveVisitors` e alguns números de prova social (na home) são simulados — decisão de produto a revisitar quando houver tráfego real. **Não confundir** com as estatísticas do painel/mídia kit (visitas, cliques, ranking) — essas são 100% reais, vêm da tabela `analytics` e de contagem direta em `blocks`.
+- Hydration mismatch conhecido em `PainelClient.tsx` (aba Perfil): `profileUrl` usa `window.location.origin` no client mas renderiza vazio/relativo no server — gera warning no console, não quebra a função. Não corrigido ainda.
+- `BlockPopup.tsx` e `PixelGrid.tsx` mantêm suas próprias cópias de config de redes sociais (cores/ícones), diferentes de `src/lib/socialConfig.tsx` (usado por `/influencer/[handle]` e pelo mídia kit) — se for mexer visualmente nos selos de rede social, checar os três lugares.
 
 ## Stack e comandos
 
@@ -60,6 +65,19 @@ npm run typecheck    # tsc --noEmit — rodar antes de encerrar mudanças
 npm run build
 npm run db:push      # schema → banco
 ```
+
+`npm run db:push` (drizzle-kit) pode abrir um prompt interativo de seleção (setas + Enter) quando não consegue decidir sozinho se uma coluna foi "criada" ou "renomeada" — isso não funciona bem via terminal não-interativo (piped stdin não é lido). Se travar nisso, aplicar a alteração via SQL direto (script `tsx` com `neon()` + `ALTER TABLE`) e depois rodar `drizzle-kit push --force` de novo só para confirmar que ficou igual ao schema (aí ele não pergunta nada, só aplica o resto).
+
+**Testar visualmente sem depender do usuário**: não há Playwright no projeto (não é dependência fixa), mas dá pra instalar temporariamente com `npm install --no-save playwright` (não mexe no `package.json`) + `npx playwright install chromium`, escrever um script `.js` temporário na raiz do projeto (fora da raiz o Node não acha `node_modules`) chamando `chromium.launch()`, e apagar tudo depois. Scripts de banco avulsos (`tsx algumascoisa.ts`) também precisam ficar na raiz do projeto pelo mesmo motivo — e não podem importar arquivos que tenham `import 'server-only'` no topo (ex. `src/lib/db/blocks.ts`, `src/lib/realtime`, `src/lib/email`), pois esse pacote lança erro fora do bundler do Next; nesses casos, replicar a query/lógica direto no script com Drizzle puro.
+
+## Sistemas construídos em jul/2026 (mapa de orientação)
+
+- **Login do anunciante** (`/login`): cola link/token de acesso, ou "esqueci meu link" por @ (reenvia e-mail — sujeito à mesma pendência de e-mail do comprador acima).
+- **Upload de foto** (`/api/upload` → `src/lib/storage/index.ts`): Vercel Blob, usado no cadastro e no painel (`ImageUpload.tsx` compartilhado).
+- **Analytics real do perfil**: `ProfileTracking.tsx` dispara `view` no load da página e delega cliques via atributo `data-track` (`social:<campo>`, `custom_link:<índice>`, `advertise_click`, `share`, `qr_generate`) para um único listener — sem precisar transformar cada link em client component. `/api/track` aceita qualquer string alfanumérica como `eventType` (antes era um enum fixo que descartava silenciosamente vários cliques do `BlockPopup`). Agregação em `src/lib/db/analytics.ts` (`getBlockStats`, últimos 7 dias), exibida na aba "📊 Stats" do painel.
+- **Ranking real**: `getBlockRanking(blockId)` em `src/lib/db/blocks.ts` — posição geral e por nicho, calculada por contagem (não é simulado).
+- **Ambiente de briefing marca↔influencer**: tabelas `brands` (auth via `clerkUserId`, não senha própria) e `proposals` (já existiam no schema, nunca tinham API/UI — só liguei). Fluxo: `BriefingModal`/`SendBriefingButton` (`src/components/proposals/`) → `POST /api/brands` (onboarding da marca) → `POST /api/proposals` (cria briefing) → aba "💼" no painel (`getProposalsForBlock`, `markProposalsRead`) → `POST /api/proposals/[id]/respond` (aceitar/recusar, valida por `editToken`). Tabela `favorites` (marca salva influencer) continua existindo no schema mas segue sem uso.
+- **Mídia kit** (`/influencer/[handle]/midia-kit`): página com dados reais (segue `src/lib/socialConfig.tsx`, compartilhado com o perfil) + botão de baixar como PNG (`DownloadKitButton.tsx`, gera num canvas maior e recorta pela altura real do conteúdo — evita sobra de espaço em branco).
 
 ## Convenções do código
 
