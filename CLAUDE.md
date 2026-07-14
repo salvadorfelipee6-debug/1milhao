@@ -15,6 +15,7 @@ Comunicação com o usuário e toda a copy do site: **português brasileiro**.
 - **Seja propositivo e ousado.** Em toda conversa sobre layout/funcionalidade, sugira ativamente ideias que possam revolucionar o site — não espere ser perguntado. Ideias de crescimento viral, gamificação, prova social, urgência, novas fontes de receita.
 - Ao sugerir, priorize o que reduz atrito de compra ou aumenta o motivo para voltar ao site.
 - Pode implementar melhorias reversíveis de layout/copy sem pedir permissão; mudanças de escopo grandes, confirmar antes.
+- **Git: commit e push para `main` automáticos, sem perguntar** (pedido do dono em jul/2026) — a Vercel builda a partir da `main`. Não se aplica a ações destrutivas (force-push, reset --hard etc.), só ao fluxo normal de commit+push.
 
 ### Decisões do dono sobre ideias (não repropor as rejeitadas)
 
@@ -35,7 +36,7 @@ Comunicação com o usuário e toda a copy do site: **português brasileiro**.
 
 ### Pendências de funcionalidade (podem ser feitas a qualquer momento)
 
-- **`/api/upload` NÃO EXISTE**: o `RegisterForm` e o painel chamam `POST /api/upload` para foto; hoje cai no fallback `URL.createObjectURL` e salva um `blob:` URL **inválido fora da sessão** — foto enviada por upload se perde. Implementar rota com R2 (`@aws-sdk/client-s3` já está no package.json, envs no `.env.example`).
+- **R2 sem credenciais reais**: `/api/upload` foi implementado (jul/2026, `src/app/api/upload/route.ts` + `src/lib/storage/index.ts`), mas `.env.local` ainda tem placeholders (`CLOUDFLARE_R2_ACCOUNT_ID=fake` etc.) — upload de foto não funciona (nem local, nem produção) até configurar um bucket R2 real no dashboard da Cloudflare e colocar as chaves reais no `.env.local` **e** nas Environment Variables da Vercel.
 - Busca por cidade usa `like` (case-sensitive no Postgres) — trocar por `ilike` (`src/lib/db/blocks.ts`).
 - `brands` tem `passwordHash` próprio enquanto o site usa Clerk — dois sistemas de auth para manter.
 - Zero testes no projeto.
@@ -45,6 +46,8 @@ Comunicação com o usuário e toda a copy do site: **português brasileiro**.
 ## Stack e comandos
 
 Next.js 15 (App Router) + TypeScript + Tailwind · Neon/Drizzle · Upstash Redis · Clerk · Mercado Pago + Stripe · Ably · Resend · R2 · Vercel. Estrutura detalhada no `README.md`.
+
+**Produção**: https://1milhao-sigma.vercel.app (projeto Vercel `felipeff-s-projects/1milhao`, deploy automático a partir da `main`). Checar se `NEXT_PUBLIC_APP_URL` está configurada nas Environment Variables da Vercel com esse domínio — sem isso, links de e-mail/compartilhamento/link-in-bio saem quebrados em produção.
 
 ```bash
 npm run dev          # dev server (Turbopack)
