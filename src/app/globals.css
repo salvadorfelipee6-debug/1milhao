@@ -187,6 +187,15 @@
     50%       { box-shadow: 0 4px 32px rgba(255,215,0,0.5); }
   }
 
+  /* Selo de rede social — pulso suave na cor do próprio app */
+  .animate-badge-pulse {
+    animation: badge-pulse 2.8s ease-in-out infinite;
+  }
+  @keyframes badge-pulse {
+    0%, 100% { box-shadow: 0 4px 14px -2px var(--glow, rgba(0,0,0,0.35)); transform: scale(1); }
+    50%       { box-shadow: 0 8px 26px 2px var(--glow, rgba(0,0,0,0.35)); transform: scale(1.015); }
+  }
+
   /* Número de stats */
   .stat-number {
     @apply font-display text-3xl leading-none;
