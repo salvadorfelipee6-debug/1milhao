@@ -36,7 +36,7 @@ Comunicação com o usuário e toda a copy do site: **português brasileiro**.
 
 ### Pendências de funcionalidade (podem ser feitas a qualquer momento)
 
-- **Upload de foto usa Vercel Blob** (trocado de Cloudflare R2 em jul/2026 — R2 é pago/exige conta separada, Blob já vem com a Vercel): `/api/upload` (`src/app/api/upload/route.ts` + `src/lib/storage/index.ts`, pacote `@vercel/blob`). Falta conectar um Blob store ao projeto na Vercel (dashboard → projeto → Storage → Create Database → Blob) — isso injeta `BLOB_READ_WRITE_TOKEN` sozinho em produção; localmente, rodar `vercel env pull .env.local` depois ou colar o token manualmente.
+- **Upload de foto usa Vercel Blob** (trocado de Cloudflare R2 em jul/2026): `/api/upload` (`src/app/api/upload/route.ts` + `src/lib/storage/index.ts`, pacote `@vercel/blob`). Store conectada e testada ponta a ponta em jul/2026 — **a store precisa ser criada como "Public" desde o início**; o modo de acesso não pode ser trocado depois (só apagar e recriar).
 - Busca por cidade usa `like` (case-sensitive no Postgres) — trocar por `ilike` (`src/lib/db/blocks.ts`).
 - `brands` tem `passwordHash` próprio enquanto o site usa Clerk — dois sistemas de auth para manter.
 - Zero testes no projeto.
@@ -47,7 +47,10 @@ Comunicação com o usuário e toda a copy do site: **português brasileiro**.
 
 Next.js 15 (App Router) + TypeScript + Tailwind · Neon/Drizzle · Upstash Redis · Clerk · Mercado Pago + Stripe · Ably · Resend · Vercel Blob (storage) · Vercel. Estrutura detalhada no `README.md`.
 
-**Produção**: https://1milhao-sigma.vercel.app (projeto Vercel `felipeff-s-projects/1milhao`, deploy automático a partir da `main`). Checar se `NEXT_PUBLIC_APP_URL` está configurada nas Environment Variables da Vercel com esse domínio — sem isso, links de e-mail/compartilhamento/link-in-bio saem quebrados em produção.
+**Produção**: https://1milhao-sigma.vercel.app (projeto Vercel `felipeff-s-projects/1milhao`, deploy automático a partir da `main`).
+
+⚠️ **jul/2026**: todas as Environment Variables de Production/Preview estavam cadastradas só de nome, com valor **vazio**, desde a criação do projeto (44 dias) — o site em produção não tinha banco, Clerk, Redis nem `NEXT_PUBLIC_APP_URL` funcionando. Corrigido: DATABASE_URL, Clerk, Upstash e `NEXT_PUBLIC_APP_URL` (+ variáveis inertes tipo `NEXT_PUBLIC_PIXEL_PRICE`) agora têm valor real; R2 antigo foi removido. Stripe/Mercado Pago/Ably/Resend continuam vazios em produção (sem credenciais reais ainda — combinado com pendências abaixo).
+Se mexer em env vars pela Vercel CLI: **`vercel env pull` grava os valores entre aspas literais no `.env.local`** — um script de shell (`grep`/`cut`) que reler esse arquivo pega a aspa junto e quebra o valor ao reenviar (`sed -e 's/^"//' -e 's/"$//'` resolve). E **`vercel redeploy` reaproveita o snapshot de env vars do deploy antigo** — pra aplicar uma env var nova em produção, precisa de `vercel deploy --prod` (ou um commit novo), não `redeploy`.
 
 ```bash
 npm run dev          # dev server (Turbopack)

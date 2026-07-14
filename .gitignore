@@ -31,3 +31,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# claude code (config local, não do time)
+.claude/
