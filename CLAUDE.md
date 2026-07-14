@@ -36,7 +36,7 @@ Comunicação com o usuário e toda a copy do site: **português brasileiro**.
 
 ### Pendências de funcionalidade (podem ser feitas a qualquer momento)
 
-- **R2 sem credenciais reais**: `/api/upload` foi implementado (jul/2026, `src/app/api/upload/route.ts` + `src/lib/storage/index.ts`), mas `.env.local` ainda tem placeholders (`CLOUDFLARE_R2_ACCOUNT_ID=fake` etc.) — upload de foto não funciona (nem local, nem produção) até configurar um bucket R2 real no dashboard da Cloudflare e colocar as chaves reais no `.env.local` **e** nas Environment Variables da Vercel.
+- **Upload de foto usa Vercel Blob** (trocado de Cloudflare R2 em jul/2026 — R2 é pago/exige conta separada, Blob já vem com a Vercel): `/api/upload` (`src/app/api/upload/route.ts` + `src/lib/storage/index.ts`, pacote `@vercel/blob`). Falta conectar um Blob store ao projeto na Vercel (dashboard → projeto → Storage → Create Database → Blob) — isso injeta `BLOB_READ_WRITE_TOKEN` sozinho em produção; localmente, rodar `vercel env pull .env.local` depois ou colar o token manualmente.
 - Busca por cidade usa `like` (case-sensitive no Postgres) — trocar por `ilike` (`src/lib/db/blocks.ts`).
 - `brands` tem `passwordHash` próprio enquanto o site usa Clerk — dois sistemas de auth para manter.
 - Zero testes no projeto.
@@ -45,7 +45,7 @@ Comunicação com o usuário e toda a copy do site: **português brasileiro**.
 
 ## Stack e comandos
 
-Next.js 15 (App Router) + TypeScript + Tailwind · Neon/Drizzle · Upstash Redis · Clerk · Mercado Pago + Stripe · Ably · Resend · R2 · Vercel. Estrutura detalhada no `README.md`.
+Next.js 15 (App Router) + TypeScript + Tailwind · Neon/Drizzle · Upstash Redis · Clerk · Mercado Pago + Stripe · Ably · Resend · Vercel Blob (storage) · Vercel. Estrutura detalhada no `README.md`.
 
 **Produção**: https://1milhao-sigma.vercel.app (projeto Vercel `felipeff-s-projects/1milhao`, deploy automático a partir da `main`). Checar se `NEXT_PUBLIC_APP_URL` está configurada nas Environment Variables da Vercel com esse domínio — sem isso, links de e-mail/compartilhamento/link-in-bio saem quebrados em produção.
 

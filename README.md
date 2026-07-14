@@ -46,7 +46,7 @@ Serviços necessários (todos têm plano gratuito):
 - **Mercado Pago** — Pix: [mercadopago.com.br/developers](https://mercadopago.com.br/developers)
 - **Ably** — WebSocket: [ably.com](https://ably.com)
 - **Resend** — e-mail: [resend.com](https://resend.com)
-- **Cloudflare R2** — storage: [cloudflare.com](https://cloudflare.com)
+- **Vercel Blob** — storage: conecte em Vercel dashboard → projeto → Storage
 
 ### 3. Crie as tabelas no banco
 
