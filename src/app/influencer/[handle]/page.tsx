@@ -4,6 +4,7 @@ import Link               from 'next/link'
 import { getBlockByHandle, getGridStats } from '@/lib/db/blocks'
 import { NICHE_LABELS }   from '@/types'
 import type { CustomLink } from '@/types'
+import { ShareButton }    from './ShareButton'
 
 interface Props {
   params: Promise<{ handle: string }>
@@ -53,6 +54,7 @@ export default async function InfluencerProfilePage({ params }: Props) {
   ])
   if (!block) notFound()
 
+  const shareUrl   = `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/influencer/${block.instagramHandle}`
   const igUrl      = `https://instagram.com/${block.instagramHandle}`
   const whatsappUrl = (block as any).whatsappUrl
     ? `https://wa.me/${((block as any).whatsappUrl).replace(/\D/g, '')}`
@@ -105,37 +107,51 @@ export default async function InfluencerProfilePage({ params }: Props) {
 
           {/* Cover + Avatar */}
           <div
-            className="mb-0 h-28 rounded-2xl"
-            style={{ background: `linear-gradient(135deg, ${color}55, ${color}22)` }}
+            className="relative mb-0 h-32 overflow-hidden rounded-2xl bg-pixel-grid"
+            style={{ background: `linear-gradient(135deg, ${color}55, ${color}15)` }}
           />
-          <div className="relative -mt-10 mb-4 flex items-end justify-between px-2">
-            <div
-              className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border-4 text-xl font-bold text-white"
-              style={{ background: color, borderColor: '#0d0d0d' }}
-            >
-              {block.avatarUrl
-                ? <img src={block.avatarUrl} alt="" className="h-full w-full object-cover" />
-                : initials}
+
+          <div className="relative -mt-11 mb-5 flex items-end justify-between px-2">
+            <div className="relative animate-fade-up">
+              <div
+                className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl border-4 text-2xl font-bold text-white"
+                style={{ background: color, borderColor: '#0d0d0d', boxShadow: `0 8px 32px ${color}55` }}
+              >
+                {block.avatarUrl
+                  ? <img src={block.avatarUrl} alt="" className="h-full w-full object-cover" />
+                  : initials}
+              </div>
+              <div
+                className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 text-[11px] font-bold"
+                style={{ background: '#FFD700', borderColor: '#0d0d0d', color: '#111' }}
+                title="Espaço ativo no mapa"
+              >
+                ✓
+              </div>
             </div>
-            <div
-              className="rounded-xl px-3 py-1.5 text-xs font-semibold"
-              style={{ background: 'rgba(255,215,0,0.15)', border: '0.5px solid rgba(255,215,0,0.35)', color: '#FFD700' }}
-            >
-              ✦ 1 Milhão
+
+            <div className="flex flex-col items-end gap-2 animate-fade-up" style={{ animationDelay: '80ms' }}>
+              <div
+                className="rounded-xl px-3 py-1.5 text-xs font-semibold"
+                style={{ background: 'rgba(255,215,0,0.15)', border: '0.5px solid rgba(255,215,0,0.35)', color: '#FFD700' }}
+              >
+                ✦ 1 Milhão
+              </div>
+              <ShareButton url={shareUrl} />
             </div>
           </div>
 
           {/* Nome + info */}
-          <div className="mb-4">
-            <h1 className="text-xl font-bold text-white">{block.displayName}</h1>
+          <div className="mb-4 animate-fade-up" style={{ animationDelay: '120ms' }}>
+            <h1 className="text-2xl font-bold leading-tight text-white">{block.displayName}</h1>
             <p className="text-sm font-semibold" style={{ color }}>{`@${block.instagramHandle}`}</p>
-            <p className="mt-0.5 text-xs text-white/65">
+            <p className="mt-1 text-xs text-white/65">
               {nicheLabel}{block.city ? ` · ${block.city}` : ''}
             </p>
           </div>
 
           {/* Stats */}
-          <div className="mb-4 grid grid-cols-3 gap-2">
+          <div className="mb-4 grid grid-cols-3 gap-2 animate-fade-up" style={{ animationDelay: '160ms' }}>
             {block.followers && (
               <div className="rounded-xl py-2.5 text-center" style={{ background: 'rgba(255,255,255,0.05)' }}>
                 <p className="text-sm font-bold" style={{ color: '#FFD700' }}>{block.followers}</p>
@@ -154,7 +170,7 @@ export default async function InfluencerProfilePage({ params }: Props) {
 
           {/* Bio */}
           {block.bio && (
-            <p className="mb-5 text-sm leading-relaxed text-white/70">{block.bio}</p>
+            <p className="mb-5 text-sm leading-relaxed text-white/70 animate-fade-up" style={{ animationDelay: '180ms' }}>{block.bio}</p>
           )}
 
           {/* BOTÃO DE ANUNCIAR — destaque máximo */}
@@ -162,8 +178,8 @@ export default async function InfluencerProfilePage({ params }: Props) {
             href={advertiseUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mb-3 flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold transition-opacity hover:opacity-90"
-            style={{ background: '#FFD700', color: '#111' }}
+            className="animate-glow-pulse mb-3 flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold text-[#111] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+            style={{ background: 'var(--grad-gold)' }}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
             {whatsappUrl ? 'Anunciar via WhatsApp' : 'Anunciar com esse influencer'}
@@ -172,14 +188,18 @@ export default async function InfluencerProfilePage({ params }: Props) {
           {/* Redes sociais */}
           {(activeSocials.length > 0 || true) && (
             <div className="mb-3 space-y-2">
-              <p className="text-[10px] uppercase tracking-widest text-white/50 mb-2">Redes sociais</p>
+              <p className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/50">
+                <span className="h-px flex-1 bg-white/10" />
+                Redes sociais
+                <span className="h-px flex-1 bg-white/10" />
+              </p>
 
               {/* Instagram sempre primeiro */}
               <a
                 href={igUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex w-full items-center gap-3 rounded-xl px-4 py-3 transition-opacity hover:opacity-80"
+                className="flex w-full items-center gap-3 rounded-xl px-4 py-3 transition-all hover:-translate-y-0.5 hover:opacity-90"
                 style={{ background: 'rgba(225,48,108,0.12)', border: '0.5px solid rgba(225,48,108,0.3)', color: '#e1306c' }}
               >
                 {SOCIAL_CONFIG[0].icon}
@@ -193,7 +213,7 @@ export default async function InfluencerProfilePage({ params }: Props) {
                   href={(block as any)[s.key]}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 transition-opacity hover:opacity-80"
+                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 transition-all hover:-translate-y-0.5 hover:opacity-90"
                   style={{ background: s.bg, border: `0.5px solid ${s.border}`, color: s.color }}
                 >
                   {s.icon}
@@ -207,14 +227,18 @@ export default async function InfluencerProfilePage({ params }: Props) {
           {/* Links personalizados */}
           {customLinks.length > 0 && (
             <div className="mb-3 space-y-2">
-              <p className="text-[10px] uppercase tracking-widest text-white/50 mb-2">Links</p>
+              <p className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/50">
+                <span className="h-px flex-1 bg-white/10" />
+                Links
+                <span className="h-px flex-1 bg-white/10" />
+              </p>
               {customLinks.map((link, i) => (
                 <a
                   key={i}
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 transition-opacity hover:opacity-80"
+                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 transition-all hover:-translate-y-0.5 hover:opacity-90"
                   style={{ background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.12)', color: '#fff' }}
                 >
                   {link.emoji && <span className="text-lg">{link.emoji}</span>}
@@ -228,7 +252,7 @@ export default async function InfluencerProfilePage({ params }: Props) {
           {/* Card do mapa */}
           <Link
             href={`/?highlight=${block.instagramHandle}`}
-            className="mb-6 flex items-center gap-3 rounded-xl px-4 py-3 transition-all hover:border-gold/30"
+            className="mb-6 mt-1 flex items-center gap-3 rounded-xl px-4 py-3 transition-all hover:-translate-y-0.5 hover:border-gold/30"
             style={{ background: 'rgba(255,215,0,0.06)', border: '0.5px solid rgba(255,215,0,0.2)' }}
           >
             <div
@@ -241,6 +265,7 @@ export default async function InfluencerProfilePage({ params }: Props) {
               <p className="text-xs font-semibold text-gold">Espaço permanente no mapa</p>
               <p className="text-[10px] text-white/55">1 Milhão de Influencer · ver meu bloco →</p>
             </div>
+            <span className="text-white/40">→</span>
           </Link>
 
           {/* Footer */}

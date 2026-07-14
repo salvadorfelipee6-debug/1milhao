@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { NICHE_LABELS, NICHE_COLORS } from '@/types'
 import type { CustomLink } from '@/types'
+import { ImageUpload } from '@/components/forms/ImageUpload'
 
 const NICHE_OPTIONS = Object.entries(NICHE_LABELS) as [string, string][]
 
@@ -285,12 +286,7 @@ export function PainelClient({ block, token, initialCustomLinks }: Props) {
             <textarea value={form.bio} onChange={e => setField('bio', e.target.value)}
               maxLength={120} rows={2} className="input-dark resize-none" />
           </div>
-          <div>
-            <label className="mb-1 block text-xs font-semibold text-white/70">Foto / Avatar (URL)</label>
-            <input type="url" value={form.avatarUrl}
-              onChange={e => setField('avatarUrl', e.target.value)}
-              placeholder="https://..." className="input-dark" />
-          </div>
+          <ImageUpload value={form.avatarUrl} onChange={v => setField('avatarUrl', v)} />
           <div>
             <label className="mb-1 block text-xs font-semibold text-white/70">Vídeo de apresentação</label>
             <input type="url" value={form.videoUrl}

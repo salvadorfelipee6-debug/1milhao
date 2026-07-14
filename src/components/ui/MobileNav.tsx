@@ -4,11 +4,11 @@ import { useState } from 'react'
 import Link from 'next/link'
 
 const links = [
-  { label: 'Como funciona', href: '/#como-funciona' },
-  { label: 'Preços',        href: '/#precos' },
-  { label: 'Ranking',       href: '/ranking' },
-  { label: 'Para marcas',   href: '/marcas' },
-  { label: 'Meu painel',    href: '/meu-painel' },
+  { label: 'Como funciona',     href: '/#como-funciona' },
+  { label: 'Preços',            href: '/#precos' },
+  { label: 'Ranking',           href: '/ranking' },
+  { label: 'Para marcas',       href: '/marcas' },
+  { label: 'Login anunciante',  href: '/login' },
 ]
 
 export function MobileNav() {

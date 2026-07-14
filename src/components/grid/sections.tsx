@@ -542,9 +542,9 @@ export async function FooterCTA() {
     { label: 'Como funciona',  href: '#como-funciona' },
     { label: 'Preços',         href: '#precos' },
     { label: 'Ranking',        href: '/ranking' },
-    { label: 'Para marcas',    href: '/marcas' },
-    { label: 'Meu painel',     href: '/meu-painel' },
-    { label: 'Termos',         href: '/termos' },
+    { label: 'Para marcas',       href: '/marcas' },
+    { label: 'Login anunciante',  href: '/login' },
+    { label: 'Termos',            href: '/termos' },
   ]
 
   return (

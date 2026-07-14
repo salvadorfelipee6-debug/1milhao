@@ -151,6 +151,14 @@ export async function handleMercadoPagoWebhook(body: { type: string; data: { id:
   await confirmPayment({ blockId, externalId: body.data.id, instagramHandle: block.instagramHandle })
 }
 
+// TODO(pendência conhecida): o e-mail real do comprador não é persistido hoje
+// (ver CLAUDE.md). Enquanto isso não for corrigido, todo envio de link de
+// acesso cai nesse placeholder — centralizado aqui para só existir 1 lugar
+// para trocar quando a persistência do e-mail real for implementada.
+export function blockContactEmail(instagramHandle: string) {
+  return `${instagramHandle}@placeholder.com`
+}
+
 async function confirmPayment({ blockId, externalId, instagramHandle }: {
   blockId: string; externalId: string; instagramHandle: string
 }) {
@@ -166,7 +174,7 @@ async function confirmPayment({ blockId, externalId, instagramHandle }: {
   await publishBlockActivated(block)
 
   await sendWelcomeEmail({
-    to:              block.editToken ? `${block.instagramHandle}@placeholder.com` : '',
+    to:              block.editToken ? blockContactEmail(block.instagramHandle) : '',
     displayName:     block.displayName,
     instagramHandle: block.instagramHandle,
     pixelCount:      block.pixelCount,
