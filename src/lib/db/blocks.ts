@@ -12,6 +12,8 @@ export type BlockForGrid = Pick<
   | 'followers' | 'bio' | 'videoUrl' | 'websiteUrl' | 'avatarUrl'
   | 'colorHex' | 'pixelX' | 'pixelY' | 'pixelWidth' | 'pixelHeight'
   | 'pixelCount'
+  | 'whatsappUrl' | 'youtubeUrl' | 'tiktokUrl' | 'twitterUrl'
+  | 'facebookUrl' | 'kwaiUrl' | 'onlyfansUrl' | 'spotifyUrl'
 >
 
 // Retorna todos os blocos ativos para montar a grade
@@ -38,6 +40,14 @@ export async function getActiveBlocksForGrid(): Promise<BlockForGrid[]> {
       pixelWidth:      schema.blocks.pixelWidth,
       pixelHeight:     schema.blocks.pixelHeight,
       pixelCount:      schema.blocks.pixelCount,
+      whatsappUrl:     schema.blocks.whatsappUrl,
+      youtubeUrl:      schema.blocks.youtubeUrl,
+      tiktokUrl:       schema.blocks.tiktokUrl,
+      twitterUrl:      schema.blocks.twitterUrl,
+      facebookUrl:     schema.blocks.facebookUrl,
+      kwaiUrl:         schema.blocks.kwaiUrl,
+      onlyfansUrl:     schema.blocks.onlyfansUrl,
+      spotifyUrl:      schema.blocks.spotifyUrl,
     })
     .from(schema.blocks)
     .where(eq(schema.blocks.status, 'active'))
