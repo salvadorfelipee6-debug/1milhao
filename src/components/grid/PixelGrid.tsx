@@ -147,6 +147,24 @@ export function PixelGrid({ initialBlocks, stats, highlight }: PixelGridProps) {
     }
   }
 
+  // ─── Cache de imagens dos avatares (canvas não pode usar <img> direto) ──
+  const imgCacheRef = useRef<Map<string, HTMLImageElement>>(new Map())
+  const drawRef      = useRef<() => void>(() => {})
+
+  function getBlockImage(b: GridBlock): HTMLImageElement | undefined {
+    if (!b.avatarUrl) return undefined
+    const key    = `${b.id}|${b.avatarUrl}`
+    const cached = imgCacheRef.current.get(key)
+    if (cached) return cached.complete && cached.naturalWidth > 0 ? cached : undefined
+
+    const img = new window.Image()
+    img.crossOrigin = 'anonymous'
+    img.onload  = () => drawRef.current()
+    img.src     = b.avatarUrl
+    imgCacheRef.current.set(key, img)
+    return undefined
+  }
+
   // ─── Draw ─────────────────────────────────────────────────────
   const draw = useCallback(() => {
     const canvas = canvasRef.current
@@ -209,14 +227,20 @@ export function PixelGrid({ initialBlocks, stats, highlight }: PixelGridProps) {
       ctx.lineWidth   = Math.max(0.5, cs * 0.3)
       ctx.strokeRect(x + ctx.lineWidth / 2, y + ctx.lineWidth / 2, w - ctx.lineWidth, h - ctx.lineWidth)
 
-      // Avatar sobreposto
-      if (b.avatarUrl && (b as any)._img) {
+      // Avatar sobreposto — foto ocupa o bloco como no Million Dollar Homepage,
+      // com um scrim escuro na base pra manter o @handle legível por cima.
+      const blockImg = getBlockImage(b)
+      if (blockImg) {
         ctx.save()
         ctx.beginPath()
         ctx.rect(x, y, w, h)
         ctx.clip()
-        ctx.globalAlpha = 0.35
-        ctx.drawImage((b as any)._img, x, y, w, h)
+        ctx.drawImage(blockImg, x, y, w, h)
+        const scrim = ctx.createLinearGradient(x, y + h * 0.55, x, y + h)
+        scrim.addColorStop(0, 'rgba(0,0,0,0)')
+        scrim.addColorStop(1, 'rgba(0,0,0,0.7)')
+        ctx.fillStyle = scrim
+        ctx.fillRect(x, y + h * 0.55, w, h * 0.45)
         ctx.restore()
       }
 
@@ -294,6 +318,8 @@ export function PixelGrid({ initialBlocks, stats, highlight }: PixelGridProps) {
       }
     }
   }, [niche])
+
+  useEffect(() => { drawRef.current = draw }, [draw])
 
   // ─── Resize ────────────────────────────────────────────────────
   useEffect(() => {
