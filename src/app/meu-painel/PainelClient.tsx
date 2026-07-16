@@ -2,9 +2,11 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { NICHE_LABELS, NICHE_COLORS } from '@/types'
+import { NICHE_LABELS, NICHE_COLORS, NICHE_EMOJI } from '@/types'
 import type { CustomLink } from '@/types'
 import { ImageUpload } from '@/components/forms/ImageUpload'
+import { CityAutocomplete } from '@/components/forms/CityAutocomplete'
+import { VitrinePreviewModal } from './VitrinePreviewModal'
 
 const NICHE_OPTIONS = Object.entries(NICHE_LABELS) as [string, string][]
 
@@ -194,6 +196,7 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
   const [saved,       setSaved]       = useState(false)
   const [error,       setError]       = useState('')
   const [tab,         setTab]         = useState<'perfil' | 'redes' | 'links' | 'estatisticas' | 'propostas'>('perfil')
+  const [previewOpen, setPreviewOpen] = useState(false)
 
   const setField = useCallback((k: keyof typeof form, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -253,30 +256,22 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
           <p className="text-xs text-white/55 mt-0.5">
             Posição: {block.pixelX},{block.pixelY} no mapa
           </p>
-          <div className="mt-2 flex gap-2">
-            <a
-              href={profileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-lg px-3 py-1 text-xs font-semibold transition-all"
-              style={{ background: 'rgba(255,215,0,0.15)', border: '0.5px solid rgba(255,215,0,0.3)', color: '#FFD700' }}
-            >
-              Ver minha página ↗
-            </a>
-            <Link
-              href={`/?highlight=${block.instagramHandle}`}
-              className="rounded-lg border border-white/10 px-3 py-1 text-xs text-white/70 hover:text-white/80"
-            >
-              Ver no mapa ↗
-            </Link>
-          </div>
+          <Link
+            href={`/?highlight=${block.instagramHandle}`}
+            className="mt-2 inline-block rounded-lg border border-white/10 px-3 py-1 text-xs text-white/70 hover:text-white/80"
+          >
+            Ver no mapa ↗
+          </Link>
         </div>
       </div>
 
-      {/* Link da bio */}
-      <div className="rounded-xl border border-gold/20 bg-gold/5 p-4">
-        <p className="text-xs font-bold text-gold mb-1">🔗 Seu link para a bio do Instagram</p>
-        <div className="flex items-center gap-2 mt-2">
+      {/* Vitrine 1M — explica o conceito e conecta o formulário à página pública */}
+      <div className="rounded-2xl border border-gold/20 bg-gold/5 p-4">
+        <p className="text-xs font-bold text-gold mb-1">✨ Sua Vitrine 1M</p>
+        <p className="text-[11px] leading-relaxed text-white/65 mb-3">
+          Tudo que você preenche aqui embaixo aparece nessa mini página — o seu "cartão de visitas" tipo Linktree — que abre quando alguém clica no link da sua bio.
+        </p>
+        <div className="flex items-center gap-2">
           <code className="flex-1 rounded-lg bg-white/5 px-3 py-2 text-xs text-white/70 truncate">
             {profileUrl}
           </code>
@@ -286,6 +281,23 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
           >
             copiar
           </button>
+        </div>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <button
+            onClick={() => setPreviewOpen(true)}
+            className="rounded-lg py-2 text-xs font-bold transition-all"
+            style={{ background: 'rgba(255,215,0,0.15)', border: '0.5px solid rgba(255,215,0,0.3)', color: '#FFD700' }}
+          >
+            👁 Ver prévia ao vivo
+          </button>
+          <a
+            href={profileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-lg border border-white/10 py-2 text-center text-xs text-white/70 hover:text-white/80"
+          >
+            Abrir página real ↗
+          </a>
         </div>
       </div>
 
@@ -320,16 +332,17 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
             <div>
               <label className="mb-1 block text-xs font-semibold text-white/70">Nicho</label>
               <select value={form.niche} onChange={e => setField('niche', e.target.value)} className="select-dark">
-                {NICHE_OPTIONS.map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                {NICHE_OPTIONS.map(([k, v]) => (
+                  <option key={k} value={k}>{NICHE_EMOJI[k as keyof typeof NICHE_EMOJI]} {v}</option>
+                ))}
               </select>
+              <p className="mt-1 text-[10px] text-white/45">Define sua cor no mapa e seu ranking por categoria</p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-xs font-semibold text-white/70">Cidade</label>
-              <input type="text" value={form.city}
-                onChange={e => setField('city', e.target.value)}
-                placeholder="São Paulo, SP" className="input-dark" />
+              <CityAutocomplete value={form.city} onChange={v => setField('city', v)} />
             </div>
             <div>
               <label className="mb-1 block text-xs font-semibold text-white/70">Seguidores</label>
@@ -575,6 +588,33 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
       <p className="text-center text-xs text-white/45">
         Alterações aparecem no mapa em até 5 minutos.
       </p>
+
+      {previewOpen && (
+        <VitrinePreviewModal
+          onClose={() => setPreviewOpen(false)}
+          displayName={form.displayName}
+          handle={block.instagramHandle}
+          niche={form.niche}
+          city={form.city}
+          followers={form.followers}
+          bio={form.bio}
+          avatarUrl={form.avatarUrl}
+          pixelCount={block.pixelCount}
+          pixelWidth={block.pixelWidth}
+          pixelHeight={block.pixelHeight}
+          socials={{
+            whatsappUrl: form.whatsappUrl,
+            youtubeUrl:  form.youtubeUrl,
+            tiktokUrl:   form.tiktokUrl,
+            twitterUrl:  form.twitterUrl,
+            facebookUrl: form.facebookUrl,
+            kwaiUrl:     form.kwaiUrl,
+            onlyfansUrl: form.onlyfansUrl,
+            spotifyUrl:  form.spotifyUrl,
+          }}
+          customLinks={customLinks}
+        />
+      )}
     </div>
   )
 }

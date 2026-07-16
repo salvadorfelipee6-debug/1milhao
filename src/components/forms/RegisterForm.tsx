@@ -3,8 +3,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import type { GridStats, Niche } from '@/types'
-import { NICHE_LABELS, PIXEL_PRICE } from '@/types'
+import { NICHE_LABELS, NICHE_EMOJI, PIXEL_PRICE } from '@/types'
 import { ImageUpload } from './ImageUpload'
+import { CityAutocomplete } from './CityAutocomplete'
 
 const MIN_PIXELS  = 1
 const MAX_PIXELS  = 1000000
@@ -484,15 +485,13 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                   <select value={form.niche} onChange={e => setField('niche', e.target.value)} className="select-dark">
                     <option value="">Selecione...</option>
                     {Object.entries(NICHE_LABELS).map(([k, v]) => (
-                      <option key={k} value={k}>{v}</option>
+                      <option key={k} value={k}>{NICHE_EMOJI[k as Niche]} {v}</option>
                     ))}
                   </select>
                 </div>
                 <div>
                   <label className="mb-1 block text-[10px] font-semibold text-white/70">Cidade</label>
-                  <input type="text" value={form.city}
-                    onChange={e => setField('city', e.target.value)}
-                    placeholder="São Paulo, SP" className="input-dark" />
+                  <CityAutocomplete value={form.city ?? ''} onChange={v => setField('city', v)} />
                 </div>
               </div>
 

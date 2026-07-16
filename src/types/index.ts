@@ -106,6 +106,21 @@ export const NICHE_LABELS: Record<Niche, string> = {
   outros:      'Outros',
 }
 
+export const NICHE_EMOJI: Record<Niche, string> = {
+  fitness:     '💪',
+  moda:        '👗',
+  tecnologia:  '💻',
+  gastronomia: '🍔',
+  beleza:      '💄',
+  viagens:     '✈️',
+  games:       '🎮',
+  financas:    '💰',
+  familia:     '👨‍👩‍👧',
+  humor:       '😂',
+  educacao:    '📚',
+  outros:      '✨',
+}
+
 export const NICHE_COLORS: Record<Niche, string> = {
   fitness:     '#E1306C',
   moda:        '#C13584',
