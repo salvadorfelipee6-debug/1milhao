@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useUser, SignInButton } from '@clerk/nextjs'
+import { useState } from 'react'
 
 interface Props {
   blockId:         string
@@ -20,9 +19,7 @@ const CAMPAIGN_TYPES = [
 ]
 
 export function BriefingModal({ blockId, instagramHandle, onClose }: Props) {
-  const { isSignedIn, isLoaded, user } = useUser()
-
-  const [step,    setStep]    = useState<'loading' | 'onboarding' | 'form' | 'sent'>('loading')
+  const [step,    setStep]    = useState<'form' | 'sent'>('form')
   const [error,   setError]   = useState('')
   const [sending, setSending] = useState(false)
 
@@ -33,45 +30,12 @@ export function BriefingModal({ blockId, instagramHandle, onClose }: Props) {
     campaignType: CAMPAIGN_TYPES[0], budget: '', deadline: '', message: '',
   })
 
-  useEffect(() => {
-    if (!isLoaded) return
-    if (!isSignedIn) { setStep('onboarding'); return }
-
-    setBrandForm(f => ({
-      ...f,
-      contactName:  user?.fullName ?? f.contactName,
-      contactEmail: user?.primaryEmailAddress?.emailAddress ?? f.contactEmail,
-    }))
-
-    fetch('/api/brands')
-      .then(r => r.json())
-      .then(data => setStep(data.brand ? 'form' : 'onboarding'))
-      .catch(() => setStep('onboarding'))
-  }, [isLoaded, isSignedIn, user])
-
-  async function submitBrand() {
+  async function submitBriefing() {
     setError('')
     if (!brandForm.companyName.trim() || !brandForm.contactName.trim() || !brandForm.contactEmail.trim()) {
       setError('Preencha nome da empresa, contato e e-mail.')
       return
     }
-    setSending(true)
-    try {
-      const res  = await fetch('/api/brands', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(brandForm),
-      })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error ?? 'Erro ao salvar.'); return }
-      setStep('form')
-    } catch {
-      setError('Erro de conexão.')
-    } finally {
-      setSending(false)
-    }
-  }
-
-  async function submitBriefing() {
-    setError('')
     if (briefing.message.trim().length < 10) {
       setError('Escreva um pouco mais sobre a proposta (mínimo 10 caracteres).')
       return
@@ -80,7 +44,7 @@ export function BriefingModal({ blockId, instagramHandle, onClose }: Props) {
     try {
       const res  = await fetch('/api/proposals', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blockId, ...briefing }),
+        body: JSON.stringify({ blockId, ...brandForm, ...briefing }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error ?? 'Erro ao enviar.'); return }
@@ -105,41 +69,27 @@ export function BriefingModal({ blockId, instagramHandle, onClose }: Props) {
             <button onClick={onClose} className="text-white/50 hover:text-white">✕</button>
           </div>
 
-          {step === 'loading' && (
-            <div className="py-10 text-center text-sm text-white/55">Carregando...</div>
-          )}
-
-          {step === 'onboarding' && !isSignedIn && (
-            <div className="space-y-4 py-4 text-center">
-              <p className="text-sm text-white/70">Entre com sua conta de marca pra enviar um briefing estruturado — sem isso, o influencer não consegue ver de onde veio a proposta.</p>
-              <SignInButton mode="modal">
-                <button className="btn-gold w-full py-3.5 text-sm">Entrar / Criar conta →</button>
-              </SignInButton>
-            </div>
-          )}
-
-          {step === 'onboarding' && isSignedIn && (
-            <div className="space-y-3">
-              <p className="mb-1 text-xs text-white/65">Primeira vez por aqui — só precisamos de alguns dados da sua empresa.</p>
-              <input className="input-dark" placeholder="Nome da empresa"
-                value={brandForm.companyName} onChange={e => setBrandForm(f => ({ ...f, companyName: e.target.value }))} />
-              <input className="input-dark" placeholder="Segmento (ex: moda, beleza, tech)"
-                value={brandForm.segment} onChange={e => setBrandForm(f => ({ ...f, segment: e.target.value }))} />
-              <input className="input-dark" placeholder="Seu nome (contato)"
-                value={brandForm.contactName} onChange={e => setBrandForm(f => ({ ...f, contactName: e.target.value }))} />
-              <input className="input-dark" type="email" placeholder="E-mail de contato"
-                value={brandForm.contactEmail} onChange={e => setBrandForm(f => ({ ...f, contactEmail: e.target.value }))} />
-              <input className="input-dark" placeholder="WhatsApp (opcional)"
-                value={brandForm.contactWhatsapp} onChange={e => setBrandForm(f => ({ ...f, contactWhatsapp: e.target.value }))} />
-              {error && <p className="text-xs text-red-400">{error}</p>}
-              <button onClick={submitBrand} disabled={sending} className="btn-gold w-full py-3 text-sm disabled:opacity-50">
-                {sending ? 'Salvando...' : 'Continuar →'}
-              </button>
-            </div>
-          )}
-
           {step === 'form' && (
             <div className="space-y-3">
+              <p className="text-xs text-white/55">Sem cadastro — preencha seus dados e a campanha, a gente entrega direto pra ela.</p>
+
+              <div className="grid grid-cols-2 gap-2">
+                <input className="input-dark" placeholder="Nome da empresa"
+                  value={brandForm.companyName} onChange={e => setBrandForm(f => ({ ...f, companyName: e.target.value }))} />
+                <input className="input-dark" placeholder="Segmento (opcional)"
+                  value={brandForm.segment} onChange={e => setBrandForm(f => ({ ...f, segment: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <input className="input-dark" placeholder="Seu nome"
+                  value={brandForm.contactName} onChange={e => setBrandForm(f => ({ ...f, contactName: e.target.value }))} />
+                <input className="input-dark" type="email" placeholder="Seu e-mail"
+                  value={brandForm.contactEmail} onChange={e => setBrandForm(f => ({ ...f, contactEmail: e.target.value }))} />
+              </div>
+              <input className="input-dark" placeholder="WhatsApp (opcional)"
+                value={brandForm.contactWhatsapp} onChange={e => setBrandForm(f => ({ ...f, contactWhatsapp: e.target.value }))} />
+
+              <div className="h-px bg-white/8" />
+
               <div>
                 <label className="mb-1 block text-xs font-semibold text-white/70">Tipo de campanha</label>
                 <select className="select-dark" value={briefing.campaignType}
@@ -176,7 +126,7 @@ export function BriefingModal({ blockId, instagramHandle, onClose }: Props) {
             <div className="space-y-3 py-6 text-center">
               <div className="text-3xl">✅</div>
               <p className="font-bold text-white">Briefing enviado!</p>
-              <p className="text-sm text-white/65">@{instagramHandle} vai ver sua proposta no painel dela e pode aceitar ou recusar. Acompanhe pelo seu login de marca.</p>
+              <p className="text-sm text-white/65">@{instagramHandle} vai ver sua proposta no painel dela e pode aceitar ou recusar — a resposta chega no e-mail ou WhatsApp que você informou.</p>
               <button onClick={onClose} className="btn-ghost w-full py-3 text-sm">Fechar</button>
             </div>
           )}

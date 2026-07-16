@@ -6,9 +6,12 @@ import type { GridStats, Niche } from '@/types'
 import { NICHE_LABELS, NICHE_EMOJI, PIXEL_PRICE } from '@/types'
 import { ImageUpload } from './ImageUpload'
 import { CityAutocomplete } from './CityAutocomplete'
+import { PositionPicker } from './PositionPicker'
 
 const MIN_PIXELS  = 1
 const MAX_PIXELS  = 1000000
+
+type Orientation = 'square' | 'wide' | 'tall'
 
 const NICHE_COLORS: Record<string, string> = {
   fitness:     '#FF6B35',
@@ -24,9 +27,17 @@ const NICHE_COLORS: Record<string, string> = {
 
 interface RegisterFormProps { stats: GridStats }
 
-function calcDims(n: number) {
-  const side = Math.max(1, Math.round(Math.sqrt(n)))
-  return { width: side, height: side, actual: side * side }
+function calcDims(n: number, orientation: Orientation = 'square') {
+  if (orientation === 'square') {
+    const side = Math.max(1, Math.round(Math.sqrt(n)))
+    return { width: side, height: side, actual: side * side }
+  }
+  // Aspecto ~2:1 pra largo/alto
+  const short = Math.max(1, Math.round(Math.sqrt(n / 2)))
+  const long  = Math.max(1, Math.round(n / short))
+  return orientation === 'wide'
+    ? { width: long, height: short, actual: long * short }
+    : { width: short, height: long, actual: long * short }
 }
 
 // ─── Mini preview canvas ──────────────────────────────────────
@@ -159,6 +170,8 @@ export function RegisterForm({ stats }: RegisterFormProps) {
     (gridW && gridH) || gridPixels ? 2 : 1
   )
   const [pixels,   setPixels]   = useState(gridPixels ?? 400)
+  const [orientation, setOrientation] = useState<Orientation>('square')
+  const [manualPos, setManualPos] = useState<{ x: number; y: number } | null>(null)
   const [loading,  setLoading]  = useState(false)
   const [error,    setError]    = useState('')
   const [provider, setProvider] = useState<'stripe' | 'mercadopago'>('mercadopago')
@@ -221,13 +234,16 @@ export function RegisterForm({ stats }: RegisterFormProps) {
     img.src = url
   }
 
-  // Dimensões — se veio do grid usa w×h, senão calcula
+  // Dimensões — se veio do grid usa w×h, senão calcula pela orientação escolhida
   const dims = gridW && gridH
     ? { width: Number(gridW), height: Number(gridH), actual: Number(gridW) * Number(gridH) }
-    : calcDims(pixels)
+    : calcDims(pixels, orientation)
 
   const price     = (dims.actual * PIXEL_PRICE).toFixed(2)
   const blockColor = form.niche ? (NICHE_COLORS[form.niche] ?? '#E1306C') : '#FFD700'
+
+  // Se pixels/orientação mudam, a posição escolhida à mão pode não caber mais
+  useEffect(() => { setManualPos(null) }, [dims.width, dims.height])
 
   // ─── Validação por step ──────────────────────────────────
   function canGoStep2() {
@@ -254,10 +270,10 @@ export function RegisterForm({ stats }: RegisterFormProps) {
           ...form,
           instagramHandle: form.instagramHandle.replace('@', '').toLowerCase(),
           pixelCount:      dims.actual,
-          pixelX:          gridX ? Number(gridX) : undefined,
-          pixelY:          gridY ? Number(gridY) : undefined,
-          pixelWidth:      gridW ? Number(gridW) : undefined,
-          pixelHeight:     gridH ? Number(gridH) : undefined,
+          pixelX:          gridX ? Number(gridX) : manualPos?.x,
+          pixelY:          gridY ? Number(gridY) : manualPos?.y,
+          pixelWidth:      gridW ? Number(gridW) : dims.width,
+          pixelHeight:     gridH ? Number(gridH) : dims.height,
           paymentProvider: provider,
           customLinks:     customLinks.filter(l => l.label && l.url),
         }),
@@ -376,6 +392,27 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                         </button>
                       ))}
                     </div>
+
+                    <p className="mb-1.5 mt-4 text-[10px] font-semibold uppercase tracking-widest text-white/55">
+                      Formato do bloco
+                    </p>
+                    <div className="flex gap-1.5">
+                      {([
+                        { v: 'square', label: '⬛ Quadrado' },
+                        { v: 'wide',   label: '▬ Largo' },
+                        { v: 'tall',   label: '▮ Alto' },
+                      ] as const).map(o => (
+                        <button key={o.v} type="button" onClick={() => setOrientation(o.v)}
+                          className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-all ${
+                            orientation === o.v
+                              ? 'bg-pink text-white'
+                              : 'border border-white/10 text-white/65 hover:border-white/20 hover:text-white/70'
+                          }`}
+                        >
+                          {o.label}
+                        </button>
+                      ))}
+                    </div>
                   </>
                 )}
 
@@ -396,6 +433,17 @@ export function RegisterForm({ stats }: RegisterFormProps) {
               </div>
             </div>
           </div>
+
+          {!(gridW && gridH) && (
+            <div className="card-dark rounded-2xl p-4">
+              <PositionPicker
+                pixelWidth={dims.width}
+                pixelHeight={dims.height}
+                value={manualPos}
+                onChange={setManualPos}
+              />
+            </div>
+          )}
 
           <button
             type="button"

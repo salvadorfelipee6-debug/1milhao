@@ -609,27 +609,35 @@ export function PixelGrid({ initialBlocks, stats, highlight }: PixelGridProps) {
           const initials   = (b.displayName || b.instagramHandle).slice(0, 2).toUpperCase()
           const nicheLabel = NICHE_LABELS[b.niche as keyof typeof NICHE_LABELS] ?? b.niche
           const blockPx    = b.pixelWidth * b.pixelHeight
+          const color      = b.colorHex || '#E1306C'
           return (
             <div
-              className="pointer-events-none absolute z-20 w-56 rounded-xl border border-white/10 bg-dark-2/95 p-3 shadow-2xl backdrop-blur-md"
+              className="pointer-events-none absolute z-20 w-56 overflow-hidden rounded-xl border border-white/10 bg-dark-2/95 shadow-2xl backdrop-blur-md"
               style={tooltipStyle(richTooltip.x, richTooltip.y)}
             >
-              <div className="flex items-center gap-2.5 mb-2.5">
+              {/* Header foto — bleed total, sem borda embaixo: funde direto no conteúdo */}
+              <div className="relative h-20 w-full" style={{ background: `linear-gradient(135deg, ${color}66, ${color}22)` }}>
+                {b.avatarUrl && (
+                  <img src={b.avatarUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                )}
+                {!b.avatarUrl && (
+                  <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-white/90">
+                    {initials}
+                  </span>
+                )}
                 <div
-                  className="h-9 w-9 shrink-0 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden"
-                  style={{ background: b.colorHex || '#E1306C' }}
-                >
-                  {b.avatarUrl
-                    ? <img src={b.avatarUrl} alt="" className="h-full w-full object-cover" />
-                    : initials}
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-white">@{b.instagramHandle}</p>
-                  {b.displayName && (
-                    <p className="truncate text-[11px] text-white/65">{b.displayName}</p>
-                  )}
-                </div>
+                  className="absolute inset-x-0 bottom-0 h-10"
+                  style={{ background: 'linear-gradient(to top, rgba(17,17,17,0.95), transparent)' }}
+                />
+                <p className="absolute bottom-1.5 left-3 right-3 truncate text-sm font-bold text-white drop-shadow">
+                  @{b.instagramHandle}
+                </p>
               </div>
+
+              <div className="p-3 pt-2">
+              {b.displayName && (
+                <p className="mb-2 truncate text-[11px] text-white/65">{b.displayName}</p>
+              )}
 
               <div className="grid grid-cols-3 gap-1.5 text-center mb-2.5">
                 {b.followers != null && (
@@ -667,6 +675,7 @@ export function PixelGrid({ initialBlocks, stats, highlight }: PixelGridProps) {
               )}
 
               <p className="mt-2 text-[10px] text-white/45">clique para ver perfil completo</p>
+              </div>
             </div>
           )
         })()}
