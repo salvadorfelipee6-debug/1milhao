@@ -197,6 +197,7 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
   const [error,       setError]       = useState('')
   const [tab,         setTab]         = useState<'perfil' | 'redes' | 'links' | 'estatisticas' | 'propostas'>('perfil')
   const [previewOpen, setPreviewOpen] = useState(false)
+  const [avatarUploading, setAvatarUploading] = useState(false)
 
   const setField = useCallback((k: keyof typeof form, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -358,7 +359,7 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
             <textarea value={form.bio} onChange={e => setField('bio', e.target.value)}
               maxLength={120} rows={2} className="input-dark resize-none" />
           </div>
-          <ImageUpload value={form.avatarUrl} onChange={v => setField('avatarUrl', v)} />
+          <ImageUpload value={form.avatarUrl} onChange={v => setField('avatarUrl', v)} onUploadingChange={setAvatarUploading} />
           <div>
             <label className="mb-1 block text-xs font-semibold text-white/70">Vídeo de apresentação</label>
             <input type="url" value={form.videoUrl}
@@ -578,12 +579,15 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
       {/* Salvar */}
       <button
         onClick={handleSave}
-        disabled={saving}
+        disabled={saving || avatarUploading}
         className="w-full rounded-2xl py-4 text-sm font-bold transition-all disabled:opacity-50"
         style={{ background: saved ? '#22c55e' : '#FFD700', color: '#111' }}
       >
-        {saving ? 'Salvando...' : saved ? '✓ Salvo com sucesso!' : 'Salvar alterações'}
+        {avatarUploading ? 'Aguardando foto...' : saving ? 'Salvando...' : saved ? '✓ Salvo com sucesso!' : 'Salvar alterações'}
       </button>
+      {avatarUploading && (
+        <p className="text-center text-xs text-gold/80">Espera a foto terminar de enviar antes de salvar.</p>
+      )}
 
       <p className="text-center text-xs text-white/45">
         Alterações aparecem no mapa em até 5 minutos.

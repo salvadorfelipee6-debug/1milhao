@@ -162,6 +162,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
   const [loading,  setLoading]  = useState(false)
   const [error,    setError]    = useState('')
   const [provider, setProvider] = useState<'stripe' | 'mercadopago'>('mercadopago')
+  const [avatarUploading, setAvatarUploading] = useState(false)
 
   const [form, setForm] = useState({
     instagramHandle: '',
@@ -512,7 +513,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                   className="input-dark resize-none" rows={2} maxLength={120} />
               </div>
 
-              <ImageUpload value={form.avatarUrl} onChange={v => setField('avatarUrl', v)} />
+              <ImageUpload value={form.avatarUrl} onChange={v => setField('avatarUrl', v)} onUploadingChange={setAvatarUploading} />
 
               {/* WhatsApp para anunciantes */}
               <div className="rounded-xl border border-gold/20 bg-gold/5 p-3 space-y-2">
@@ -761,10 +762,12 @@ export function RegisterForm({ stats }: RegisterFormProps) {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={loading || !form.email}
+              disabled={loading || avatarUploading || !form.email}
               className="btn-gold flex-[3] py-4 text-base disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading
+              {avatarUploading
+                ? 'Aguardando foto...'
+                : loading
                 ? 'Processando...'
                 : `Pagar R$${price.replace('.', ',')} e garantir espaço →`}
             </button>

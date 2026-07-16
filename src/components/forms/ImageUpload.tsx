@@ -3,8 +3,8 @@
 import { useState, useRef } from 'react'
 
 export function ImageUpload({
-  value, onChange,
-}: { value: string; onChange: (url: string) => void }) {
+  value, onChange, onUploadingChange,
+}: { value: string; onChange: (url: string) => void; onUploadingChange?: (uploading: boolean) => void }) {
   const [dragging, setDragging] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
@@ -13,6 +13,7 @@ export function ImageUpload({
   async function handleFile(file: File) {
     if (!file.type.startsWith('image/')) return
     setUploading(true)
+    onUploadingChange?.(true)
     setError('')
     try {
       const fd = new FormData()
@@ -28,6 +29,7 @@ export function ImageUpload({
       setError('Erro de conexão ao enviar imagem.')
     } finally {
       setUploading(false)
+      onUploadingChange?.(false)
     }
   }
 
