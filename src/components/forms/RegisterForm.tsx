@@ -164,6 +164,15 @@ export function RegisterForm({ stats }: RegisterFormProps) {
   const gridY      = searchParams.get('y')
   const gridW      = searchParams.get('w')
   const gridH      = searchParams.get('h')
+  const ref        = searchParams.get('ref')
+
+  // Veio de um link de indicação — conta o clique (best-effort, não trava nada)
+  useEffect(() => {
+    if (!ref) return
+    fetch('/api/ref/click', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refCode: ref }),
+    }).catch(() => {})
+  }, [ref])
 
   // Se já escolheu o espaço (seleção no mapa ou card de preço), pula direto pro perfil
   const [step,     setStep]     = useState<1 | 2 | 3>(
@@ -276,6 +285,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
           pixelHeight:     gridH ? Number(gridH) : dims.height,
           paymentProvider: provider,
           customLinks:     customLinks.filter(l => l.label && l.url),
+          ref:             ref || undefined,
         }),
       })
       const data = await res.json()

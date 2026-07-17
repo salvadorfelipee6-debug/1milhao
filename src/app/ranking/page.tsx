@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { searchBlocks, getGridStats } from '@/lib/db/blocks'
+import { searchBlocks, getGridStats, getTopThisMonth } from '@/lib/db/blocks'
 import { NICHE_LABELS } from '@/types'
 import Link from 'next/link'
 import { RankingClient } from './RankingClient'
+import { TopThisMonth } from './TopThisMonth'
 
 export const metadata: Metadata = {
   title: 'Ranking — 1 Milhão de Influencer',
@@ -20,9 +21,10 @@ export default async function RankingPage({ searchParams }: PageProps) {
   const keyword = params.keyword || ''
   const city    = params.city    || ''
 
-  const [blocks, stats] = await Promise.all([
+  const [blocks, stats, topThisMonth] = await Promise.all([
     searchBlocks({ niche: niche || undefined, keyword: keyword || undefined, city: city || undefined, limit: 100 }),
     getGridStats(),
+    getTopThisMonth(),
   ])
 
   return (
@@ -42,6 +44,8 @@ export default async function RankingPage({ searchParams }: PageProps) {
             {stats.active.toLocaleString('pt-BR')} influencers · {stats.sold.toLocaleString('pt-BR')} pixels vendidos
           </p>
         </div>
+
+        <TopThisMonth blocks={topThisMonth as any} />
 
         <Suspense fallback={<div className="h-96 animate-pulse rounded-2xl bg-white/5" />}>
           <RankingClient blocks={blocks} initialNiche={niche} initialKeyword={keyword} initialCity={city} />

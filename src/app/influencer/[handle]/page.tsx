@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import type { CSSProperties } from 'react'
 import { notFound }       from 'next/navigation'
 import Link               from 'next/link'
-import { getBlockByHandle, getGridStats } from '@/lib/db/blocks'
+import { getBlockByHandle, getGridStats, getBlockBadges } from '@/lib/db/blocks'
 import { NICHE_LABELS }   from '@/types'
 import type { CustomLink } from '@/types'
 import { ShareButton }    from './ShareButton'
@@ -10,6 +10,7 @@ import { ProfileTracking } from './ProfileTracking'
 import { QrCodeButton }   from './QrCodeButton'
 import { SendBriefingButton } from '@/components/proposals/SendBriefingButton'
 import { SOCIAL_CONFIG }  from '@/lib/socialConfig'
+import { BadgeRow }       from '@/components/ui/BadgeRow'
 
 interface Props {
   params: Promise<{ handle: string }>
@@ -23,9 +24,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title:       `@${block.instagramHandle} — ${block.displayName}`,
     description: block.bio ?? `${block.displayName} · ${NICHE_LABELS[block.niche as keyof typeof NICHE_LABELS]} · ${block.followers ?? ''} seguidores`,
     openGraph: {
-      type:   'profile',
-      title:  `@${block.instagramHandle} no 1 Milhão de Influencer`,
-      images: block.avatarUrl ? [{ url: block.avatarUrl }] : [],
+      type:  'profile',
+      title: `@${block.instagramHandle} no 1 Milhão de Influencer`,
+      // Imagem gerada dinamicamente por opengraph-image.tsx nesta mesma pasta —
+      // não declarar `images` aqui, o Next já injeta sozinho pela convenção de arquivo.
     },
   }
 }
@@ -39,6 +41,7 @@ export default async function InfluencerProfilePage({ params }: Props) {
     getGridStats(),
   ])
   if (!block) notFound()
+  const badges = await getBlockBadges(block.id)
 
   const shareUrl   = `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/influencer/${block.instagramHandle}`
   const igUrl      = `https://instagram.com/${block.instagramHandle}`
@@ -133,6 +136,11 @@ export default async function InfluencerProfilePage({ params }: Props) {
             <p className="mt-1 text-xs text-white/65">
               {nicheLabel}{block.city ? ` · ${block.city}` : ''}
             </p>
+            {badges.length > 0 && (
+              <div className="mt-2">
+                <BadgeRow badges={badges} />
+              </div>
+            )}
           </div>
 
           {/* Stats */}

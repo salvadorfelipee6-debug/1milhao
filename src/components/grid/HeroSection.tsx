@@ -4,12 +4,24 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import type { GridStats, GridBlock } from '@/types'
 import { LiveVisitors } from '@/components/ui/LiveVisitors'
+import { ActivityFeed } from '@/components/ui/ActivityFeed'
 import { NICHE_COLORS } from '@/types'
+
+interface Activation {
+  instagramHandle: string
+  displayName:     string
+  avatarUrl:       string | null
+  colorHex:        string
+  pixelCount:      number
+  niche:            string
+  createdAt:        string | Date
+}
 
 interface HeroSectionProps {
   stats:     GridStats
   blocks:    GridBlock[]
   highlight?: string
+  activations?: Activation[]
 }
 
 // Mini canvas do grid no hero
@@ -121,7 +133,7 @@ function MiniGrid({ blocks }: { blocks: GridBlock[] }) {
   )
 }
 
-export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
+export function HeroSection({ stats, blocks, highlight, activations = [] }: HeroSectionProps) {
   const pct   = Math.round((stats.sold / 1_000_000) * 100)
   const avail = (1_000_000 - stats.sold).toLocaleString('pt-BR')
 
@@ -156,6 +168,7 @@ export function HeroSection({ stats, blocks, highlight }: HeroSectionProps) {
               {avail} pixels restantes
             </div>
             <LiveVisitors />
+            <ActivityFeed activations={activations} />
           </div>
 
           {/* Título */}

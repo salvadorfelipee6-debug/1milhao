@@ -12,6 +12,7 @@ import {
   isAreaOccupied,
   getGridStats,
 } from '@/lib/db/blocks'
+import { getAffiliateByRefCode, incrementAffiliateSignups } from '@/lib/db/affiliates'
 import { rateLimit } from '@/lib/cache'
 import { NICHE_COLORS } from '@/types'
 import crypto from 'crypto'
@@ -51,6 +52,8 @@ const bodySchema = z.object({
   pixelY:           z.number().int().optional(),
   pixelWidth:       z.number().int().optional(),
   pixelHeight:      z.number().int().optional(),
+  // Indicação — @ de quem indicou (refCode = instagramHandle do afiliado)
+  ref:              z.string().max(100).optional(),
 })
 
 export async function POST(req: NextRequest) {
@@ -173,6 +176,12 @@ export async function POST(req: NextRequest) {
       .returning()
 
     if (!block) throw new Error('Falha ao inserir bloco')
+
+    // Indicação — conta o cadastro pro afiliado, se o ref for válido e não for auto-indicação
+    if (data.ref && data.ref !== handle) {
+      const affiliate = await getAffiliateByRefCode(data.ref)
+      if (affiliate) await incrementAffiliateSignups(data.ref)
+    }
 
     // Cria sessão de pagamento
     if (data.paymentProvider === 'stripe') {

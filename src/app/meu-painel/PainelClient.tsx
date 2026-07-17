@@ -3,10 +3,11 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { NICHE_LABELS, NICHE_COLORS, NICHE_EMOJI } from '@/types'
-import type { CustomLink } from '@/types'
+import type { CustomLink, Badge } from '@/types'
 import { ImageUpload } from '@/components/forms/ImageUpload'
 import { CityAutocomplete } from '@/components/forms/CityAutocomplete'
 import { VitrinePreviewModal } from './VitrinePreviewModal'
+import { BadgeRow } from '@/components/ui/BadgeRow'
 
 const NICHE_OPTIONS = Object.entries(NICHE_LABELS) as [string, string][]
 
@@ -66,6 +67,7 @@ interface Props {
   initialCustomLinks:  CustomLink[]
   stats:               Stats
   initialProposals:    ProposalItem[]
+  badges:              Badge[]
 }
 
 const SOCIAL_LABELS: Record<string, string> = {
@@ -153,7 +155,7 @@ function BlockPreview({ block, handle, niche, avatarUrl }: {
   )
 }
 
-export function PainelClient({ block, token, initialCustomLinks, stats, initialProposals }: Props) {
+export function PainelClient({ block, token, initialCustomLinks, stats, initialProposals, badges }: Props) {
   const [proposals, setProposals] = useState<ProposalItem[]>(initialProposals)
   const [respondingId, setRespondingId] = useState<string | null>(null)
 
@@ -195,9 +197,32 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
   const [saving,      setSaving]      = useState(false)
   const [saved,       setSaved]       = useState(false)
   const [error,       setError]       = useState('')
-  const [tab,         setTab]         = useState<'perfil' | 'redes' | 'links' | 'estatisticas' | 'propostas'>('perfil')
+  const [tab,         setTab]         = useState<'perfil' | 'redes' | 'links' | 'estatisticas' | 'propostas' | 'indicacao'>('perfil')
   const [previewOpen, setPreviewOpen] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
+
+  const [affiliate, setAffiliate] = useState<{ refCode: string; totalClicks: number; totalSignups: number; pixKey: string | null } | null>(null)
+  const [pixKey, setPixKey] = useState('')
+  const [pixSaved, setPixSaved] = useState(false)
+
+  useEffect(() => {
+    if (tab !== 'indicacao' || affiliate) return
+    fetch(`/api/affiliate?token=${encodeURIComponent(token)}`)
+      .then(r => r.json())
+      .then(data => { if (data.affiliate) { setAffiliate(data.affiliate); setPixKey(data.affiliate.pixKey ?? '') } })
+      .catch(() => {})
+  }, [tab, affiliate, token])
+
+  async function savePixKey() {
+    setPixSaved(false)
+    try {
+      const res = await fetch('/api/affiliate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, pixKey }),
+      })
+      if (res.ok) { setPixSaved(true); setTimeout(() => setPixSaved(false), 2500) }
+    } catch {}
+  }
 
   const setField = useCallback((k: keyof typeof form, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -257,6 +282,11 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
           <p className="text-xs text-white/55 mt-0.5">
             Posição: {block.pixelX},{block.pixelY} no mapa
           </p>
+          {badges.length > 0 && (
+            <div className="mt-1.5">
+              <BadgeRow badges={badges} />
+            </div>
+          )}
           <Link
             href={`/?highlight=${block.instagramHandle}`}
             className="mt-2 inline-block rounded-lg border border-white/10 px-3 py-1 text-xs text-white/70 hover:text-white/80"
@@ -302,15 +332,31 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
         </div>
       </div>
 
+      {/* Banner de propostas novas — motivo real de voltar ao painel */}
+      {proposals.filter(p => p.status === 'sent').length > 0 && (
+        <button
+          onClick={() => setTab('propostas')}
+          className="animate-glow-pulse flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-3.5 text-left transition-transform hover:-translate-y-0.5"
+          style={{ background: 'var(--grad-gold)' }}
+        >
+          <span className="text-sm font-bold text-[#111]">
+            💼 {proposals.filter(p => p.status === 'sent').length === 1
+              ? 'Você tem 1 proposta nova de marca!'
+              : `Você tem ${proposals.filter(p => p.status === 'sent').length} propostas novas de marcas!`}
+          </span>
+          <span className="text-[#111]/70">Ver agora →</span>
+        </button>
+      )}
+
       {/* Tabs */}
       <div className="flex gap-1 rounded-xl border border-white/8 bg-dark-2 p-1">
-        {(['perfil', 'redes', 'links', 'propostas', 'estatisticas'] as const).map(t => (
+        {(['perfil', 'redes', 'links', 'propostas', 'estatisticas', 'indicacao'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`relative flex-1 rounded-lg py-2 text-xs font-semibold capitalize transition-all ${
               tab === t ? 'bg-white/10 text-white' : 'text-white/65 hover:text-white/60'
             }`}
           >
-            {t === 'perfil' ? 'Perfil' : t === 'redes' ? 'Redes' : t === 'links' ? 'Links' : t === 'propostas' ? '💼' : '📊'}
+            {t === 'perfil' ? 'Perfil' : t === 'redes' ? 'Redes' : t === 'links' ? 'Links' : t === 'propostas' ? '💼' : t === 'estatisticas' ? '📊' : '🎁'}
             {t === 'propostas' && proposals.filter(p => p.status === 'sent').length > 0 && (
               <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[9px] font-bold text-[#111]">
                 {proposals.filter(p => p.status === 'sent').length}
@@ -564,6 +610,59 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
                   </div>
                 </div>
               )}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Tab: Indicação */}
+      {tab === 'indicacao' && (
+        <div className="space-y-4">
+          <div className="rounded-xl border border-gold/20 bg-gold/5 p-4">
+            <p className="text-xs font-bold text-gold mb-1">🎁 Convide outros criadores</p>
+            <p className="text-[11px] leading-relaxed text-white/65">
+              Compartilhe esse link. A gente já está contando cliques e cadastros — quando a recompensa por indicação for definida, quem já apareceu aqui entra valendo.
+            </p>
+          </div>
+
+          {!affiliate ? (
+            <p className="text-xs text-white/45">Carregando...</p>
+          ) : (
+            <>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 truncate rounded-lg bg-white/5 px-3 py-2 text-xs text-white/70">
+                  {typeof window !== 'undefined' ? window.location.origin : ''}/comprar?ref={affiliate.refCode}
+                </code>
+                <button
+                  onClick={() => navigator.clipboard.writeText(`${window.location.origin}/comprar?ref=${affiliate.refCode}`)}
+                  className="shrink-0 rounded-lg border border-white/10 px-3 py-2 text-xs text-white/70 hover:text-white transition-colors"
+                >
+                  copiar
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-xl bg-dark-2 border border-white/8 py-3 text-center">
+                  <p className="font-display text-2xl text-gold">{affiliate.totalClicks}</p>
+                  <p className="text-[10px] text-white/55">cliques no link</p>
+                </div>
+                <div className="rounded-xl bg-dark-2 border border-white/8 py-3 text-center">
+                  <p className="font-display text-2xl text-gold">{affiliate.totalSignups}</p>
+                  <p className="text-[10px] text-white/55">cadastros iniciados</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-white/70">Chave PIX (pra quando a recompensa sair)</label>
+                <div className="flex items-center gap-2">
+                  <input type="text" value={pixKey} onChange={e => setPixKey(e.target.value)}
+                    placeholder="CPF, e-mail, telefone ou aleatória" className="input-dark" />
+                  <button onClick={savePixKey}
+                    className="shrink-0 rounded-lg border border-white/10 px-3 py-2.5 text-xs text-white/70 hover:text-white transition-colors">
+                    {pixSaved ? '✓ salvo' : 'salvar'}
+                  </button>
+                </div>
+              </div>
             </>
           )}
         </div>

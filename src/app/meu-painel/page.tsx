@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import { PainelClient } from './PainelClient'
 import { getBlockStats } from '@/lib/db/analytics'
 import { getProposalsForBlock, markProposalsRead } from '@/lib/db/proposals'
+import { getBlockBadges } from '@/lib/db/blocks'
 import type { CustomLink } from '@/types'
 
 export const metadata: Metadata = {
@@ -53,6 +54,7 @@ export default async function MeuPainelPage({ searchParams }: PageProps) {
   } catch {}
 
   const stats = await getBlockStats(block.id)
+  const badges = await getBlockBadges(block.id)
 
   const proposals = await getProposalsForBlock(block.id)
   await markProposalsRead(block.id)
@@ -75,7 +77,7 @@ export default async function MeuPainelPage({ searchParams }: PageProps) {
         </div>
 
         <Suspense fallback={<div className="h-96 animate-pulse rounded-2xl bg-white/5" />}>
-          <PainelClient block={block as any} token={token} initialCustomLinks={customLinks} stats={stats} initialProposals={proposals} />
+          <PainelClient block={block as any} token={token} initialCustomLinks={customLinks} stats={stats} initialProposals={proposals} badges={badges} />
         </Suspense>
       </div>
     </main>

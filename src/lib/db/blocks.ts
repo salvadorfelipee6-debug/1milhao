@@ -87,6 +87,27 @@ export async function getGridStats() {
   return stats
 }
 
+// Últimas ativações reais — alimenta o feed de atividade da home (sem números
+// inventados: some/renderiza vazio quando não há nada recente de verdade).
+export async function getRecentActivations(limit = 8) {
+  const rows = await db
+    .select({
+      instagramHandle: schema.blocks.instagramHandle,
+      displayName:      schema.blocks.displayName,
+      avatarUrl:        schema.blocks.avatarUrl,
+      colorHex:         schema.blocks.colorHex,
+      pixelCount:       schema.blocks.pixelCount,
+      niche:            schema.blocks.niche,
+      createdAt:        schema.blocks.createdAt,
+    })
+    .from(schema.blocks)
+    .where(eq(schema.blocks.status, 'active'))
+    .orderBy(desc(schema.blocks.createdAt))
+    .limit(limit)
+
+  return rows
+}
+
 // Busca bloco por handle do Instagram
 export async function getBlockByHandle(handle: string) {
   const rows = await db
@@ -268,6 +289,20 @@ export async function updateBlock(
   await invalidateBlocksCache()
 }
 
+// Destaque do mês — quem mais garantiu espaço no calendário atual, sem mexer
+// no ranking permanente (que continua por pixelCount total, para sempre).
+export async function getTopThisMonth(limit = 5) {
+  const now   = new Date()
+  const start = new Date(now.getFullYear(), now.getMonth(), 1)
+
+  return db
+    .select()
+    .from(schema.blocks)
+    .where(and(eq(schema.blocks.status, 'active'), sql`${schema.blocks.createdAt} >= ${start}`))
+    .orderBy(desc(schema.blocks.pixelCount))
+    .limit(limit)
+}
+
 // Top N blocos por pixels (ranking)
 export async function getTopBlocks(limit = 50) {
   return db
@@ -317,5 +352,47 @@ export async function getBlockRanking(blockId: string) {
     nichePosition: (inNiche?.ahead ?? 0) + 1,
     nicheTotal:    totalsNiche?.total ?? 0,
   }
+}
+
+// Badges de marco — status colecionável, calculado (não é campo salvo).
+// Fundador = entre os 100 primeiros cadastros ativos (por ordem de chegada,
+// não por tamanho). Top 10 do nicho reaproveita getBlockRanking. Tamanho é
+// por faixa de pixelCount, só a maior faixa alcançada.
+export async function getBlockBadges(blockId: string): Promise<import('@/types').Badge[]> {
+  const [block] = await db
+    .select({ createdAt: schema.blocks.createdAt, pixelCount: schema.blocks.pixelCount, niche: schema.blocks.niche })
+    .from(schema.blocks)
+    .where(eq(schema.blocks.id, blockId))
+    .limit(1)
+  if (!block) return []
+
+  const badges: import('@/types').Badge[] = []
+
+  const [signupRank] = await db
+    .select({ before: sql<number>`count(*)::int` })
+    .from(schema.blocks)
+    .where(and(eq(schema.blocks.status, 'active'), sql`${schema.blocks.createdAt} < ${block.createdAt}`))
+  if ((signupRank?.before ?? 0) < 100) {
+    badges.push({ key: 'founder', label: 'Fundador', desc: 'Um dos 100 primeiros espaços do mapa', color: '#FFD700', icon: '🏆' })
+  }
+
+  const ranking = await getBlockRanking(blockId)
+  if (ranking && ranking.nichePosition <= 10 && ranking.nicheTotal >= 3) {
+    badges.push({ key: 'top10-niche', label: 'Top 10 do nicho', desc: 'Entre os 10 maiores espaços da categoria', color: '#FFD700', icon: '⭐' })
+  }
+
+  const tiers: [number, string, string, string][] = [
+    [10000, 'tier-imperio', 'Império', '👑'],
+    [2500,  'tier-grande',  'Espaço grande', '🚀'],
+    [900,   'tier-solido',  'Espaço sólido', '💪'],
+    [100,   'tier-inicial', 'Primeiro espaço', '🌱'],
+  ]
+  const tier = tiers.find(([min]) => block.pixelCount >= min)
+  if (tier) {
+    const [, key, label, icon] = tier
+    badges.push({ key, label, desc: `${block.pixelCount.toLocaleString('pt-BR')} pixels no mapa`, color: '#FFD700', icon })
+  }
+
+  return badges
 }
 

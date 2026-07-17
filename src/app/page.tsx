@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { getActiveBlocksForGrid, getGridStats } from '@/lib/db/blocks'
+import { getActiveBlocksForGrid, getGridStats, getRecentActivations } from '@/lib/db/blocks'
 import { HeroSection }       from '@/components/grid/HeroSection'
 import { PixelGrid }         from '@/components/grid/PixelGrid'
 import { HowItWorksSection }  from '@/components/grid/HowItWorksSection'
@@ -27,9 +27,10 @@ export default async function HomePage({ searchParams }: PageProps) {
   const params    = await searchParams
   const highlight = params.highlight || ''
 
-  const [blocks, stats] = await Promise.all([
+  const [blocks, stats, recentActivations] = await Promise.all([
     getActiveBlocksForGrid(),
     getGridStats(),
+    getRecentActivations(),
   ])
 
   return (
@@ -38,7 +39,7 @@ export default async function HomePage({ searchParams }: PageProps) {
       <TickerBanner available={stats.available} />
 
       {/* Hero com grid embutido */}
-      <HeroSection stats={stats} blocks={blocks} highlight={highlight || undefined} />
+      <HeroSection stats={stats} blocks={blocks} highlight={highlight || undefined} activations={recentActivations} />
 
       {/* Grid completo */}
       <section id="grade" className="px-4 pb-12 pt-4">
