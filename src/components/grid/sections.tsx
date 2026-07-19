@@ -24,9 +24,9 @@ export function HowItWorksSection() {
       color: '#405DE6',
     },
     {
-      n: '04', icon: '🗺️',
-      title: 'Apareça para sempre',
-      desc: 'Seu bloco entra no mapa em tempo real. Marcas te acham com um hover. Para sempre.',
+      n: '04', icon: '🚀',
+      title: 'Ganhe seguidores',
+      desc: 'Seu perfil entra no mapa, no ranking e na roleta de descoberta. Quem te encontra segue com 1 clique. Para sempre.',
       color: '#1ed760',
     },
   ]
@@ -419,6 +419,10 @@ export function FAQSection() {
           a: 'É um mapa digital permanente com 1.000.000 de pixels onde cada influencer compra seu espaço. Você aparece para marcas e seguidores para sempre, sem pagar mensalidade.',
         },
         {
+          q: 'Como eu ganho seguidores aqui?',
+          a: 'De vários jeitos ao mesmo tempo: seu bloco aparece no mapa com sua foto; seu perfil entra na roleta de descoberta (/descobrir), onde visitantes giram e seguem com 1 clique; você aparece no ranking por nicho e cidade; e ganha uma página Vitrine 1M com todas as suas redes. Cada visita e clique aparece nas estatísticas do seu painel.',
+        },
+        {
           q: 'Quanto custa e como funciona o pagamento?',
           a: 'R$ 0,99 por pixel, a partir de 1 pixel. O pagamento é único — você paga uma vez e seu espaço fica no mapa para sempre. Aceitamos Pix e cartão de crédito.',
         },
@@ -541,6 +545,7 @@ export async function FooterCTA() {
     { label: 'Início',         href: '/' },
     { label: 'Como funciona',  href: '#como-funciona' },
     { label: 'Preços',         href: '#precos' },
+    { label: 'Descobrir influencers', href: '/descobrir' },
     { label: 'Ranking',        href: '/ranking' },
     { label: 'Para marcas',       href: '/marcas' },
     { label: 'Login anunciante',  href: '/login' },

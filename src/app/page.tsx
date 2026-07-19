@@ -14,7 +14,7 @@ import { TickerBanner }      from '@/components/ui/TickerBanner'
 
 export const metadata: Metadata = {
   title: '1 Milhão de Influencer — O mapa permanente dos influencers do Brasil',
-  description: '1.000.000 de pixels. Cada pixel, um influencer. Compre seu espaço e apareça para marcas e seguidores para sempre. A partir de R$ 0,99.',
+  description: '1.000.000 de pixels. Cada pixel, um influencer. Compre seu espaço uma vez, apareça para sempre e ganhe seguidores todos os dias. A partir de R$ 0,99.',
 }
 
 export const revalidate = 60

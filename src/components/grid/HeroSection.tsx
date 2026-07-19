@@ -191,9 +191,10 @@ export function HeroSection({ stats, blocks, highlight, activations = [] }: Hero
 
           {/* Subtítulo */}
           <p className="mb-6 max-w-md text-sm leading-relaxed text-white/75 lg:text-base">
-            Compre seu espaço <strong className="text-white/85">uma única vez</strong> e apareça para marcas e seguidores{' '}
-            <strong className="text-white/85">para sempre.</strong>{' '}
-            Sem mensalidade. Sem renovação. R$ 0,99 por pixel.
+            Compre seu espaço <strong className="text-white/85">uma única vez</strong> e{' '}
+            <strong className="text-white/85">ganhe seguidores para sempre:</strong>{' '}
+            quem explora o mapa, gira a roleta ou abre o ranking descobre você — e segue com 1 clique.
+            R$ 0,99 por pixel, sem mensalidade.
           </p>
 
           {/* CTAs */}
@@ -201,10 +202,17 @@ export function HeroSection({ stats, blocks, highlight, activations = [] }: Hero
             <Link href="/comprar" className="btn-gold px-7 py-3.5 text-sm">
               Garantir meu espaço — a partir de R$ 0,99 →
             </Link>
-            <Link href="/marcas" className="btn-ghost px-6 py-3.5 text-sm">
-              Sou uma marca
+            <Link href="/descobrir" className="btn-ghost px-6 py-3.5 text-sm">
+              🎰 Descobrir influencers
             </Link>
           </div>
+
+          <p className="-mt-4 mb-8 text-xs text-white/55">
+            É uma marca procurando influencers?{' '}
+            <Link href="/marcas" className="text-white/75 underline underline-offset-2 transition-colors hover:text-white">
+              Acesse o portal de marcas →
+            </Link>
+          </p>
 
           {/* Stats — contraste aumentado */}
           <div className="flex gap-0 border-t border-white/15 pt-6">

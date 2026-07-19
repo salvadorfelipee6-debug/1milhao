@@ -1,6 +1,6 @@
 import 'server-only'
 import { db, schema } from '.'
-import { eq, and, gte, sql, desc, like, or } from 'drizzle-orm'
+import { eq, and, gte, sql, desc, ilike, or } from 'drizzle-orm'
 import { redis } from '../cache'
 
 const CACHE_KEY   = 'blocks:all'
@@ -194,7 +194,7 @@ export async function searchBlocks({
     conditions.push(eq(schema.blocks.niche, niche as schema.Block['niche']))
   }
   if (city) {
-    conditions.push(like(schema.blocks.city!, `%${city}%`))
+    conditions.push(ilike(schema.blocks.city!, `%${city}%`))
   }
   if (minPixels) {
     conditions.push(gte(schema.blocks.pixelCount, minPixels))
@@ -202,8 +202,8 @@ export async function searchBlocks({
   if (keyword) {
     conditions.push(
       or(
-        like(schema.blocks.instagramHandle, `%${keyword}%`),
-        like(schema.blocks.displayName, `%${keyword}%`)
+        ilike(schema.blocks.instagramHandle, `%${keyword}%`),
+        ilike(schema.blocks.displayName, `%${keyword}%`)
       )!
     )
   }
