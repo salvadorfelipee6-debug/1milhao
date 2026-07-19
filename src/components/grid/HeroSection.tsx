@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { GridStats, GridBlock } from '@/types'
 import { LiveVisitors } from '@/components/ui/LiveVisitors'
 import { ActivityFeed } from '@/components/ui/ActivityFeed'
+import { CountUp } from '@/components/ui/Reveal'
 import { NICHE_COLORS } from '@/types'
 
 interface Activation {
@@ -149,10 +150,31 @@ export function HeroSection({ stats, blocks, highlight, activations = [] }: Hero
   return (
     <section className="relative overflow-hidden bg-dark">
 
-      {/* Glow de fundo */}
+      {/* Glow de fundo + pixels flutuando */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-1/4 top-0 h-[500px] w-[500px] rounded-full bg-gold/5 blur-[120px]" />
         <div className="absolute bottom-0 right-1/4 h-[300px] w-[400px] rounded-full bg-pink/4 blur-[80px]" />
+        {[
+          { top: '18%', left: '6%',  size: 10, color: '#FFD700', dur: '9s',  delay: '0s' },
+          { top: '64%', left: '3%',  size: 7,  color: '#E1306C', dur: '11s', delay: '1.2s' },
+          { top: '30%', left: '44%', size: 8,  color: '#833AB4', dur: '10s', delay: '0.6s' },
+          { top: '78%', left: '38%', size: 6,  color: '#FFD700', dur: '12s', delay: '2s' },
+          { top: '10%', left: '30%', size: 5,  color: '#405DE6', dur: '9.5s', delay: '1.6s' },
+          { top: '50%', left: '48%', size: 6,  color: '#1ed760', dur: '13s', delay: '0.3s' },
+        ].map((p, i) => (
+          <span
+            key={i}
+            className="pixel-drift"
+            style={{
+              top: p.top, left: p.left,
+              width: p.size, height: p.size,
+              background: p.color,
+              boxShadow: `0 0 ${p.size * 2}px ${p.color}88`,
+              ['--drift-dur' as string]: p.dur,
+              ['--drift-delay' as string]: p.delay,
+            }}
+          />
+        ))}
       </div>
 
       {/* Layout duas colunas */}
@@ -176,8 +198,8 @@ export function HeroSection({ stats, blocks, highlight, activations = [] }: Hero
             <span className="block text-[clamp(28px,5vw,52px)] text-white/90">O MAPA PERMANENTE</span>
             <span className="block text-[clamp(28px,5vw,52px)] text-white/90">DOS</span>
             <span
-              className="block text-[clamp(36px,7vw,72px)]"
-              style={{ color: '#FFD700', textShadow: '0 0 60px rgba(255,215,0,0.35)' }}
+              className="animate-title-glow block text-[clamp(36px,7vw,72px)]"
+              style={{ color: '#FFD700' }}
             >
               INFLUENCERS
             </span>
@@ -191,10 +213,10 @@ export function HeroSection({ stats, blocks, highlight, activations = [] }: Hero
 
           {/* Subtítulo */}
           <p className="mb-6 max-w-md text-sm leading-relaxed text-white/75 lg:text-base">
-            Compre seu espaço <strong className="text-white/85">uma única vez</strong> e{' '}
-            <strong className="text-white/85">ganhe seguidores para sempre:</strong>{' '}
-            quem explora o mapa, gira a roleta ou abre o ranking descobre você — e segue com 1 clique.
-            R$ 0,99 por pixel, sem mensalidade.
+            <strong className="text-gold">Do primeiro seguidor ao próximo milhão.</strong>{' '}
+            Está começando? Quem explora o mapa e gira a roleta descobre você — e segue com 1 clique.
+            Já é grande? Bloco gigante, topo do ranking e propostas de marcas.{' '}
+            <strong className="text-white/85">R$ 0,99 por pixel, uma única vez, seu pra sempre.</strong>
           </p>
 
           {/* CTAs */}
@@ -217,10 +239,10 @@ export function HeroSection({ stats, blocks, highlight, activations = [] }: Hero
           {/* Stats — contraste aumentado */}
           <div className="flex gap-0 border-t border-white/15 pt-6">
             {[
-              { n: stats.sold.toLocaleString('pt-BR'), l: 'pixels vendidos' },
-              { n: stats.active.toString(),            l: 'influencers' },
-              { n: 'R$0,99',                           l: 'por pixel' },
-              { n: '∞',                                l: 'vitalício' },
+              { n: <CountUp value={stats.sold} />,   l: 'pixels vendidos' },
+              { n: <CountUp value={stats.active} />, l: 'influencers' },
+              { n: 'R$0,99',                         l: 'por pixel' },
+              { n: '∞',                              l: 'vitalício' },
             ].map((s, i) => (
               <div key={s.l} className={`flex-1 text-center ${i > 0 ? 'border-l border-white/15' : ''}`}>
                 <p className="font-display text-xl text-gold">{s.n}</p>

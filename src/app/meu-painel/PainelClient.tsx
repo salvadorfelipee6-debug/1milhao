@@ -6,6 +6,7 @@ import { NICHE_LABELS, NICHE_COLORS, NICHE_EMOJI } from '@/types'
 import type { CustomLink, Badge } from '@/types'
 import { ImageUpload } from '@/components/forms/ImageUpload'
 import { CityAutocomplete } from '@/components/forms/CityAutocomplete'
+import { ProfileStrength } from '@/components/forms/ProfileStrength'
 import { VitrinePreviewModal } from './VitrinePreviewModal'
 import { BadgeRow } from '@/components/ui/BadgeRow'
 
@@ -331,6 +332,9 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
           </a>
         </div>
       </div>
+
+      {/* Força do perfil — atualiza ao vivo enquanto edita qualquer aba */}
+      <ProfileStrength fields={form} customLinksCount={customLinks.filter(l => l.label && l.url).length} />
 
       {/* Banner de propostas novas — motivo real de voltar ao painel */}
       {proposals.filter(p => p.status === 'sent').length > 0 && (

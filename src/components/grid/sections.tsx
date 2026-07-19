@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getTopBlocks, getGridStats } from '@/lib/db/blocks'
 import { NICHE_LABELS, NICHE_COLORS } from '@/types'
+import { Reveal } from '@/components/ui/Reveal'
 
 // ─── Como Funciona ────────────────────────────────────────
 export function HowItWorksSection() {
@@ -41,24 +42,24 @@ export function HowItWorksSection() {
       </div>
 
       <div className="relative mx-auto max-w-5xl">
-        <div className="mb-16 text-center">
+        <Reveal className="mb-16 text-center">
           <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-pink">
             Como funciona
           </p>
           <h2 className="font-display text-5xl tracking-wide text-white md:text-6xl">
             4 PASSOS PARA<br />
-            <span className="text-gold">APARECER</span>
+            <span className="text-gold">GANHAR SEGUIDORES</span>
           </h2>
           <p className="mt-4 text-sm text-white/60">
-            Sem assinatura. Sem renovação. Pague uma vez, apareça sempre.
+            Começando do zero ou já com milhões: pague uma vez, apareça sempre.
           </p>
-        </div>
+        </Reveal>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((s, i) => (
+            <Reveal key={s.n} delay={i * 110}>
             <div
-              key={s.n}
-              className="group relative overflow-hidden rounded-2xl border border-white/5 bg-dark-3 p-6 transition-all hover:-translate-y-1 hover:border-white/10"
+              className="group relative h-full overflow-hidden rounded-2xl border border-white/5 bg-dark-3 p-6 transition-all hover:-translate-y-1 hover:border-white/10"
             >
               {/* Número grande decorativo */}
               <div
@@ -86,6 +87,7 @@ export function HowItWorksSection() {
                 style={{ background: s.color }}
               />
             </div>
+            </Reveal>
           ))}
         </div>
 
@@ -103,12 +105,12 @@ export function HowItWorksSection() {
 // ─── Preços ───────────────────────────────────────────────
 export function PricingSection() {
   const plans = [
-    { name: 'Micro',   pixels: 1,      side: 1,   price: '0,99',   niche: 'fitness',     featured: false },
-    { name: 'Básico',  pixels: 100,    side: 10,  price: '99',     niche: 'tecnologia',  featured: false },
-    { name: 'Médio',   pixels: 900,    side: 30,  price: '891',    niche: 'moda',        featured: true  },
-    { name: 'Grande',  pixels: 2500,   side: 50,  price: '2.475',  niche: 'viagens',     featured: false },
-    { name: 'Premium', pixels: 10000,  side: 100, price: '9.900',  niche: 'games',       featured: false },
-    { name: 'Marca',   pixels: 40000,  side: 200, price: '39.600', niche: 'financas',    featured: false },
+    { name: 'Micro',   pixels: 1,      side: 1,   price: '0,99',   niche: 'fitness',     featured: false, tag: 'seu primeiro passo' },
+    { name: 'Básico',  pixels: 100,    side: 10,  price: '99',     niche: 'tecnologia',  featured: false, tag: 'pra quem tá começando' },
+    { name: 'Médio',   pixels: 900,    side: 30,  price: '891',    niche: 'moda',        featured: true,  tag: 'criador em crescimento' },
+    { name: 'Grande',  pixels: 2500,   side: 50,  price: '2.475',  niche: 'viagens',     featured: false, tag: 'destaque no mapa' },
+    { name: 'Premium', pixels: 10000,  side: 100, price: '9.900',  niche: 'games',       featured: false, tag: 'pra quem já é grande' },
+    { name: 'Marca',   pixels: 40000,  side: 200, price: '39.600', niche: 'financas',    featured: false, tag: 'presença de gigante' },
   ]
 
   return (
@@ -118,7 +120,7 @@ export function PricingSection() {
       </div>
 
       <div className="relative mx-auto max-w-5xl">
-        <div className="mb-16 text-center">
+        <Reveal className="mb-16 text-center">
           <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-gold">
             Preços
           </p>
@@ -127,19 +129,19 @@ export function PricingSection() {
             <span className="text-gold">SEU ESPAÇO</span>
           </h2>
           <p className="mt-4 text-sm text-white/60">
-            Cada real investido é permanente. Não existe renovação. R$ 0,99/pixel.
+            Tem tamanho pra cada fase: do primeiro pixel de quem tá começando ao quarteirão de quem já é gigante. R$ 0,99/pixel, permanente.
           </p>
-        </div>
+        </Reveal>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {plans.map(p => {
+          {plans.map((p, i) => {
             const color = NICHE_COLORS[p.niche as keyof typeof NICHE_COLORS] || '#E1306C'
             const previewSize = Math.min(p.side, 72)
 
             return (
+              <Reveal key={p.name} delay={(i % 3) * 100}>
               <div
-                key={p.name}
-                className={`group relative overflow-hidden rounded-2xl p-5 transition-all hover:-translate-y-1 ${
+                className={`group relative h-full overflow-hidden rounded-2xl p-5 transition-all hover:-translate-y-1 ${
                   p.featured
                     ? 'border border-gold/30 bg-gold/5'
                     : 'border border-white/5 bg-dark-2 hover:border-white/10'
@@ -176,6 +178,7 @@ export function PricingSection() {
                 </div>
 
                 <p className="text-[10px] font-bold uppercase tracking-widest text-white/55">{p.name}</p>
+                <p className="mt-0.5 text-xs font-semibold" style={{ color: color + 'cc' }}>{p.tag}</p>
                 <p className="mt-0.5 text-xs text-white/45">
                   {p.pixels.toLocaleString('pt-BR')} pixels · {p.side}×{p.side}
                 </p>
@@ -196,6 +199,7 @@ export function PricingSection() {
                   Escolher
                 </Link>
               </div>
+              </Reveal>
             )
           })}
         </div>
@@ -220,7 +224,7 @@ export async function RankingSection() {
       </div>
 
       <div className="relative mx-auto max-w-2xl">
-        <div className="mb-10 text-center">
+        <Reveal className="mb-10 text-center">
           <p className="mb-3 text-[11px] font-bold uppercase tracking-widest" style={{ color: '#833AB4' }}>
             Ranking
           </p>
@@ -228,15 +232,15 @@ export async function RankingSection() {
             OS MAIORES<br />
             <span className="text-gold">BLOCOS</span>
           </h2>
-        </div>
+        </Reveal>
 
         <div className="space-y-2">
           {top.map((b, i) => {
             const initials = (b.displayName || b.instagramHandle).slice(0, 2).toUpperCase()
             const color    = b.colorHex || '#E1306C'
             return (
+              <Reveal key={b.id} delay={i * 60}>
               <Link
-                key={b.id}
                 href={`/influencer/${b.instagramHandle}`}
                 className="group flex items-center gap-3 rounded-xl border border-white/5 bg-dark-3 px-4 py-3 transition-all hover:-translate-y-0.5 hover:border-white/10"
               >
@@ -264,6 +268,7 @@ export async function RankingSection() {
                 </div>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-white/40 group-hover:text-white/65 transition-colors"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
+              </Reveal>
             )
           })}
         </div>
@@ -289,7 +294,7 @@ export async function SocialProofSection() {
       </div>
 
       <div className="relative mx-auto max-w-5xl">
-        <div className="mb-14 text-center">
+        <Reveal className="mb-14 text-center">
           <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-pink">
             Quem já garantiu
           </p>
@@ -300,20 +305,20 @@ export async function SocialProofSection() {
           <p className="mt-4 text-sm text-white/60">
             Esses influencers já garantiram seu espaço permanente. O seu ainda está disponível.
           </p>
-        </div>
+        </Reveal>
 
         {/* Cards dos early adopters */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {top.map((b) => {
+          {top.map((b, cardIdx) => {
             const initials   = (b.displayName || b.instagramHandle).slice(0, 2).toUpperCase()
             const color      = b.colorHex || '#E1306C'
             const nicheLabel = NICHE_LABELS[b.niche as keyof typeof NICHE_LABELS] ?? b.niche
 
             return (
+              <Reveal key={b.id} delay={(cardIdx % 3) * 100}>
               <Link
-                key={b.id}
                 href={`/influencer/${b.instagramHandle}`}
-                className="group relative overflow-hidden rounded-2xl border border-white/5 bg-dark-2 p-5 transition-all hover:-translate-y-1 hover:border-white/10"
+                className="group relative block h-full overflow-hidden rounded-2xl border border-white/5 bg-dark-2 p-5 transition-all hover:-translate-y-1 hover:border-white/10"
               >
                 {/* Badge early adopter */}
                 <div className="absolute right-3 top-3 rounded-full bg-gold/15 px-2 py-0.5 text-[9px] font-bold text-gold">
@@ -371,6 +376,7 @@ export async function SocialProofSection() {
                   <span className="text-xs font-semibold text-gold">Ver perfil completo →</span>
                 </div>
               </Link>
+              </Reveal>
             )
           })}
         </div>
@@ -382,15 +388,14 @@ export async function SocialProofSection() {
             { icon: '⚡', n: 'R$ 0,99',  l: 'por pixel' },
             { icon: '∞',  n: 'vitalício', l: 'sem renovação' },
             { icon: '🔗', n: 'gratuito',  l: 'link-in-bio incluso' },
-          ].map(s => (
-            <div
-              key={s.l}
-              className="rounded-2xl border border-white/5 bg-dark-2 p-5 text-center"
-            >
-              <div className="mb-2 text-2xl">{s.icon}</div>
+          ].map((s, i) => (
+            <Reveal key={s.l} delay={i * 80}>
+            <div className="h-full rounded-2xl border border-white/5 bg-dark-2 p-5 text-center">
+              <div className="mb-2 text-2xl animate-float" style={{ animationDelay: `${i * 0.4}s` }}>{s.icon}</div>
               <p className="font-display text-xl text-gold">{s.n}</p>
               <p className="mt-1 text-[10px] uppercase tracking-widest text-white/55">{s.l}</p>
             </div>
+            </Reveal>
           ))}
         </div>
 
@@ -417,6 +422,10 @@ export function FAQSection() {
         {
           q: 'O que é o 1 Milhão de Influencer?',
           a: 'É um mapa digital permanente com 1.000.000 de pixels onde cada influencer compra seu espaço. Você aparece para marcas e seguidores para sempre, sem pagar mensalidade.',
+        },
+        {
+          q: 'Estou começando do zero. Funciona pra mim?',
+          a: 'Sim — foi feito pra isso. Por R$ 0,99 você já entra no mapa, na roleta de descoberta e no ranking do seu nicho: os mesmos lugares onde os grandes aparecem. Quem está começando é descoberto por quem navega; quem já é grande usa o espaço pra multiplicar a audiência que já tem. Os dois saem ganhando seguidores.',
         },
         {
           q: 'Como eu ganho seguidores aqui?',
@@ -475,7 +484,7 @@ export function FAQSection() {
       </div>
 
       <div className="relative mx-auto max-w-3xl">
-        <div className="mb-14 text-center">
+        <Reveal className="mb-14 text-center">
           <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-gold">
             Dúvidas frequentes
           </p>
@@ -483,7 +492,7 @@ export function FAQSection() {
             PERGUNTAS &<br />
             <span className="text-gold">RESPOSTAS</span>
           </h2>
-        </div>
+        </Reveal>
 
         <div className="space-y-10">
           {faqs.map(cat => (
@@ -560,6 +569,7 @@ export async function FooterCTA() {
       </div>
 
       <div className="relative mx-auto max-w-2xl text-center">
+        <Reveal>
         {/* Urgência */}
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-4 py-1.5 text-xs text-red-400">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
@@ -567,12 +577,13 @@ export async function FooterCTA() {
         </div>
 
         <h2 className="font-display text-5xl tracking-wide text-white md:text-7xl">
-          SUA VEZ<br />
-          <span className="text-gold">DE APARECER</span>
+          SEUS PRÓXIMOS SEGUIDORES<br />
+          <span className="animate-title-glow" style={{ color: '#FFD700' }}>ESTÃO AQUI</span>
         </h2>
         <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-white/65">
-          Quando acabar, acabou. Espaço permanente a partir de R$ 0,99. Sem renovação. Para sempre.
+          Começando do zero ou já com milhões: quando acabar, acabou. Espaço permanente a partir de R$ 0,99. Sem renovação. Para sempre.
         </p>
+        </Reveal>
 
         {/* CTAs */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

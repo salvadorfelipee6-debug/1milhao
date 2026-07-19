@@ -7,6 +7,7 @@ import { NICHE_LABELS, NICHE_EMOJI, PIXEL_PRICE } from '@/types'
 import { ImageUpload } from './ImageUpload'
 import { CityAutocomplete } from './CityAutocomplete'
 import { PositionPicker } from './PositionPicker'
+import { ProfileStrength } from './ProfileStrength'
 
 const MIN_PIXELS  = 1
 const MAX_PIXELS  = 1000000
@@ -337,13 +338,13 @@ export function RegisterForm({ stats }: RegisterFormProps) {
       {step === 1 && (
         <div className="space-y-4">
 
-          {/* Preview + calculadora lado a lado */}
-          <div className="grid grid-cols-5 gap-4">
-            <div className="col-span-2">
+          {/* Preview + calculadora lado a lado (empilha no celular) */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
+            <div className="sm:col-span-2">
               <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/55">
                 Preview do bloco
               </p>
-              <div className="overflow-hidden rounded-xl border border-white/8 bg-dark-2">
+              <div className="mx-auto w-full max-w-[220px] overflow-hidden rounded-xl border border-white/8 bg-dark-2 sm:max-w-none">
                 <BlockPreview
                   width={dims.width}
                   height={dims.height}
@@ -358,7 +359,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
               </p>
             </div>
 
-            <div className="col-span-3 space-y-4">
+            <div className="sm:col-span-3 space-y-4">
               <div className="card-dark rounded-2xl p-4">
                 <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-white/55">
                   {gridW && gridH
@@ -470,13 +471,13 @@ export function RegisterForm({ stats }: RegisterFormProps) {
       {step === 2 && (
         <div className="space-y-4">
 
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
             {/* Preview ao vivo */}
-            <div className="col-span-2 space-y-2">
+            <div className="sm:col-span-2 space-y-2">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-white/55">
                 Preview ao vivo
               </p>
-              <div className="overflow-hidden rounded-xl border border-white/8 bg-dark-2">
+              <div className="mx-auto w-full max-w-[220px] overflow-hidden rounded-xl border border-white/8 bg-dark-2 sm:max-w-none">
                 <BlockPreview
                   width={dims.width}
                   height={dims.height}
@@ -486,6 +487,12 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                   color={blockColor}
                 />
               </div>
+              {/* Força do perfil — mostra ao vivo o que ainda vale pontos */}
+              <ProfileStrength
+                fields={form}
+                customLinksCount={customLinks.filter(l => l.label && l.url).length}
+              />
+
               {/* Mini popup preview */}
               {(form.instagramHandle || form.displayName) && (
                 <div className="rounded-xl border border-white/8 bg-dark-2 p-2.5 text-[11px]">
@@ -505,7 +512,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
             </div>
 
             {/* Campos */}
-            <div className="col-span-3 space-y-3">
+            <div className="sm:col-span-3 space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="mb-1 block text-[10px] font-semibold text-white/70">

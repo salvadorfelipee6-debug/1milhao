@@ -3,8 +3,124 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { BlockForGrid } from '@/lib/db/blocks'
-import { NICHE_LABELS, NICHE_EMOJI } from '@/types'
+import { NICHE_LABELS, NICHE_EMOJI, NICHE_COLORS } from '@/types'
 import { SOCIAL_CONFIG } from '@/lib/socialConfig'
+
+// ─── Roleta demo: mapa vazio ─────────────────────────────────
+// Gira "vagas abertas" por nicho (sem gente fake) — a página nasce viva
+// e cada carta vendida é uma vaga real do mapa.
+const DEMO_SLOTS = (Object.keys(NICHE_LABELS) as (keyof typeof NICHE_LABELS)[]).map(n => ({
+  niche: n,
+  label: NICHE_LABELS[n],
+  emoji: NICHE_EMOJI[n],
+  color: NICHE_COLORS[n],
+}))
+
+function DemoRoleta() {
+  const [idx, setIdx]           = useState(0)
+  const [spinning, setSpinning] = useState(false)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const busyRef    = useRef(false)
+
+  function spin() {
+    if (busyRef.current) return
+    busyRef.current = true
+    setSpinning(true)
+    const steps = 8 + Math.floor(Math.random() * 4)
+    let i = 0
+    const tick = (delay: number) => {
+      timeoutRef.current = setTimeout(() => {
+        setIdx(Math.floor(Math.random() * DEMO_SLOTS.length))
+        i++
+        if (i < steps) tick(delay * 1.22)
+        else {
+          setSpinning(false)
+          busyRef.current = false
+        }
+      }, delay)
+    }
+    tick(65)
+  }
+
+  // Gira sozinha de tempos em tempos — a página nunca fica parada
+  useEffect(() => {
+    spin()
+    const auto = setInterval(spin, 5000)
+    return () => {
+      clearInterval(auto)
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const slot = DEMO_SLOTS[idx] ?? DEMO_SLOTS[0]!
+
+  return (
+    <>
+      <div
+        className="overflow-hidden rounded-3xl border border-white/10 shadow-2xl transition-all duration-150"
+        style={{
+          background: '#111',
+          transform:  spinning ? 'scale(0.97)' : 'scale(1)',
+          filter:     spinning ? 'blur(1.5px) saturate(1.4)' : 'none',
+        }}
+        aria-live="polite"
+      >
+        <div
+          className="relative h-28"
+          style={{ background: `linear-gradient(135deg, ${slot.color}66, ${slot.color}18)` }}
+        >
+          <div
+            className="absolute -bottom-10 left-1/2 flex h-20 w-20 -translate-x-1/2 items-center justify-center rounded-full text-3xl"
+            style={{ background: slot.color + '33', border: `4px solid #111`, boxShadow: `0 0 30px ${slot.color}55` }}
+          >
+            {slot.emoji}
+          </div>
+        </div>
+
+        <div className="px-6 pb-6 pt-14 text-center">
+          <p className="text-lg font-bold text-white">@seuarroba</p>
+          <p className="mt-0.5 text-xs text-white/60">
+            {slot.emoji} {slot.label} · <span style={{ color: slot.color }}>vaga aberta</span>
+          </p>
+
+          <p className="mt-3 inline-block rounded-full bg-white/5 px-3 py-1 text-xs font-bold text-gold">
+            seus futuros seguidores
+          </p>
+
+          <p className="mx-auto mt-3 max-w-xs text-xs leading-relaxed text-white/70">
+            Esta vaga de {slot.label} ainda não tem dono. Quem entrar primeiro
+            aparece em todos os giros — sem dividir a atenção com ninguém.
+          </p>
+
+          <Link
+            href="/comprar"
+            className="btn-gold mt-5 flex w-full items-center justify-center py-3.5 text-sm"
+          >
+            Garantir esta vaga — R$ 0,99 →
+          </Link>
+          <Link
+            href="/"
+            className="mt-2 block w-full rounded-2xl border border-white/10 py-3 text-xs font-semibold text-white/60 transition-all hover:border-white/20 hover:text-white/80"
+          >
+            Ver o mapa →
+          </Link>
+        </div>
+      </div>
+
+      <button
+        onClick={spin}
+        disabled={spinning}
+        className="btn-gold mt-5 w-full py-4 text-base disabled:opacity-60"
+      >
+        {spinning ? 'Girando…' : '🎰 Girar de novo'}
+      </button>
+      <p className="mt-3 text-center text-[11px] text-white/55">
+        O mapa acabou de abrir — a roleta está girando as primeiras vagas.
+      </p>
+    </>
+  )
+}
 
 interface DescobrirClientProps {
   blocks:           BlockForGrid[]
@@ -198,8 +314,10 @@ export function DescobrirClient({ blocks, totalInfluencers }: DescobrirClientPro
           </div>
         )}
 
-        {/* Card do perfil sorteado */}
-        {current ? (
+        {/* Card do perfil sorteado — ou roleta demo de vagas se o mapa está vazio */}
+        {blocks.length === 0 ? (
+          <DemoRoleta />
+        ) : current ? (
           <div
             className="overflow-hidden rounded-3xl border border-white/10 shadow-2xl transition-all duration-150"
             style={{
@@ -285,16 +403,14 @@ export function DescobrirClient({ blocks, totalInfluencers }: DescobrirClientPro
             </div>
           </div>
         ) : (
-          /* Estado vazio — mapa sem ninguém (ou nicho sem ninguém) */
+          /* Nicho filtrado sem ninguém ainda */
           <div className="rounded-3xl border border-gold/20 bg-gold/5 p-10 text-center">
             <p className="mb-2 text-4xl">🎰</p>
             <p className="font-display text-2xl tracking-wide text-white">
-              {niche ? 'NINGUÉM DESSE NICHO AINDA' : 'O MAPA ACABOU DE ABRIR'}
+              NINGUÉM DESSE NICHO AINDA
             </p>
             <p className="mx-auto mt-2 max-w-xs text-sm text-white/65">
-              {niche
-                ? 'Seja o primeiro do seu nicho a aparecer na roleta — sem concorrência, todos os giros são seus.'
-                : 'Os primeiros a entrar aparecem em todos os giros da roleta. Melhor hora impossível.'}
+              Seja o primeiro do seu nicho a aparecer na roleta — sem concorrência, todos os giros são seus.
             </p>
             <Link href="/comprar" className="btn-gold mt-6 inline-block px-8 py-3.5 text-sm">
               Garantir meu espaço — R$ 0,99 →
@@ -324,7 +440,8 @@ export function DescobrirClient({ blocks, totalInfluencers }: DescobrirClientPro
             Quer aparecer nessa roleta e <span className="text-gold">ganhar seguidores</span>?
           </p>
           <p className="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-white/65">
-            Cada giro coloca seu perfil na frente de alguém novo — com botão de seguir a 1 clique.
+            Está começando? É assim que seus primeiros seguidores te encontram.
+            Já é grande? Mais um canal girando a seu favor, com botão de seguir a 1 clique.
             Pagamento único a partir de R$ 0,99, apareça pra sempre.
           </p>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
