@@ -555,6 +555,7 @@ export async function FooterCTA() {
     { label: 'Como funciona',  href: '#como-funciona' },
     { label: 'Preços',         href: '#precos' },
     { label: 'Descobrir influencers', href: '/descobrir' },
+    { label: 'Link na bio (Vitrine 1M)', href: '/vitrine' },
     { label: 'Ranking',        href: '/ranking' },
     { label: 'Para marcas',       href: '/marcas' },
     { label: 'Login anunciante',  href: '/login' },
