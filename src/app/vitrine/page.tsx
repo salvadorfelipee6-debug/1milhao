@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { SocialLinks } from '@/components/ui/social-links'
 import { Reveal } from '@/components/ui/Reveal'
 import { SOCIAL_CONFIG } from '@/lib/socialConfig'
+import { BrandShapes } from '@/components/ui/shape-landing-hero'
+import { FeatureCardsFx, ComparativoFx } from './VitrineFx'
 
 export const metadata: Metadata = {
   title: 'Vitrine 1M — link na bio vitalício por R$ 0,99',
@@ -14,14 +16,14 @@ export const metadata: Metadata = {
 const DEMO_KEYS = ['instagramUrl', 'youtubeUrl', 'tiktokUrl', 'spotifyUrl', 'twitterUrl'] as const
 
 const FEATURES = [
-  { icon: '🔗', title: 'Sua página própria',        desc: '1milhao.com.br/influencer/seuarroba — pronta pra colar na bio do Instagram.' },
-  { icon: '📱', title: 'Todas as suas redes',        desc: 'Instagram, YouTube, TikTok, X, Facebook, Kwai, OnlyFans, Spotify e WhatsApp em botões oficiais.' },
-  { icon: '🧩', title: 'Até 6 links livres',          desc: 'Loja, curso, portfólio, PIX, o que você quiser — com emoji e nome próprios.' },
-  { icon: '📊', title: 'Estatísticas reais',          desc: 'Visitas e cliques por rede e por link, direto no seu painel. Sem achismo.' },
-  { icon: '🎯', title: 'QR code pronto',              desc: 'Gere o QR da sua página pra usar em card, banner ou stories.' },
-  { icon: '📸', title: 'Mídia kit automático',        desc: 'Página de mídia kit gerada com seus números — baixe em imagem e mande pra marcas.' },
-  { icon: '💼', title: 'Propostas de marcas',         desc: 'Marcas enviam briefing direto pra você. Aceita ou recusa no painel.' },
-  { icon: '🗺️', title: 'Pixel no mapa incluso',       desc: 'Seu R$ 0,99 já compra 1 pixel no mapa — você entra na roleta e no ranking.' },
+  { icon: '🔗', title: 'Sua página própria',    desc: '1milhao.com.br/influencer/seuarroba — pronta pra colar na bio do Instagram.', accent: '#FFD700' },
+  { icon: '📱', title: 'Todas as suas redes',   desc: 'Instagram, YouTube, TikTok, X, Facebook, Kwai, OnlyFans, Spotify e WhatsApp em botões oficiais.', accent: '#E1306C' },
+  { icon: '🧩', title: 'Até 6 links livres',     desc: 'Loja, curso, portfólio, PIX, o que você quiser — com emoji e nome próprios.', accent: '#833AB4' },
+  { icon: '📊', title: 'Estatísticas reais',     desc: 'Visitas e cliques por rede e por link, direto no seu painel. Sem achismo.', accent: '#405DE6' },
+  { icon: '🎯', title: 'QR code pronto',         desc: 'Gere o QR da sua página pra usar em card, banner ou stories.', accent: '#F77737' },
+  { icon: '📸', title: 'Mídia kit automático',   desc: 'Página de mídia kit gerada com seus números — baixe em imagem e mande pra marcas.', accent: '#0095F6' },
+  { icon: '💼', title: 'Propostas de marcas',    desc: 'Marcas enviam briefing direto pra você. Aceita ou recusa no painel.', accent: '#1ed760' },
+  { icon: '🗺️', title: 'Pixel no mapa incluso',  desc: 'É assim que o link nasce: você garante um espaço no mapa e a página vem junto — mais roleta e ranking.', accent: '#FFA500' },
 ]
 
 export default function VitrinePage() {
@@ -32,11 +34,12 @@ export default function VitrinePage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-dark px-4 pb-16 pt-24 lg:pt-16">
 
-      {/* Glow de fundo */}
+      {/* Glow de fundo + formas de vidro flutuantes */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-1/2 top-0 h-[420px] w-[640px] -translate-x-1/2 rounded-full bg-gold/5 blur-[120px]" />
         <div className="absolute bottom-0 right-1/4 h-[300px] w-[400px] rounded-full bg-pink/4 blur-[100px]" />
       </div>
+      <BrandShapes />
 
       <div className="relative mx-auto max-w-3xl">
 
@@ -78,64 +81,39 @@ export default function VitrinePage() {
         {/* CTA topo */}
         <div className="mt-6 text-center">
           <Link href="/comprar?pixels=1" className="btn-gold px-9 py-4 text-base">
-            Criar minha Vitrine — R$ 0,99 →
+            Pegar meu link na bio vitalício — R$ 0,99 →
           </Link>
-          <p className="mt-2 text-[11px] text-white/55">
-            Pagamento único · vitalício · pronto em 2 minutos
+          <p className="mx-auto mt-3 max-w-md text-xs leading-relaxed text-white/65">
+            Como funciona: você garante um <strong className="text-white/85">espaço no mapa dos influencers</strong>{' '}
+            (a partir de 1 pixel, R$ 0,99) e o <strong className="text-gold">link na bio completo já vem junto</strong>.
+            Pagamento único, tudo vitalício, pronto em 2 minutos.
           </p>
         </div>
 
-        {/* Tudo que vem nos R$ 0,99 */}
+        {/* Tudo que vem no R$ 0,99 */}
         <Reveal className="mt-16 text-center">
           <h2 className="font-display text-4xl tracking-wide text-white md:text-5xl">
-            TUDO ISSO NOS<br /><span className="text-gold">R$ 0,99</span>
+            TUDO ISSO POR<br /><span className="text-gold">R$ 0,99</span>
           </h2>
           <p className="mt-3 text-sm text-white/60">
             Não é versão grátis capada. É o produto inteiro, de uma vez, pra sempre.
           </p>
         </Reveal>
 
-        <div className="mt-8 grid gap-3 sm:grid-cols-2">
-          {FEATURES.map((f, i) => (
-            <Reveal key={f.title} delay={(i % 2) * 90}>
-              <div className="h-full rounded-2xl border border-white/5 bg-dark-2 p-5 transition-all hover:-translate-y-0.5 hover:border-white/10">
-                <div className="mb-2 text-2xl">{f.icon}</div>
-                <p className="text-sm font-bold text-white">{f.title}</p>
-                <p className="mt-1 text-xs leading-relaxed text-white/65">{f.desc}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
+        <FeatureCardsFx features={FEATURES} />
 
-        {/* Comparativo assinatura vs vitalício */}
-        <Reveal className="mt-16">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-white/8 bg-dark-2 p-6">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/55">
-                Ferramentas de assinatura
-              </p>
-              <p className="mt-2 font-display text-3xl text-white/80">R$ 20–50<span className="text-base text-white/55">/mês</span></p>
-              <ul className="mt-3 space-y-1.5 text-xs text-white/60">
-                <li>✕ Cobra todo mês, pra sempre</li>
-                <li>✕ Cancelou, sumiu sua página</li>
-                <li>✕ Recursos bons só no plano pago</li>
-                <li>✕ Você é mais um no meio de milhões</li>
-              </ul>
-            </div>
-            <div className="rounded-2xl border border-gold/30 bg-gold/5 p-6">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gold">
-                Vitrine 1M
-              </p>
-              <p className="mt-2 font-display text-3xl text-gold">R$ 0,99<span className="text-base text-white/65"> uma vez</span></p>
-              <ul className="mt-3 space-y-1.5 text-xs text-white/70">
-                <li>✓ Vitalício — paga uma vez, é seu</li>
-                <li>✓ Estatísticas, QR e mídia kit inclusos</li>
-                <li>✓ Marcas te encontram e mandam proposta</li>
-                <li>✓ Bônus: pixel no mapa + roleta + ranking</li>
-              </ul>
-            </div>
-          </div>
+        {/* Comparativo assinatura vs vitalício — relógio cobrando ao vivo */}
+        <Reveal className="mt-16 text-center">
+          <h2 className="font-display text-4xl tracking-wide text-white md:text-5xl">
+            ENQUANTO VOCÊ LÊ,<br /><span className="text-gold">A ASSINATURA COBRA</span>
+          </h2>
+          <p className="mt-3 text-sm text-white/60">
+            Cada tique é um mês de mensalidade. Repare em qual lado o número não se mexe.
+          </p>
         </Reveal>
+        <div className="mt-8">
+          <ComparativoFx />
+        </div>
 
         {/* Sem surpresas */}
         <Reveal className="mt-10">
@@ -156,7 +134,7 @@ export default function VitrinePage() {
           </h2>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link href="/comprar?pixels=1" className="btn-gold px-10 py-4 text-base">
-              Criar minha Vitrine — R$ 0,99 →
+              Pegar meu link na bio vitalício — R$ 0,99 →
             </Link>
             <Link href="/" className="btn-ghost px-7 py-4 text-sm">
               Ver o mapa

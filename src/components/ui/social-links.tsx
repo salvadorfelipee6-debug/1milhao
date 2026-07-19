@@ -64,7 +64,9 @@ export function SocialLinks({ socials, autoCycleMs = 2000, className, ...props }
               ? { href: social.href, target: '_blank', rel: 'noopener noreferrer' }
               : {})}
             className={cn(
-              'relative cursor-pointer px-4 py-2 transition-opacity duration-200 sm:px-5',
+              // pt-16 inclui a zona onde a logo aparece — o hover pega na área
+              // toda (logo + palavra), não só no texto
+              'relative cursor-pointer px-4 pb-2 pt-16 transition-opacity duration-200 sm:px-5',
               hovered && hovered !== social.name ? 'opacity-40' : 'opacity-100',
             )}
             onMouseEnter={() => enter(social.name)}
@@ -76,16 +78,16 @@ export function SocialLinks({ socials, autoCycleMs = 2000, className, ...props }
             <AnimatePresence>
               {hovered === social.name && (
                 <motion.div
-                  className="pointer-events-none absolute bottom-0 left-0 right-0 flex h-full w-full items-center justify-center"
+                  className="pointer-events-none absolute inset-x-0 top-0 flex justify-center"
                   animate={{ scale: 1 }}
                 >
                   <motion.div
                     key={social.name}
                     className="flex h-14 w-14 items-center justify-center rounded-2xl shadow-2xl"
                     style={{ background: social.bg, color: social.fg ?? '#ffffff' }}
-                    initial={{ y: -40, rotate: rotation, opacity: 0, filter: 'blur(2px)' }}
-                    animate={{ y: -52, opacity: 1, filter: 'blur(0px)' }}
-                    exit={{ y: -40, opacity: 0, filter: 'blur(2px)' }}
+                    initial={{ y: 14, rotate: rotation, opacity: 0, filter: 'blur(2px)' }}
+                    animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+                    exit={{ y: 14, opacity: 0, filter: 'blur(2px)' }}
                     transition={{ duration: 0.2 }}
                   >
                     {social.icon}

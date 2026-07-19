@@ -6,6 +6,14 @@ import type { GridStats, GridBlock } from '@/types'
 import { LiveVisitors } from '@/components/ui/LiveVisitors'
 import { ActivityFeed } from '@/components/ui/ActivityFeed'
 import { CountUp } from '@/components/ui/Reveal'
+import { BrandShapes } from '@/components/ui/shape-landing-hero'
+import { SocialLinks } from '@/components/ui/social-links'
+import { SOCIAL_CONFIG } from '@/lib/socialConfig'
+
+const HERO_SOCIAL_KEYS = ['instagramUrl', 'youtubeUrl', 'tiktokUrl', 'spotifyUrl'] as const
+const HERO_SOCIALS = SOCIAL_CONFIG
+  .filter(s => (HERO_SOCIAL_KEYS as readonly string[]).includes(s.key))
+  .map(s => ({ name: s.label === 'X / Twitter' ? 'X' : s.label, bg: s.bg, fg: s.fg, icon: s.icon }))
 import { NICHE_COLORS } from '@/types'
 
 interface Activation {
@@ -177,6 +185,9 @@ export function HeroSection({ stats, blocks, highlight, activations = [] }: Hero
         ))}
       </div>
 
+      {/* Formas de vidro flutuantes nas cores da marca */}
+      <BrandShapes />
+
       {/* Layout duas colunas */}
       <div className="relative z-10 grid min-h-[calc(100vh-28px)] grid-cols-1 lg:grid-cols-2">
 
@@ -229,12 +240,20 @@ export function HeroSection({ stats, blocks, highlight, activations = [] }: Hero
             </Link>
           </div>
 
-          <p className="-mt-4 mb-8 text-xs text-white/55">
+          <p className="-mt-4 mb-5 text-xs text-white/55">
             É uma marca procurando influencers?{' '}
             <Link href="/marcas" className="text-white/75 underline underline-offset-2 transition-colors hover:text-white">
               Acesse o portal de marcas →
             </Link>
           </p>
+
+          {/* Redes num link só — demo viva do link na bio */}
+          <Link href="/vitrine" className="group mb-6 block" aria-label="Conheça o link na bio Vitrine 1M">
+            <p className="mb-0 text-[10px] font-semibold uppercase tracking-widest text-white/55 transition-colors group-hover:text-gold">
+              Todas as suas redes num link só — incluso no seu espaço ↗
+            </p>
+            <SocialLinks socials={HERO_SOCIALS} autoCycleMs={2200} className="-ml-4 justify-start" />
+          </Link>
 
           {/* Stats — contraste aumentado */}
           <div className="flex gap-0 border-t border-white/15 pt-6">
