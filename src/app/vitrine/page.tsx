@@ -4,7 +4,7 @@ import { SocialLinks } from '@/components/ui/social-links'
 import { Reveal } from '@/components/ui/Reveal'
 import { SOCIAL_CONFIG } from '@/lib/socialConfig'
 import { BrandShapes } from '@/components/ui/shape-landing-hero'
-import { FeatureCardsFx, ComparativoFx } from './VitrineFx'
+import { FeatureCardsFx, ComparativoFx, ExemploButton } from './VitrineFx'
 
 export const metadata: Metadata = {
   title: 'Vitrine 1M — link na bio vitalício por R$ 0,99',
@@ -80,9 +80,12 @@ export default function VitrinePage() {
 
         {/* CTA topo */}
         <div className="mt-6 text-center">
-          <Link href="/comprar?pixels=1" className="btn-gold px-9 py-4 text-base">
-            Pegar meu link na bio vitalício — R$ 0,99 →
-          </Link>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Link href="/comprar?pixels=1" className="btn-gold px-9 py-4 text-base">
+              Pegar meu link na bio vitalício — R$ 0,99 →
+            </Link>
+            <ExemploButton />
+          </div>
           <p className="mx-auto mt-3 max-w-md text-xs leading-relaxed text-white/65">
             Como funciona: você garante um <strong className="text-white/85">espaço no mapa dos influencers</strong>{' '}
             (a partir de 1 pixel, R$ 0,99) e o <strong className="text-gold">link na bio completo já vem junto</strong>.
@@ -136,9 +139,7 @@ export default function VitrinePage() {
             <Link href="/comprar?pixels=1" className="btn-gold px-10 py-4 text-base">
               Pegar meu link na bio vitalício — R$ 0,99 →
             </Link>
-            <Link href="/" className="btn-ghost px-7 py-4 text-sm">
-              Ver o mapa
-            </Link>
+            <ExemploButton />
           </div>
           <p className="mt-3 text-xs text-white/50">
             Do primeiro seguidor ao próximo milhão — começa com um link.
