@@ -88,6 +88,12 @@ export const blocks = pgTable(
     // Links personalizados (JSON array)
     customLinks:      text('custom_links'),
 
+    // UGC (User-Generated Content) — criador que faz vídeo pra marca usar,
+    // não depende de seguidores próprios
+    isUgcCreator:     boolean('is_ugc_creator').notNull().default(false),
+    ugcPortfolio:     text('ugc_portfolio'),   // JSON array [{ label, url }]
+    ugcRateCard:      text('ugc_rate_card'),   // JSON array [{ deliverable, price }]
+
     // Posição na grade (grade 1000×1000)
     pixelX:           integer('pixel_x').notNull().default(0),
     pixelY:           integer('pixel_y').notNull().default(0),
@@ -109,6 +115,7 @@ export const blocks = pgTable(
     positionIdx:     index('blocks_position_idx').on(t.pixelX, t.pixelY),
     userIdx:         index('blocks_user_idx').on(t.userId),
     uniqueInstagram: uniqueIndex('blocks_instagram_unique').on(t.instagramHandle),
+    ugcIdx:          index('blocks_ugc_idx').on(t.isUgcCreator),
   })
 )
 

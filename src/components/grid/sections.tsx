@@ -428,6 +428,10 @@ export function FAQSection() {
           a: 'Sim — foi feito pra isso. Por R$ 0,99 você já entra no mapa, na roleta de descoberta e no ranking do seu nicho: os mesmos lugares onde os grandes aparecem. Quem está começando é descoberto por quem navega; quem já é grande usa o espaço pra multiplicar a audiência que já tem. Os dois saem ganhando seguidores.',
         },
         {
+          q: 'Não tenho seguidores. Ainda dá pra trabalhar com marcas?',
+          a: 'Dá — é exatamente pra isso que existe o modo Criador UGC. Você ativa no cadastro (ou depois no painel), monta um portfólio de vídeos e uma tabela de preços, e aparece numa busca dedicada no portal de marcas. Marca de UGC não olha seguidores, olha o vídeo. Detalhes em /ugc.',
+        },
+        {
           q: 'Como eu ganho seguidores aqui?',
           a: 'De vários jeitos ao mesmo tempo: seu bloco aparece no mapa com sua foto; seu perfil entra na roleta de descoberta (/descobrir), onde visitantes giram e seguem com 1 clique; você aparece no ranking por nicho e cidade; e ganha uma página Vitrine 1M com todas as suas redes. Cada visita e clique aparece nas estatísticas do seu painel.',
         },
@@ -556,6 +560,7 @@ export async function FooterCTA() {
     { label: 'Preços',         href: '#precos' },
     { label: 'Descobrir influencers', href: '/descobrir' },
     { label: 'Link na bio (Vitrine 1M)', href: '/vitrine' },
+    { label: 'Sou criador(a) UGC', href: '/ugc' },
     { label: 'Ranking',        href: '/ranking' },
     { label: 'Para marcas',       href: '/marcas' },
     { label: 'Login anunciante',  href: '/login' },

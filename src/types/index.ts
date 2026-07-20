@@ -33,12 +33,26 @@ export interface GridBlock {
   // Links personalizados
   customLinks?:    CustomLink[] | null
   editToken?:      string | null
+  // UGC (criador que faz vídeo pra marca usar — não depende de seguidores)
+  isUgcCreator?:   boolean
+  ugcPortfolio?:   UgcPortfolioItem[] | null
+  ugcRateCard?:    UgcRateCardItem[] | null
 }
 
 export interface CustomLink {
   label: string
   url:   string
   emoji?: string
+}
+
+export interface UgcPortfolioItem {
+  label: string   // ex: "Unboxing Nike", "Testemunhal skincare"
+  url:   string    // link do vídeo (YouTube, Drive, TikTok...)
+}
+
+export interface UgcRateCardItem {
+  deliverable: string   // ex: "Reels 15s", "Stories", "Unboxing"
+  price:       string   // texto livre — "R$150", "a combinar" etc.
 }
 
 export interface GridStats {
@@ -73,6 +87,9 @@ export interface RegisterFormData {
   onlyfansUrl?:    string
   spotifyUrl?:     string
   customLinks?:    CustomLink[]
+  isUgcCreator?:   boolean
+  ugcPortfolio?:   UgcPortfolioItem[]
+  ugcRateCard?:    UgcRateCardItem[]
 }
 
 // ─── Nichos ───────────────────────────────────────────────

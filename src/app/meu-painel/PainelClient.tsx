@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { NICHE_LABELS, NICHE_COLORS, NICHE_EMOJI } from '@/types'
-import type { CustomLink, Badge } from '@/types'
+import type { CustomLink, Badge, UgcPortfolioItem, UgcRateCardItem } from '@/types'
 import { ImageUpload } from '@/components/forms/ImageUpload'
 import { CityAutocomplete } from '@/components/forms/CityAutocomplete'
 import { ProfileStrength } from '@/components/forms/ProfileStrength'
@@ -37,6 +37,7 @@ interface Block {
   kwaiUrl?:        string | null
   onlyfansUrl?:    string | null
   spotifyUrl?:     string | null
+  isUgcCreator?:   boolean | null
 }
 
 interface Stats {
@@ -66,6 +67,8 @@ interface Props {
   block:               Block
   token:               string
   initialCustomLinks:  CustomLink[]
+  initialUgcPortfolio: UgcPortfolioItem[]
+  initialUgcRateCard:  UgcRateCardItem[]
   stats:               Stats
   initialProposals:    ProposalItem[]
   badges:              Badge[]
@@ -156,7 +159,7 @@ function BlockPreview({ block, handle, niche, avatarUrl }: {
   )
 }
 
-export function PainelClient({ block, token, initialCustomLinks, stats, initialProposals, badges }: Props) {
+export function PainelClient({ block, token, initialCustomLinks, initialUgcPortfolio, initialUgcRateCard, stats, initialProposals, badges }: Props) {
   const [proposals, setProposals] = useState<ProposalItem[]>(initialProposals)
   const [respondingId, setRespondingId] = useState<string | null>(null)
 
@@ -198,7 +201,33 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
   const [saving,      setSaving]      = useState(false)
   const [saved,       setSaved]       = useState(false)
   const [error,       setError]       = useState('')
-  const [tab,         setTab]         = useState<'perfil' | 'redes' | 'links' | 'estatisticas' | 'propostas' | 'indicacao'>('perfil')
+  const [tab,         setTab]         = useState<'perfil' | 'redes' | 'links' | 'ugc' | 'estatisticas' | 'propostas' | 'indicacao'>('perfil')
+
+  // UGC — criador que faz vídeo pra marca usar, não depende de seguidores
+  const [isUgc, setIsUgc] = useState(!!block.isUgcCreator)
+  const [ugcPortfolio, setUgcPortfolio] = useState<UgcPortfolioItem[]>(initialUgcPortfolio)
+  const [ugcRateCard,  setUgcRateCard]  = useState<UgcRateCardItem[]>(initialUgcRateCard)
+
+  function addPortfolioItem() {
+    if (ugcPortfolio.length >= 6) return
+    setUgcPortfolio(prev => [...prev, { label: '', url: '' }])
+  }
+  function removePortfolioItem(i: number) {
+    setUgcPortfolio(prev => prev.filter((_, idx) => idx !== i))
+  }
+  function updatePortfolioItem(i: number, field: 'label' | 'url', value: string) {
+    setUgcPortfolio(prev => prev.map((l, idx) => idx === i ? { ...l, [field]: value } : l))
+  }
+  function addRateCardItem() {
+    if (ugcRateCard.length >= 6) return
+    setUgcRateCard(prev => [...prev, { deliverable: '', price: '' }])
+  }
+  function removeRateCardItem(i: number) {
+    setUgcRateCard(prev => prev.filter((_, idx) => idx !== i))
+  }
+  function updateRateCardItem(i: number, field: 'deliverable' | 'price', value: string) {
+    setUgcRateCard(prev => prev.map((l, idx) => idx === i ? { ...l, [field]: value } : l))
+  }
   const [previewOpen, setPreviewOpen] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
 
@@ -235,7 +264,12 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
       const res = await fetch('/api/painel', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ token, ...form, customLinks }),
+        body:    JSON.stringify({
+          token, ...form, customLinks,
+          isUgcCreator: isUgc,
+          ugcPortfolio: isUgc ? ugcPortfolio.filter(l => l.label && l.url) : [],
+          ugcRateCard:  isUgc ? ugcRateCard.filter(l => l.deliverable && l.price) : [],
+        }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error ?? 'Erro ao salvar.'); return }
@@ -354,13 +388,13 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
 
       {/* Tabs */}
       <div className="flex gap-1 rounded-xl border border-white/8 bg-dark-2 p-1">
-        {(['perfil', 'redes', 'links', 'propostas', 'estatisticas', 'indicacao'] as const).map(t => (
+        {(['perfil', 'redes', 'links', 'ugc', 'propostas', 'estatisticas', 'indicacao'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`relative flex-1 rounded-lg py-2 text-xs font-semibold capitalize transition-all ${
               tab === t ? 'bg-white/10 text-white' : 'text-white/65 hover:text-white/60'
             }`}
           >
-            {t === 'perfil' ? 'Perfil' : t === 'redes' ? 'Redes' : t === 'links' ? 'Links' : t === 'propostas' ? '💼' : t === 'estatisticas' ? '📊' : '🎁'}
+            {t === 'perfil' ? 'Perfil' : t === 'redes' ? 'Redes' : t === 'links' ? 'Links' : t === 'ugc' ? '🎬' : t === 'propostas' ? '💼' : t === 'estatisticas' ? '📊' : '🎁'}
             {t === 'propostas' && proposals.filter(p => p.status === 'sent').length > 0 && (
               <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[9px] font-bold text-[#111]">
                 {proposals.filter(p => p.status === 'sent').length}
@@ -488,6 +522,93 @@ export function PainelClient({ block, token, initialCustomLinks, stats, initialP
               className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/15 py-3 text-xs text-white/55 hover:border-white/30 hover:text-white/70 transition-all">
               + Adicionar link
             </button>
+          )}
+        </div>
+      )}
+
+      {/* Tab: UGC */}
+      {tab === 'ugc' && (
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={() => setIsUgc(v => !v)}
+            className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-all ${
+              isUgc ? 'border-violet-400/40 bg-violet-500/10' : 'border-white/8 bg-white/2 hover:border-white/15'
+            }`}
+          >
+            <span className="mt-0.5 text-lg">🎬</span>
+            <span className="flex-1">
+              <span className="block text-xs font-bold text-white">Sou criador(a) UGC</span>
+              <span className="mt-0.5 block text-[11px] leading-relaxed text-white/60">
+                Faço vídeo pra marca usar na própria página dela — não preciso ter seguidores.
+                Ativa o badge, portfólio de vídeos e tabela de preços no seu perfil público.
+              </span>
+            </span>
+            <span className={`mt-0.5 flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors ${isUgc ? 'bg-violet-500' : 'bg-white/15'}`}>
+              <span className={`h-4 w-4 rounded-full bg-white transition-transform ${isUgc ? 'translate-x-4' : 'translate-x-0'}`} />
+            </span>
+          </button>
+
+          {isUgc && (
+            <>
+              <div className="rounded-xl border border-white/8 bg-white/2 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-semibold uppercase tracking-widest text-violet-300">
+                    Portfólio de vídeos
+                  </label>
+                  <span className="text-[10px] text-white/50">{ugcPortfolio.length}/6</span>
+                </div>
+                <p className="text-[11px] text-white/60">Links de vídeos prontos — a marca assiste antes de te chamar.</p>
+                {ugcPortfolio.map((item, i) => (
+                  <div key={i} className="flex gap-2 items-center">
+                    <input type="text" value={item.label}
+                      onChange={e => updatePortfolioItem(i, 'label', e.target.value)}
+                      placeholder="Ex: Unboxing Nike"
+                      className="w-32 shrink-0 rounded-lg border border-white/8 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/35 outline-none focus:border-white/20" />
+                    <input type="url" value={item.url}
+                      onChange={e => updatePortfolioItem(i, 'url', e.target.value)}
+                      placeholder="https://..."
+                      className="flex-1 rounded-lg border border-white/8 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/35 outline-none focus:border-white/20" />
+                    <button type="button" onClick={() => removePortfolioItem(i)} className="text-white/55 hover:text-red-400 text-sm">✕</button>
+                  </div>
+                ))}
+                {ugcPortfolio.length < 6 && (
+                  <button type="button" onClick={addPortfolioItem}
+                    className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-white/15 py-2 text-xs text-white/55 hover:border-white/30 hover:text-white/70 transition-all">
+                    + Adicionar vídeo
+                  </button>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-white/8 bg-white/2 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-semibold uppercase tracking-widest text-violet-300">
+                    Tabela de preços
+                  </label>
+                  <span className="text-[10px] text-white/50">{ugcRateCard.length}/6</span>
+                </div>
+                <p className="text-[11px] text-white/60">Quanto cobra por entrega — economiza ida e volta com a marca.</p>
+                {ugcRateCard.map((item, i) => (
+                  <div key={i} className="flex gap-2 items-center">
+                    <input type="text" value={item.deliverable}
+                      onChange={e => updateRateCardItem(i, 'deliverable', e.target.value)}
+                      placeholder="Ex: Reels 15s"
+                      className="flex-1 rounded-lg border border-white/8 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/35 outline-none focus:border-white/20" />
+                    <input type="text" value={item.price}
+                      onChange={e => updateRateCardItem(i, 'price', e.target.value)}
+                      placeholder="R$150"
+                      className="w-24 shrink-0 rounded-lg border border-white/8 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/35 outline-none focus:border-white/20" />
+                    <button type="button" onClick={() => removeRateCardItem(i)} className="text-white/55 hover:text-red-400 text-sm">✕</button>
+                  </div>
+                ))}
+                {ugcRateCard.length < 6 && (
+                  <button type="button" onClick={addRateCardItem}
+                    className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-white/15 py-2 text-xs text-white/55 hover:border-white/30 hover:text-white/70 transition-all">
+                    + Adicionar item de preço
+                  </button>
+                )}
+              </div>
+            </>
           )}
         </div>
       )}

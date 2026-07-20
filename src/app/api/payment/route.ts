@@ -47,6 +47,16 @@ const bodySchema = z.object({
     url:   z.string().min(1).max(300),
     emoji: z.string().max(4).optional(),
   })).max(6).optional(),
+  // UGC — criador que faz vídeo pra marca usar, não depende de seguidores
+  isUgcCreator:     z.boolean().optional(),
+  ugcPortfolio:     z.array(z.object({
+    label: z.string().min(1).max(80),
+    url:   z.string().min(1).max(300),
+  })).max(6).optional(),
+  ugcRateCard:      z.array(z.object({
+    deliverable: z.string().min(1).max(60),
+    price:       z.string().min(1).max(40),
+  })).max(6).optional(),
   // Coordenadas opcionais (quando vem da seleção do grid)
   pixelX:           z.number().int().optional(),
   pixelY:           z.number().int().optional(),
@@ -164,6 +174,10 @@ export async function POST(req: NextRequest) {
         onlyfansUrl:     data.onlyfansUrl  || null,
         spotifyUrl:      data.spotifyUrl   || null,
         customLinks:     data.customLinks?.length ? JSON.stringify(data.customLinks) : null,
+        // UGC
+        isUgcCreator:    data.isUgcCreator ?? false,
+        ugcPortfolio:    data.ugcPortfolio?.length ? JSON.stringify(data.ugcPortfolio) : null,
+        ugcRateCard:     data.ugcRateCard?.length  ? JSON.stringify(data.ugcRateCard)  : null,
         // Posição
         pixelX:          pos.x,
         pixelY:          pos.y,

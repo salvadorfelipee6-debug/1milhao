@@ -14,6 +14,7 @@ interface PageProps {
     keyword?:    string
     city?:       string
     minPixels?:  string
+    ugc?:        string
   }>
 }
 
@@ -23,6 +24,7 @@ export default async function MarcasPage({ searchParams }: PageProps) {
   const keyword    = params.keyword    || ''
   const city       = params.city       || ''
   const minPixels  = params.minPixels  ? Number(params.minPixels) : undefined
+  const ugcOnly    = params.ugc === '1'
 
   const [blocks, stats] = await Promise.all([
     searchBlocks({
@@ -30,6 +32,7 @@ export default async function MarcasPage({ searchParams }: PageProps) {
       keyword:   keyword   || undefined,
       city:      city      || undefined,
       minPixels: minPixels || undefined,
+      ugcOnly,
       limit:     200,
     }),
     getGridStats(),
@@ -84,6 +87,7 @@ export default async function MarcasPage({ searchParams }: PageProps) {
               initialKeyword={keyword}
               initialCity={city}
               initialMinPixels={minPixels ?? 0}
+              initialUgcOnly={ugcOnly}
             />
           </Suspense>
         </div>

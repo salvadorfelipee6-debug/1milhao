@@ -7,7 +7,7 @@ import { PainelClient } from './PainelClient'
 import { getBlockStats } from '@/lib/db/analytics'
 import { getProposalsForBlock, markProposalsRead } from '@/lib/db/proposals'
 import { getBlockBadges } from '@/lib/db/blocks'
-import type { CustomLink } from '@/types'
+import type { CustomLink, UgcPortfolioItem, UgcRateCardItem } from '@/types'
 
 export const metadata: Metadata = {
   title: 'Meu Painel — 1 Milhão de Influencer',
@@ -53,6 +53,18 @@ export default async function MeuPainelPage({ searchParams }: PageProps) {
     if (raw) customLinks = typeof raw === 'string' ? JSON.parse(raw) : raw
   } catch {}
 
+  let ugcPortfolio: UgcPortfolioItem[] = []
+  try {
+    const raw = (block as any).ugcPortfolio
+    if (raw) ugcPortfolio = typeof raw === 'string' ? JSON.parse(raw) : raw
+  } catch {}
+
+  let ugcRateCard: UgcRateCardItem[] = []
+  try {
+    const raw = (block as any).ugcRateCard
+    if (raw) ugcRateCard = typeof raw === 'string' ? JSON.parse(raw) : raw
+  } catch {}
+
   const stats = await getBlockStats(block.id)
   const badges = await getBlockBadges(block.id)
 
@@ -77,7 +89,16 @@ export default async function MeuPainelPage({ searchParams }: PageProps) {
         </div>
 
         <Suspense fallback={<div className="h-96 animate-pulse rounded-2xl bg-white/5" />}>
-          <PainelClient block={block as any} token={token} initialCustomLinks={customLinks} stats={stats} initialProposals={proposals} badges={badges} />
+          <PainelClient
+            block={block as any}
+            token={token}
+            initialCustomLinks={customLinks}
+            initialUgcPortfolio={ugcPortfolio}
+            initialUgcRateCard={ugcRateCard}
+            stats={stats}
+            initialProposals={proposals}
+            badges={badges}
+          />
         </Suspense>
       </div>
     </main>

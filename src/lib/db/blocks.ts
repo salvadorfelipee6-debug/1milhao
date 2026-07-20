@@ -14,6 +14,7 @@ export type BlockForGrid = Pick<
   | 'pixelCount'
   | 'whatsappUrl' | 'youtubeUrl' | 'tiktokUrl' | 'twitterUrl'
   | 'facebookUrl' | 'kwaiUrl' | 'onlyfansUrl' | 'spotifyUrl'
+  | 'isUgcCreator'
 >
 
 // Retorna todos os blocos ativos para montar a grade
@@ -48,6 +49,7 @@ export async function getActiveBlocksForGrid(): Promise<BlockForGrid[]> {
       kwaiUrl:         schema.blocks.kwaiUrl,
       onlyfansUrl:     schema.blocks.onlyfansUrl,
       spotifyUrl:      schema.blocks.spotifyUrl,
+      isUgcCreator:    schema.blocks.isUgcCreator,
     })
     .from(schema.blocks)
     .where(eq(schema.blocks.status, 'active'))
@@ -178,6 +180,7 @@ export async function searchBlocks({
   city,
   minPixels,
   keyword,
+  ugcOnly,
   limit = 48,
   offset = 0,
 }: {
@@ -185,6 +188,7 @@ export async function searchBlocks({
   city?:      string
   minPixels?: number
   keyword?:   string
+  ugcOnly?:   boolean
   limit?:     number
   offset?:    number
 }) {
@@ -199,6 +203,9 @@ export async function searchBlocks({
   if (minPixels) {
     conditions.push(gte(schema.blocks.pixelCount, minPixels))
   }
+  if (ugcOnly) {
+    conditions.push(eq(schema.blocks.isUgcCreator, true))
+  }
   if (keyword) {
     conditions.push(
       or(
@@ -212,7 +219,9 @@ export async function searchBlocks({
     .select()
     .from(schema.blocks)
     .where(and(...conditions))
-    .orderBy(desc(schema.blocks.pixelCount))
+    // Busca de UGC ordena por mais recente — marca não liga pra seguidores
+    // aqui, quer ver quem chegou agora. Busca normal continua por tamanho.
+    .orderBy(ugcOnly ? desc(schema.blocks.createdAt) : desc(schema.blocks.pixelCount))
     .limit(limit)
     .offset(offset)
 }

@@ -4,7 +4,7 @@ import { notFound }       from 'next/navigation'
 import Link               from 'next/link'
 import { getBlockByHandle, getGridStats, getBlockBadges } from '@/lib/db/blocks'
 import { NICHE_LABELS }   from '@/types'
-import type { CustomLink } from '@/types'
+import type { CustomLink, UgcPortfolioItem, UgcRateCardItem } from '@/types'
 import { ShareButton }    from './ShareButton'
 import { ProfileTracking } from './ProfileTracking'
 import { QrCodeButton }   from './QrCodeButton'
@@ -63,6 +63,19 @@ export default async function InfluencerProfilePage({ params }: Props) {
   try {
     const raw = (block as any).customLinks
     if (raw) customLinks = typeof raw === 'string' ? JSON.parse(raw) : raw
+  } catch {}
+
+  // UGC — portfólio de vídeos e tabela de preços por entrega
+  const isUgc = !!(block as any).isUgcCreator
+  let ugcPortfolio: UgcPortfolioItem[] = []
+  let ugcRateCard:  UgcRateCardItem[]  = []
+  try {
+    const raw = (block as any).ugcPortfolio
+    if (raw) ugcPortfolio = typeof raw === 'string' ? JSON.parse(raw) : raw
+  } catch {}
+  try {
+    const raw = (block as any).ugcRateCard
+    if (raw) ugcRateCard = typeof raw === 'string' ? JSON.parse(raw) : raw
   } catch {}
 
   const jsonLd = {
@@ -136,6 +149,11 @@ export default async function InfluencerProfilePage({ params }: Props) {
             <p className="mt-1 text-xs text-white/65">
               {nicheLabel}{block.city ? ` · ${block.city}` : ''}
             </p>
+            {isUgc && (
+              <span className="mt-2 inline-flex items-center gap-1 rounded-full border border-violet-400/30 bg-violet-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-violet-300">
+                🎬 Criador UGC
+              </span>
+            )}
             {badges.length > 0 && (
               <div className="mt-2">
                 <BadgeRow badges={badges} />
@@ -164,6 +182,63 @@ export default async function InfluencerProfilePage({ params }: Props) {
           {/* Bio */}
           {block.bio && (
             <p className="mb-5 text-sm leading-relaxed text-white/70 animate-fade-up" style={{ animationDelay: '180ms' }}>{block.bio}</p>
+          )}
+
+          {/* Portfólio UGC — a marca vê o trabalho antes de decidir */}
+          {isUgc && ugcPortfolio.length > 0 && (
+            <div className="mb-4">
+              <p className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/50">
+                <span className="h-px flex-1 bg-white/10" />
+                Portfólio
+                <span className="h-px flex-1 bg-white/10" />
+              </p>
+              <div className="space-y-2">
+                {ugcPortfolio.map((item, i) => (
+                  <a
+                    key={i}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-track={`ugc_portfolio:${i}`}
+                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 transition-all hover:-translate-y-0.5"
+                    style={{ background: 'rgba(131,58,180,0.08)', border: '0.5px solid rgba(131,58,180,0.25)', color: '#fff' }}
+                  >
+                    <span
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs"
+                      style={{ background: 'rgba(131,58,180,0.25)' }}
+                    >
+                      ▶
+                    </span>
+                    <span className="flex-1 text-sm font-semibold">{item.label}</span>
+                    <span className="text-xs text-white/55">assistir ↗</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Tabela de preços UGC */}
+          {isUgc && ugcRateCard.length > 0 && (
+            <div className="mb-5">
+              <p className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/50">
+                <span className="h-px flex-1 bg-white/10" />
+                Tabela de preços
+                <span className="h-px flex-1 bg-white/10" />
+              </p>
+              <div className="overflow-hidden rounded-xl border border-white/10">
+                {ugcRateCard.map((item, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-center justify-between px-4 py-2.5 text-sm ${i > 0 ? 'border-t border-white/8' : ''}`}
+                    style={{ background: i % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent' }}
+                  >
+                    <span className="text-white/75">{item.deliverable}</span>
+                    <span className="font-bold text-gold">{item.price}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-1.5 text-[10px] text-white/45">Valores de referência — combine os detalhes direto com o criador.</p>
+            </div>
           )}
 
           {/* BOTÃO DE ANUNCIAR — destaque máximo */}

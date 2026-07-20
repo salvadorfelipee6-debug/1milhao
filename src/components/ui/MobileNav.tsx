@@ -5,6 +5,7 @@ import Link from 'next/link'
 
 const links = [
   { label: '🔗 Link na bio — R$ 0,99', href: '/vitrine' },
+  { label: '🎬 Sou criador(a) UGC',    href: '/ugc' },
   { label: '🎰 Descobrir influencers', href: '/descobrir' },
   { label: 'Como funciona',     href: '/#como-funciona' },
   { label: 'Preços',            href: '/#precos' },

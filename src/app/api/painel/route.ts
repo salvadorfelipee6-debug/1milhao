@@ -30,6 +30,15 @@ const bodySchema = z.object({
     url:   z.string().url(),
     emoji: z.string().max(4).optional(),
   })).max(6).optional(),
+  isUgcCreator: z.boolean().optional(),
+  ugcPortfolio: z.array(z.object({
+    label: z.string().min(1).max(80),
+    url:   z.string().min(1).max(300),
+  })).max(6).optional(),
+  ugcRateCard:  z.array(z.object({
+    deliverable: z.string().min(1).max(60),
+    price:       z.string().min(1).max(40),
+  })).max(6).optional(),
 })
 
 export async function POST(req: NextRequest) {
@@ -40,7 +49,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Dados inválidos.' }, { status: 400 })
     }
 
-    const { token, customLinks, ...data } = parsed.data
+    const { token, customLinks, isUgcCreator, ugcPortfolio, ugcRateCard, ...data } = parsed.data
 
     // Busca bloco pelo editToken
     const rows = await db
@@ -75,6 +84,9 @@ export async function POST(req: NextRequest) {
         onlyfansUrl:  data.onlyfansUrl || null,
         spotifyUrl:   data.spotifyUrl  || null,
         customLinks:  customLinks ? JSON.stringify(customLinks) : null,
+        isUgcCreator: isUgcCreator ?? false,
+        ugcPortfolio: ugcPortfolio?.length ? JSON.stringify(ugcPortfolio) : null,
+        ugcRateCard:  ugcRateCard?.length  ? JSON.stringify(ugcRateCard)  : null,
         updatedAt:    new Date(),
       })
       .where(eq(schema.blocks.id, blockId))

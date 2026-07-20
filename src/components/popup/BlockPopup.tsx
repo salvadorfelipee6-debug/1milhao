@@ -151,6 +151,11 @@ export function BlockPopup({ block, onClose }: BlockPopupProps) {
               {nicheLabel}
               {block.city ? ` · ${block.city}` : ''}
             </p>
+            {(block as any).isUgcCreator && (
+              <span className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-violet-400/30 bg-violet-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-violet-300">
+                🎬 Criador UGC
+              </span>
+            )}
           </div>
 
           {/* Stats */}

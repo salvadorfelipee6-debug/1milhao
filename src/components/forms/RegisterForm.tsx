@@ -166,6 +166,7 @@ export function RegisterForm({ stats }: RegisterFormProps) {
   const gridW      = searchParams.get('w')
   const gridH      = searchParams.get('h')
   const ref        = searchParams.get('ref')
+  const ugcParam   = searchParams.get('ugc') === '1'
 
   // Veio de um link de indicação — conta o clique (best-effort, não trava nada)
   useEffect(() => {
@@ -209,6 +210,35 @@ export function RegisterForm({ stats }: RegisterFormProps) {
   })
 
   const [customLinks, setCustomLinks] = useState<{ label: string; url: string; emoji: string }[]>([])
+
+  // ─── UGC (criador que faz vídeo pra marca usar) ───────────
+  const [isUgc, setIsUgc] = useState(ugcParam)
+  const [ugcPortfolio, setUgcPortfolio] = useState<{ label: string; url: string }[]>([])
+  const [ugcRateCard,  setUgcRateCard]  = useState<{ deliverable: string; price: string }[]>(
+    ugcParam ? [{ deliverable: '', price: '' }] : []
+  )
+
+  function addPortfolioItem() {
+    if (ugcPortfolio.length >= 6) return
+    setUgcPortfolio(prev => [...prev, { label: '', url: '' }])
+  }
+  function removePortfolioItem(i: number) {
+    setUgcPortfolio(prev => prev.filter((_, idx) => idx !== i))
+  }
+  function updatePortfolioItem(i: number, field: 'label' | 'url', value: string) {
+    setUgcPortfolio(prev => prev.map((l, idx) => idx === i ? { ...l, [field]: value } : l))
+  }
+
+  function addRateCardItem() {
+    if (ugcRateCard.length >= 6) return
+    setUgcRateCard(prev => [...prev, { deliverable: '', price: '' }])
+  }
+  function removeRateCardItem(i: number) {
+    setUgcRateCard(prev => prev.filter((_, idx) => idx !== i))
+  }
+  function updateRateCardItem(i: number, field: 'deliverable' | 'price', value: string) {
+    setUgcRateCard(prev => prev.map((l, idx) => idx === i ? { ...l, [field]: value } : l))
+  }
 
   function addCustomLink() {
     if (customLinks.length >= 6) return
@@ -286,6 +316,9 @@ export function RegisterForm({ stats }: RegisterFormProps) {
           pixelHeight:     gridH ? Number(gridH) : dims.height,
           paymentProvider: provider,
           customLinks:     customLinks.filter(l => l.label && l.url),
+          isUgcCreator:    isUgc,
+          ugcPortfolio:    isUgc ? ugcPortfolio.filter(l => l.label && l.url) : undefined,
+          ugcRateCard:     isUgc ? ugcRateCard.filter(l => l.deliverable && l.price) : undefined,
           ref:             ref || undefined,
         }),
       })
@@ -561,12 +594,116 @@ export function RegisterForm({ stats }: RegisterFormProps) {
                 </div>
               </div>
 
+              {/* Toggle criador UGC — muda a ênfase do formulário */}
+              <button
+                type="button"
+                onClick={() => setIsUgc(v => !v)}
+                className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-all ${
+                  isUgc ? 'border-violet-400/40 bg-violet-500/10' : 'border-white/8 bg-white/2 hover:border-white/15'
+                }`}
+              >
+                <span className="mt-0.5 text-lg">🎬</span>
+                <span className="flex-1">
+                  <span className="block text-xs font-bold text-white">Sou criador(a) UGC</span>
+                  <span className="mt-0.5 block text-[11px] leading-relaxed text-white/60">
+                    Faço vídeo pra marca usar na própria página dela — não preciso ter seguidores.
+                    Ativa portfólio de vídeos e tabela de preços no seu perfil.
+                  </span>
+                </span>
+                <span
+                  className={`mt-0.5 flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors ${isUgc ? 'bg-violet-500' : 'bg-white/15'}`}
+                >
+                  <span className={`h-4 w-4 rounded-full bg-white transition-transform ${isUgc ? 'translate-x-4' : 'translate-x-0'}`} />
+                </span>
+              </button>
+
               <div>
-                <label className="mb-1 block text-[10px] font-semibold text-white/70">Seguidores</label>
+                <label className="mb-1 block text-[10px] font-semibold text-white/70">
+                  Seguidores {isUgc && <span className="font-normal text-white/45">(opcional pra criador UGC)</span>}
+                </label>
                 <input type="text" value={form.followers}
                   onChange={e => setField('followers', e.target.value)}
-                  placeholder="ex: 50k, 1.2M" className="input-dark" />
+                  placeholder={isUgc ? 'Sem seguidores? Pode deixar em branco' : 'ex: 50k, 1.2M'} className="input-dark" />
               </div>
+
+              {/* Portfólio + tabela de preços — só aparece pro criador UGC */}
+              {isUgc && (
+                <div className="rounded-xl border border-violet-400/25 bg-violet-500/5 p-3 space-y-3">
+                  <div>
+                    <div className="mb-1 flex items-center justify-between">
+                      <label className="text-[10px] font-semibold uppercase tracking-widest text-violet-300">
+                        Portfólio de vídeos
+                      </label>
+                      <span className="text-[10px] text-white/50">{ugcPortfolio.length}/6</span>
+                    </div>
+                    <p className="mb-2 text-[11px] text-white/60">
+                      Cole links de vídeos prontos (YouTube, Drive, TikTok...) — a marca assiste antes de te chamar.
+                    </p>
+                    {ugcPortfolio.map((item, i) => (
+                      <div key={i} className="mb-1.5 flex gap-2 items-center">
+                        <input
+                          type="text"
+                          value={item.label}
+                          onChange={e => updatePortfolioItem(i, 'label', e.target.value)}
+                          placeholder="Ex: Unboxing Nike"
+                          className="w-32 shrink-0 rounded-lg border border-white/8 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/35 outline-none focus:border-white/20"
+                        />
+                        <input
+                          type="url"
+                          value={item.url}
+                          onChange={e => updatePortfolioItem(i, 'url', e.target.value)}
+                          placeholder="https://..."
+                          className="flex-1 rounded-lg border border-white/8 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/35 outline-none focus:border-white/20"
+                        />
+                        <button type="button" onClick={() => removePortfolioItem(i)} className="text-white/55 hover:text-red-400 text-sm">✕</button>
+                      </div>
+                    ))}
+                    {ugcPortfolio.length < 6 && (
+                      <button type="button" onClick={addPortfolioItem}
+                        className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-white/15 py-2 text-xs text-white/55 hover:border-white/30 hover:text-white/70 transition-all">
+                        + Adicionar vídeo
+                      </button>
+                    )}
+                  </div>
+
+                  <div>
+                    <div className="mb-1 flex items-center justify-between">
+                      <label className="text-[10px] font-semibold uppercase tracking-widest text-violet-300">
+                        Tabela de preços
+                      </label>
+                      <span className="text-[10px] text-white/50">{ugcRateCard.length}/6</span>
+                    </div>
+                    <p className="mb-2 text-[11px] text-white/60">
+                      Deixa claro quanto cobra por entrega — economiza ida e volta com a marca.
+                    </p>
+                    {ugcRateCard.map((item, i) => (
+                      <div key={i} className="mb-1.5 flex gap-2 items-center">
+                        <input
+                          type="text"
+                          value={item.deliverable}
+                          onChange={e => updateRateCardItem(i, 'deliverable', e.target.value)}
+                          placeholder="Ex: Reels 15s"
+                          className="flex-1 rounded-lg border border-white/8 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/35 outline-none focus:border-white/20"
+                        />
+                        <input
+                          type="text"
+                          value={item.price}
+                          onChange={e => updateRateCardItem(i, 'price', e.target.value)}
+                          placeholder="R$150"
+                          className="w-24 shrink-0 rounded-lg border border-white/8 bg-transparent px-2.5 py-2 text-xs text-white placeholder-white/35 outline-none focus:border-white/20"
+                        />
+                        <button type="button" onClick={() => removeRateCardItem(i)} className="text-white/55 hover:text-red-400 text-sm">✕</button>
+                      </div>
+                    ))}
+                    {ugcRateCard.length < 6 && (
+                      <button type="button" onClick={addRateCardItem}
+                        className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-white/15 py-2 text-xs text-white/55 hover:border-white/30 hover:text-white/70 transition-all">
+                        + Adicionar item de preço
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="mb-1 block text-[10px] font-semibold text-white/70">

@@ -55,9 +55,10 @@ interface Props {
   initialKeyword:    string
   initialCity:       string
   initialMinPixels:  number
+  initialUgcOnly:    boolean
 }
 
-export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity, initialMinPixels }: Props) {
+export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity, initialMinPixels, initialUgcOnly }: Props) {
   const router   = useRouter()
   const pathname = usePathname()
 
@@ -65,35 +66,43 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
   const [keyword,   setKeyword]   = useState(initialKeyword)
   const [city,      setCity]      = useState(initialCity)
   const [minPixels, setMinPixels] = useState(initialMinPixels)
+  const [ugcOnly,   setUgcOnly]   = useState(initialUgcOnly)
   const [expanded,  setExpanded]  = useState<string | null>(null)
 
-  function applyFilters(n: string, k: string, c: string, mp: number) {
+  function applyFilters(n: string, k: string, c: string, mp: number, ugc: boolean) {
     const params = new URLSearchParams()
-    if (n)  params.set('niche',     n)
-    if (k)  params.set('keyword',   k)
-    if (c)  params.set('city',      c)
-    if (mp) params.set('minPixels', mp.toString())
+    if (n)   params.set('niche',     n)
+    if (k)   params.set('keyword',   k)
+    if (c)   params.set('city',      c)
+    if (mp)  params.set('minPixels', mp.toString())
+    if (ugc) params.set('ugc',       '1')
     router.push(`${pathname}?${params.toString()}`)
   }
 
   function handleNiche(n: string) {
     setNiche(n)
-    applyFilters(n, keyword, city, minPixels)
+    applyFilters(n, keyword, city, minPixels, ugcOnly)
   }
 
   function handleSize(mp: number) {
     setMinPixels(mp)
-    applyFilters(niche, keyword, city, mp)
+    applyFilters(niche, keyword, city, mp, ugcOnly)
+  }
+
+  function handleUgcToggle() {
+    const next = !ugcOnly
+    setUgcOnly(next)
+    applyFilters(niche, keyword, city, minPixels, next)
   }
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
-    applyFilters(niche, keyword, city, minPixels)
+    applyFilters(niche, keyword, city, minPixels, ugcOnly)
   }
 
   function clearAll() {
-    setNiche(''); setKeyword(''); setCity(''); setMinPixels(0)
-    applyFilters('', '', '', 0)
+    setNiche(''); setKeyword(''); setCity(''); setMinPixels(0); setUgcOnly(false)
+    applyFilters('', '', '', 0, false)
   }
 
   const filtered = useMemo(() => {
@@ -102,11 +111,12 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
       const matchKeyword   = !keyword   || b.instagramHandle.includes(keyword.toLowerCase()) || (b.displayName?.toLowerCase().includes(keyword.toLowerCase()) ?? false) || (b.bio?.toLowerCase().includes(keyword.toLowerCase()) ?? false)
       const matchCity      = !city      || (b.city?.toLowerCase().includes(city.toLowerCase()) ?? false)
       const matchMinPixels = !minPixels || b.pixelCount >= minPixels
-      return matchNiche && matchKeyword && matchCity && matchMinPixels
+      const matchUgc       = !ugcOnly   || !!(b as any).isUgcCreator
+      return matchNiche && matchKeyword && matchCity && matchMinPixels && matchUgc
     })
-  }, [blocks, niche, keyword, city, minPixels])
+  }, [blocks, niche, keyword, city, minPixels, ugcOnly])
 
-  const hasFilters = !!(niche || keyword || city || minPixels)
+  const hasFilters = !!(niche || keyword || city || minPixels || ugcOnly)
 
   return (
     <div className="space-y-6">
@@ -186,6 +196,24 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
           </div>
         </div>
 
+        {/* Criadores UGC */}
+        <div>
+          <p className="mb-2 text-[10px] uppercase tracking-widest text-white/50">Tipo de criador</p>
+          <button
+            onClick={handleUgcToggle}
+            className={`flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold transition-all ${
+              ugcOnly
+                ? 'border border-violet-400/40 bg-violet-500/15 text-violet-300'
+                : 'border border-white/10 text-white/65 hover:border-white/20 hover:text-white/70'
+            }`}
+          >
+            🎬 Só criadores UGC
+          </button>
+          <p className="mt-1.5 text-[10px] text-white/45">
+            Criador que faz vídeo pra você usar na sua própria página — não precisa ter seguidores.
+          </p>
+        </div>
+
         {/* Limpar */}
         {hasFilters && (
           <button onClick={clearAll} className="text-xs text-white/55 hover:text-white/60">
@@ -260,6 +288,12 @@ export function MarcasClient({ blocks, initialNiche, initialKeyword, initialCity
                       {nicheLabel}
                     </span>
                   </div>
+
+                  {(b as any).isUgcCreator && (
+                    <span className="mb-2 inline-flex items-center gap-1 rounded-full border border-violet-400/30 bg-violet-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-violet-300">
+                      🎬 Criador UGC
+                    </span>
+                  )}
 
                   {/* Stats */}
                   <div className="grid grid-cols-3 gap-1.5 mb-3">
