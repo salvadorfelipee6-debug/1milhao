@@ -132,8 +132,9 @@ export default async function InfluencerProfilePage({ params }: Props) {
               <div
                 className="rounded-xl px-3 py-1.5 text-xs font-semibold"
                 style={{ background: 'rgba(255,215,0,0.15)', border: '0.5px solid rgba(255,215,0,0.35)', color: '#FFD700' }}
+                title="Sua Vitrine 1M — link na bio vitalício"
               >
-                ✦ 1 Milhão
+                ✦ Vitrine 1M
               </div>
               <div className="flex gap-2">
                 <ShareButton url={shareUrl} blockId={block.id} />
@@ -241,22 +242,45 @@ export default async function InfluencerProfilePage({ params }: Props) {
             </div>
           )}
 
-          {/* BOTÃO DE ANUNCIAR — destaque máximo */}
+          {/* BOTÃO DE SEGUIR — destaque máximo: quem chega por um link de bio é */}
+          {/* seguidor na imensa maioria das vezes, não marca. Anunciar vem depois. */}
           <a
-            href={advertiseUrl}
+            href={igUrl}
             target="_blank"
             rel="noopener noreferrer"
-            data-track="advertise_click"
-            className="animate-glow-pulse mb-3 flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold text-[#111] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
-            style={{ background: 'var(--grad-gold)' }}
+            data-track="social:instagramUrl"
+            className="mb-3 flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+            style={{ background: 'linear-gradient(45deg,#833AB4,#E1306C 60%,#F77737)' }}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-            {whatsappUrl ? 'Anunciar via WhatsApp' : 'Anunciar com esse influencer'}
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            Seguir @{block.instagramHandle}
           </a>
 
-          {/* Briefing estruturado — pra marca que quer registrar a proposta de verdade */}
+          {/* Para marcas — secundário: Anunciar + Briefing */}
           <div className="mb-3">
-            <SendBriefingButton blockId={block.id} instagramHandle={block.instagramHandle} />
+            <p className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/50">
+              <span className="h-px flex-1 bg-white/10" />
+              É uma marca?
+              <span className="h-px flex-1 bg-white/10" />
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <a
+                href={advertiseUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-track="advertise_click"
+                className="flex items-center justify-center gap-1.5 rounded-xl py-3 text-xs font-bold transition-all hover:border-gold/30"
+                style={{ background: 'rgba(255,215,0,0.06)', border: '0.5px solid rgba(255,215,0,0.25)', color: '#FFD700' }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="13" height="13"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                {whatsappUrl ? 'WhatsApp' : 'Anunciar'}
+              </a>
+              <SendBriefingButton
+                blockId={block.id}
+                instagramHandle={block.instagramHandle}
+                className="flex items-center justify-center gap-1.5 rounded-xl border border-white/12 bg-white/4 py-3 text-xs font-bold text-white/75 transition-all hover:border-white/20"
+              />
+            </div>
           </div>
 
           {/* Redes sociais — selos sólidos na cor oficial de cada app */}
@@ -359,7 +383,7 @@ export default async function InfluencerProfilePage({ params }: Props) {
               </Link>
             </p>
             <p className="mt-2 text-[10px] text-white/40">
-              Quer um link na bio como esse?{' '}
+              Quer uma Vitrine 1M como essa?{' '}
               <Link href="/comprar" className="underline hover:text-white/65">
                 Garanta seu espaço →
               </Link>

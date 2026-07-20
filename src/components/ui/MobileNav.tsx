@@ -7,6 +7,7 @@ const links = [
   { label: '🔗 Link na bio — R$ 0,99', href: '/vitrine' },
   { label: '🎬 Sou criador(a) UGC',    href: '/ugc' },
   { label: '🎰 Descobrir influencers', href: '/descobrir' },
+  { label: '📈 Dicas de crescimento',  href: '/dicas' },
   { label: 'Como funciona',     href: '/#como-funciona' },
   { label: 'Preços',            href: '/#precos' },
   { label: 'Ranking',           href: '/ranking' },

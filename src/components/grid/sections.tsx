@@ -560,6 +560,7 @@ export async function FooterCTA() {
     { label: 'Preços',         href: '#precos' },
     { label: 'Descobrir influencers', href: '/descobrir' },
     { label: 'Link na bio (Vitrine 1M)', href: '/vitrine' },
+    { label: 'Dicas de crescimento', href: '/dicas' },
     { label: 'Sou criador(a) UGC', href: '/ugc' },
     { label: 'Ranking',        href: '/ranking' },
     { label: 'Para marcas',       href: '/marcas' },
