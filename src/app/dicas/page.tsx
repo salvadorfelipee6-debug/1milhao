@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { DICAS } from '@/lib/content/dicas'
-import { DicaCard } from '@/components/dicas/DicaCard'
+import { DicasFilter } from '@/components/dicas/DicasFilter'
 import { Reveal } from '@/components/ui/Reveal'
 
 export const metadata: Metadata = {
@@ -29,11 +29,7 @@ export default function DicasPage() {
           </p>
         </Reveal>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          {DICAS.map((dica, i) => (
-            <DicaCard key={dica.slug} dica={dica} delay={i * 90} />
-          ))}
-        </div>
+        <DicasFilter dicas={DICAS} />
       </div>
     </main>
   )
